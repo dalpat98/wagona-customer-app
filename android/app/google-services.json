@@ -1,19 +1,62 @@
 {
   "project_info": {
-    "project_number": "YOUR_PROJECT_NUMBER",
-    "firebase_url": "https://YOUR_PROJECT_ID.firebaseio.com",
-    "project_id": "YOUR_PROJECT_ID",
-    "storage_bucket": "YOUR_PROJECT_ID.appspot.com"
+    "project_number": "538529152282",
+    "project_id": "wagona-6a7fb",
+    "storage_bucket": "wagona-6a7fb.firebasestorage.app"
   },
-  "api_key": [
+  "client": [
     {
-      "current_key": "YOUR_FIREBASE_API_KEY"
+      "client_info": {
+        "mobilesdk_app_id": "1:538529152282:android:afe12b61a6c141af7d40a3",
+        "android_client_info": {
+          "package_name": "com.wagona.customer.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538529152282-jbhbqh197t944jm5qd68qgivi778glno.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wagona.customer.android",
+            "certificate_hash": "6d9a8a9ea208ba7286ba0aa407db8460a5ec9bc6"
+          }
+        },
+        {
+          "client_id": "538529152282-mta3hpklij9g1g3ljrnpevr0vd6gmvit.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wagona.customer.android",
+            "certificate_hash": "e800ef2891bf9ff8702279ab6f431cda67cdf8fd"
+          }
+        },
+        {
+          "client_id": "538529152282-8sfneaha19migig5fkqpe8ihhjr77t1g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3FctAXUhv6s6imtcJ55x6PuMiNqAMHYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538529152282-8sfneaha19migig5fkqpe8ihhjr77t1g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "538529152282-o6qn3i38475a7ljp8p5v3t4h8tuc1qrr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wagona.customer.ios"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
-  "services": {
-    "appinvite_service": {
-      "other_platform_oauth_client": []
-    }
-  },
   "configuration_version": "1"
 }

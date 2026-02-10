@@ -49,23 +49,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_ANDROID_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_ANDROID_PROJECT_ID',
-    databaseURL: 'YOUR_ANDROID_DATABASE_URL',
-    storageBucket: 'YOUR_ANDROID_STORAGE_BUCKET',
+    apiKey: 'AIzaSyB3FctAXUhv6s6imtcJ55x6PuMiNqAMHYU',
+    appId: '1:538529152282:android:afe12b61a6c141af7d40a3',
+    messagingSenderId: '538529152282',
+    projectId: 'wagona-6a7fb',
+    storageBucket: 'wagona-6a7fb.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_IOS_API_KEY',
-    appId: 'YOUR_IOS_APP_ID',
-    messagingSenderId: 'YOUR_IOS_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_IOS_PROJECT_ID',
-    databaseURL: 'YOUR_IOS_DATABASE_URL',
-    storageBucket: 'YOUR_IOS_STORAGE_BUCKET',
-    androidClientId: 'YOUR_ANDROID_CLIENT_ID',
-    iosClientId: 'YOUR_IOS_CLIENT_ID',
-    iosBundleId: 'YOUR_IOS_BUNDLE_ID',
+    apiKey: 'AIzaSyCA2GaKd_3ABYYmAzrWm7v7umOCfBjeP_Y',
+    appId: '1:538529152282:ios:b84dc0801fb74bfe7d40a3',
+    messagingSenderId: '538529152282',
+    projectId: 'wagona-6a7fb',
+    storageBucket: 'wagona-6a7fb.firebasestorage.app',
+    iosBundleId: 'com.wagona.customer.ios',
   );
+
 }

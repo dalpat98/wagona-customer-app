@@ -2,25 +2,35 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>API_KEY</key>
-    <string>YOUR_FIREBASE_API_KEY</string>
-    <key>CLIENT_ID</key>
-    <string>YOUR_CLIENT_ID</string>
-    <key>PROJECT_ID</key>
-    <string>YOUR_PROJECT_ID</string>
-    <key>STORAGE_BUCKET</key>
-    <string>YOUR_PROJECT_ID.appspot.com</string>
-    <key>GCM_SENDER_ID</key>
-    <string>YOUR_PROJECT_NUMBER</string>
-    <key>PLIST_VERSION</key>
-    <string>1</string>
-    <key>BUNDLE_ID</key>
-    <string>YOUR_IOS_BUNDLE_ID</string>
-    <key>DATABASE_URL</key>
-    <string>https://YOUR_PROJECT_ID.firebaseio.com</string>
-    <key>TRACKING_ID</key>
-    <string>YOUR_TRACKING_ID</string>
-    <key>GOOGLE_APP_ID</key>
-    <string>YOUR_GOOGLE_APP_ID</string>
+	<key>CLIENT_ID</key>
+	<string>538529152282-o6qn3i38475a7ljp8p5v3t4h8tuc1qrr.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.538529152282-o6qn3i38475a7ljp8p5v3t4h8tuc1qrr</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>538529152282-jbhbqh197t944jm5qd68qgivi778glno.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCA2GaKd_3ABYYmAzrWm7v7umOCfBjeP_Y</string>
+	<key>GCM_SENDER_ID</key>
+	<string>538529152282</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.wagona.customer.ios</string>
+	<key>PROJECT_ID</key>
+	<string>wagona-6a7fb</string>
+	<key>STORAGE_BUCKET</key>
+	<string>wagona-6a7fb.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:538529152282:ios:b84dc0801fb74bfe7d40a3</string>
 </dict>
 </plist>
