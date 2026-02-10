@@ -543,7 +543,7 @@ class CartController extends GetxController {
           selectedPaymentMethod.value = PaymentGateway.xendit.name;
         }
         Stripe.publishableKey = stripeModel.value.clientpublishableKey.toString();
-        Stripe.merchantIdentifier = 'Foodie Customer';
+        Stripe.merchantIdentifier = 'Wagona Customer';
         Stripe.instance.applySettings();
         setRef();
 

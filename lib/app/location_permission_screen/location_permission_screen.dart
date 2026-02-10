@@ -50,7 +50,7 @@ class LocationPermissionScreen extends StatelessWidget {
                         fontFamily: AppThemeData.semiBold),
                   ),
                   Text(
-                    "To provide the best dining experience, allow Foodie to access your location."
+                    "To provide the best dining experience, allow Wagona to access your location."
                         .tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(

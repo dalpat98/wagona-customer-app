@@ -92,7 +92,7 @@ class ReferFriendScreen extends StatelessWidget {
                                   height: 8,
                                 ),
                                 Text(
-                                  "${'Invite your friends to sign up with Foodie using your code, and you’ll earn'.tr} ${Constant.amountShow(amount: Constant.referralAmount)} ${'after their Success the first order! 💸🍔'.tr}"
+                                  "${'Invite your friends to sign up with Wagona using your code, and you’ll earn'.tr} ${Constant.amountShow(amount: Constant.referralAmount)} ${'after their Success the first order! 💸🍔'.tr}"
                                       .tr,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
@@ -192,7 +192,7 @@ class ReferFriendScreen extends StatelessWidget {
                                   textColor: AppThemeData.grey50,
                                   onPress: () async {
                                     await Share.share(
-                                      "${"Hey there, thanks for choosing Foodie. Hope you love our product. If you do, share it with your friends using code".tr} ${controller.referralModel.value.referralCode.toString()} ${"and get".tr}${Constant.amountShow(amount: Constant.referralAmount.toString())} ${"when order completed".tr}",
+                                      "${"Hey there, thanks for choosing Wagona. Hope you love our product. If you do, share it with your friends using code".tr} ${controller.referralModel.value.referralCode.toString()} ${"and get".tr}${Constant.amountShow(amount: Constant.referralAmount.toString())} ${"when order completed".tr}",
                                     );
                                   },
                                 ),

@@ -55,7 +55,7 @@ class OnBoardingScreen extends StatelessWidget {
                                         height: 72,
                                       ),
                                       Text(
-                                        "Foodie".tr,
+                                        "Wagona".tr,
                                         style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50, fontSize: 24, fontFamily: AppThemeData.bold),
                                       ),
                                       const SizedBox(

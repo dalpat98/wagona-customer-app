@@ -35,7 +35,7 @@ class RatingModel {
     return RatingModel(
         comment: parsedJson['comment'] ?? '',
         photos: parsedJson['photos'] ?? [],
-        rating: double.parse(parsedJson['rating'].toString()),
+        rating: double.tryParse(parsedJson['rating'].toString()),
         id: parsedJson['Id'] ?? '',
         orderId: parsedJson['orderid'] ?? '',
         vendorId: parsedJson['VendorId'] ?? '',
