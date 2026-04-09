@@ -62,6 +62,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '538529152282',
     projectId: 'wagona-6a7fb',
     storageBucket: 'wagona-6a7fb.firebasestorage.app',
+    androidClientId: '538529152282-3m9jjoon50m25gh5c977gaadr7touv4a.apps.googleusercontent.com',
+    iosClientId: '538529152282-o6qn3i38475a7ljp8p5v3t4h8tuc1qrr.apps.googleusercontent.com',
     iosBundleId: 'com.wagona.customer.ios',
   );
 

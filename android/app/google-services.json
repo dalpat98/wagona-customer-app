@@ -47,10 +47,114 @@
               "client_type": 3
             },
             {
-              "client_id": "538529152282-o6qn3i38475a7ljp8p5v3t4h8tuc1qrr.apps.googleusercontent.com",
+              "client_id": "538529152282-hnpuf7kh7fa3av80glfnsurjutgibqbi.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.wagona.customer.ios"
+                "bundle_id": "com.wagona.restaurant.ios"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538529152282:android:d083f124376988977d40a3",
+        "android_client_info": {
+          "package_name": "com.wagona.driver.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538529152282-3m9jjoon50m25gh5c977gaadr7touv4a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wagona.driver.android",
+            "certificate_hash": "6d9a8a9ea208ba7286ba0aa407db8460a5ec9bc6"
+          }
+        },
+        {
+          "client_id": "538529152282-lovllbs3v5blu88onrv9ukghec840tt7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wagona.driver.android",
+            "certificate_hash": "e800ef2891bf9ff8702279ab6f431cda67cdf8fd"
+          }
+        },
+        {
+          "client_id": "538529152282-8sfneaha19migig5fkqpe8ihhjr77t1g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3FctAXUhv6s6imtcJ55x6PuMiNqAMHYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538529152282-8sfneaha19migig5fkqpe8ihhjr77t1g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "538529152282-hnpuf7kh7fa3av80glfnsurjutgibqbi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wagona.restaurant.ios"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538529152282:android:7024a7fb560b24357d40a3",
+        "android_client_info": {
+          "package_name": "com.wagona.restaurant.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538529152282-fpfhm7le50ot7ee1nvifnk3u3m8i12s3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wagona.restaurant.android",
+            "certificate_hash": "6d9a8a9ea208ba7286ba0aa407db8460a5ec9bc6"
+          }
+        },
+        {
+          "client_id": "538529152282-mffl0ihi354ovhaai5jq3u9gr6kqvrru.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wagona.restaurant.android",
+            "certificate_hash": "e800ef2891bf9ff8702279ab6f431cda67cdf8fd"
+          }
+        },
+        {
+          "client_id": "538529152282-8sfneaha19migig5fkqpe8ihhjr77t1g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3FctAXUhv6s6imtcJ55x6PuMiNqAMHYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538529152282-8sfneaha19migig5fkqpe8ihhjr77t1g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "538529152282-hnpuf7kh7fa3av80glfnsurjutgibqbi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wagona.restaurant.ios"
               }
             }
           ]
