@@ -1,6 +1,7 @@
 import 'package:customer/app/auth_screen/login_screen.dart';
 import 'package:customer/app/cashback_screen/cashback_offers_list.dart';
 import 'package:customer/app/change%20langauge/change_language_screen.dart';
+import 'package:customer/app/change_password_screen/change_password_screen.dart';
 import 'package:customer/app/chat_screens/driver_inbox_screen.dart';
 import 'package:customer/app/chat_screens/restaurant_inbox_screen.dart';
 import 'package:customer/app/dine_in_booking/dine_in_booking_screen.dart';
@@ -315,9 +316,6 @@ class ProfileScreen extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            const SizedBox(
-                              height: 10,
-                            ),
                             Container(
                               width: Responsive.width(100, context),
                               decoration: ShapeDecoration(
@@ -328,6 +326,10 @@ class ProfileScreen extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 child: Column(
                                   children: [
+                                    if (Constant.userModel?.provider == 'email')
+                                      cardDecoration(themeChange, controller, "assets/icons/ic_lock.svg", "Change Password".tr, () {
+                                        Get.to(const ChangePasswordScreen());
+                                      }),
                                     Constant.userModel == null
                                         ? cardDecoration(themeChange, controller, "assets/icons/ic_logout.svg", "Log In", () {
                                             Get.offAll(const LoginScreen());
@@ -382,7 +384,7 @@ class ProfileScreen extends StatelessWidget {
                                                 negativeString: "Cancel".tr,
                                                 positiveClick: () async {
                                                   ShowToastDialog.showLoader("Please wait".tr);
-                                                  await controller.deleteUserFromServer();
+                                                  controller.deleteUserFromServer();
                                                   await FireStoreUtils.deleteUser().then((value) {
                                                     ShowToastDialog.closeLoader();
                                                     if (value == true) {
@@ -435,7 +437,8 @@ class ProfileScreen extends StatelessWidget {
                                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                 ),
                               ),
-                            )
+                            ),
+                            SizedBox(height: 10)
                           ],
                         ),
                       ),

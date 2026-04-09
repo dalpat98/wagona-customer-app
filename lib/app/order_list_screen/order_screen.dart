@@ -6,10 +6,12 @@ import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/order_controller.dart';
 import 'package:customer/models/cart_product_model.dart';
 import 'package:customer/models/order_model.dart';
+import 'package:customer/models/vendor_model.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/my_separator.dart';
 import 'package:flutter/material.dart';
@@ -247,7 +249,7 @@ class OrderScreen extends StatelessWidget {
         });
   }
 
-  itemView(DarkThemeProvider themeChange, BuildContext context, OrderModel orderModel, OrderController controller) {
+  Padding itemView(DarkThemeProvider themeChange, BuildContext context, OrderModel orderModel, OrderController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Container(
@@ -295,7 +297,7 @@ class OrderScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          orderModel.status.toString(),
+                          orderModel.status.toString().tr,
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: Constant.statusColor(status: orderModel.status.toString()),
@@ -376,22 +378,111 @@ class OrderScreen extends StatelessWidget {
               Row(
                 children: [
                   orderModel.status == Constant.orderCompleted
-                      ? Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              for (var element in orderModel.products!) {
-                                controller.addToCart(cartProductModel: element);
-                                ShowToastDialog.showToast("Item Added In a cart".tr);
+                      ? FutureBuilder<bool>(
+                          future: controller.hasAnyPublishedProduct(orderModel.products),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const SizedBox();
+                            } else {
+                              if (snapshot.hasError) {
+                                return const SizedBox();
+                              } else if (snapshot.data == null) {
+                                return const SizedBox();
+                              } else {
+                                if (snapshot.data == false) {
+                                  return const SizedBox();
+                                } else {
+                                  return FutureBuilder(
+                                      future: FireStoreUtils.getVendorById(orderModel.vendorID!),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return const SizedBox();
+                                        } else {
+                                          if (snapshot.hasError) {
+                                            return const SizedBox();
+                                          } else if (snapshot.data == null) {
+                                            return const SizedBox();
+                                          } else {
+                                            VendorModel vendorModel = snapshot.data!;
+                                            if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && vendorModel.subscriptionPlan != null) {
+                                              if (vendorModel.subscriptionTotalOrders == "-1") {
+                                                return Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      for (var element in orderModel.products!) {
+                                                        controller.addToCart(cartProductModel: element);
+                                                        ShowToastDialog.showToast("Item Added In a cart".tr);
+                                                      }
+                                                    },
+                                                    child: Text(
+                                                      "Reorder".tr,
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(
+                                                          color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                                          fontFamily: AppThemeData.semiBold,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 16),
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                if ((vendorModel.subscriptionExpiryDate != null && vendorModel.subscriptionExpiryDate!.toDate().isBefore(DateTime.now()) == false) ||
+                                                    vendorModel.subscriptionPlan?.expiryDay == '-1') {
+                                                  if (vendorModel.subscriptionTotalOrders != '0') {
+                                                    return Expanded(
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          for (var element in orderModel.products!) {
+                                                            controller.addToCart(cartProductModel: element);
+                                                            ShowToastDialog.showToast("Item Added In a cart".tr);
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                          "Reorder".tr,
+                                                          textAlign: TextAlign.center,
+                                                          style: TextStyle(
+                                                              color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                                              fontFamily: AppThemeData.semiBold,
+                                                              fontWeight: FontWeight.w600,
+                                                              fontSize: 16),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    return SizedBox();
+                                                  }
+                                                } else {
+                                                  return SizedBox();
+                                                }
+                                              }
+                                            } else {
+                                              return Expanded(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    for (var element in orderModel.products!) {
+                                                      controller.addToCart(cartProductModel: element);
+                                                      ShowToastDialog.showToast("Item Added In a cart".tr);
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    "Reorder".tr,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                                        fontFamily: AppThemeData.semiBold,
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 16),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        }
+                                      });
+                                }
                               }
-                            },
-                            child: Text(
-                              "Reorder".tr,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300, fontFamily: AppThemeData.semiBold, fontWeight: FontWeight.w600, fontSize: 16),
-                            ),
-                          ),
-                        )
+                            }
+                          })
                       : orderModel.status == Constant.orderShipped || orderModel.status == Constant.orderInTransit
                           ? Expanded(
                               child: InkWell(

@@ -1,4 +1,5 @@
 // ignore: must_be_immutable
+
 import 'package:customer/app/restaurant_details_screen/restaurant_details_screen.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/models/story_model.dart';
@@ -11,7 +12,6 @@ import 'package:customer/widget/story_view/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-
 import '../../widget/story_view/widgets/story_view.dart';
 
 // ignore: must_be_immutable

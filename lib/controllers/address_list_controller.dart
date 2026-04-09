@@ -31,7 +31,7 @@ class AddressListController extends GetxController {
     localityEditingController.value.clear();
     landmarkEditingController.value.clear();
     location.value = UserLocation();
-    selectedSaveAs.value = "Home".tr;
+    selectedSaveAs.value = "Home";
   }
 
   setData(ShippingAddress shippingAddress) {

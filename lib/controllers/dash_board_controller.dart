@@ -5,7 +5,6 @@ import 'package:customer/app/order_list_screen/order_screen.dart';
 import 'package:customer/app/profile_screen/profile_screen.dart';
 import 'package:customer/app/wallet_screen/wallet_screen.dart';
 import 'package:customer/constant/constant.dart';
-import 'package:customer/utils/fire_store_utils.dart';
 import 'package:get/get.dart';
 
 class DashBoardController extends GetxController {
@@ -16,7 +15,12 @@ class DashBoardController extends GetxController {
   @override
   void onInit() {
     // TODO: implement onInit
-    getTaxList();
+    getInit();
+
+    super.onInit();
+  }
+
+  Future<void> getInit() async {
     if (Constant.theme == "theme_2") {
       if (Constant.walletSetting == false) {
         pageList.value = [
@@ -52,17 +56,6 @@ class DashBoardController extends GetxController {
         ];
       }
     }
-    super.onInit();
-  }
-
-  Future<void> getTaxList() async {
-    await FireStoreUtils.getTaxList().then(
-      (value) {
-        if (value != null) {
-          Constant.taxList = value;
-        }
-      },
-    );
   }
 
   DateTime? currentBackPressTime;

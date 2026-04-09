@@ -88,7 +88,7 @@ class WalletController extends GetxController {
         xenditModel.value = Xendit.fromJson(jsonDecode(Preferences.getString(Preferences.xenditSettings)));
 
         Stripe.publishableKey = stripeModel.value.clientpublishableKey.toString();
-        Stripe.merchantIdentifier = 'GoRide';
+        Stripe.merchantIdentifier = 'Wagona';
         Stripe.instance.applySettings();
         setRef();
 
@@ -119,7 +119,7 @@ class WalletController extends GetxController {
     isLoading.value = false;
   }
 
-  walletTopUp() async {
+  Future<void> walletTopUp() async {
     WalletTransactionModel transactionModel = WalletTransactionModel(
         id: Constant.getUuid(),
         amount: double.parse(topUpAmountController.value.text),
@@ -132,6 +132,7 @@ class WalletController extends GetxController {
         paymentStatus: "success");
 
     await FireStoreUtils.setWalletTransaction(transactionModel).then((value) async {
+      ShowToastDialog.closeLoader();
       if (value == true) {
         await FireStoreUtils.updateUserWallet(amount: topUpAmountController.value.text, userId: FireStoreUtils.getCurrentUid()).then((value) {
           getWalletTransaction();
@@ -147,10 +148,12 @@ class WalletController extends GetxController {
   Future<void> stripeMakePayment({required String amount}) async {
     log(double.parse(amount).toStringAsFixed(0));
     try {
+      ShowToastDialog.showLoader("Please wait".tr);
       Map<String, dynamic>? paymentIntentData = await createStripeIntent(amount: amount);
       log("stripe Responce====>$paymentIntentData");
       if (paymentIntentData!.containsKey("error")) {
         Get.back();
+        ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
       } else {
         await Stripe.instance.initPaymentSheet(
@@ -169,11 +172,13 @@ class WalletController extends GetxController {
                     primary: AppThemeData.primary300,
                   ),
                 ),
-                merchantDisplayName: 'GoRide'));
+                merchantDisplayName: 'Wagona'));
+        ShowToastDialog.closeLoader();
         displayStripePaymentSheet(amount: amount);
       }
     } catch (e, s) {
       log("$e \n$s");
+      ShowToastDialog.closeLoader();
       ShowToastDialog.showToast("exception:$e \n$s");
     }
   }
@@ -252,8 +257,9 @@ class WalletController extends GetxController {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
+      ShowToastDialog.closeLoader();
       Get.to(MercadoPagoScreen(initialURl: data['init_point']))!.then((value) {
-        if (value) {
+        if (value == true) {
           ShowToastDialog.showToast("Payment Successful!!".tr);
           walletTopUp();
         } else {
@@ -261,13 +267,16 @@ class WalletController extends GetxController {
         }
       });
     } else {
-      ShowToastDialog.showToast("Something want wrong please contact administrator".tr);
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.".tr);
       print('Error creating preference: ${response.body}');
       return null;
     }
   }
 
-  paypalPaymentSheet(String amount, context) {
+  void paypalPaymentSheet(String amount, context) {
+    String amountData = double.parse(amount).toStringAsFixed(Constant.currencyModel?.decimalDigits ?? 2);
+    ShowToastDialog.closeLoader();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) => UsePaypal(
@@ -279,9 +288,9 @@ class WalletController extends GetxController {
             transactions: [
               {
                 "amount": {
-                  "total": amount,
+                  "total": amountData,
                   "currency": "USD",
-                  "details": {"subtotal": amount}
+                  "details": {"subtotal": amountData}
                 },
               }
             ],
@@ -303,27 +312,30 @@ class WalletController extends GetxController {
   }
 
   ///PayStack Payment Method
-  payStackPayment(String totalAmount) async {
-    await PayStackURLGen.payStackURLGen(amount: (double.parse(totalAmount) * 100).toString(), currency: "ZAR", secretKey: payStackModel.value.secretKey.toString(), userModel: userModel.value)
+  Future<void> payStackPayment(String totalAmount) async {
+    ShowToastDialog.showLoader("Please wait".tr);
+    await PayStackURLGen.payStackURLGen(amount: (double.parse(totalAmount) * 100).toStringAsFixed(0), currency: "ZAR", secretKey: payStackModel.value.secretKey.toString(), userModel: userModel.value)
         .then((value) async {
       if (value != null) {
+        ShowToastDialog.closeLoader();
         PayStackUrlModel payStackModel0 = value;
-        Get.to(PayStackScreen(
-          secretKey: payStackModel.value.secretKey.toString(),
-          callBackUrl: payStackModel.value.callbackURL.toString(),
-          initialURl: payStackModel0.data.authorizationUrl,
-          amount: totalAmount,
-          reference: payStackModel0.data.reference,
-        ))!
-            .then((value) {
-          if (value) {
+        Get.to<bool>(() => PayStackScreen(
+              secretKey: payStackModel.value.secretKey.toString(),
+              callBackUrl: payStackModel.value.callbackURL.toString(),
+              initialURl: payStackModel0.data.authorizationUrl,
+              amount: totalAmount,
+              reference: payStackModel0.data.reference,
+            ))?.then((value) {
+          if (value == true) {
             ShowToastDialog.showToast("Payment Successful!!".tr);
             walletTopUp();
           } else {
+            ShowToastDialog.closeLoader();
             ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
           }
         });
       } else {
+        ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
       }
     });
@@ -331,6 +343,7 @@ class WalletController extends GetxController {
 
   //flutter wave Payment Method
   flutterWaveInitiatePayment({required BuildContext context, required String amount}) async {
+    ShowToastDialog.showLoader("Please wait".tr);
     final url = Uri.parse('https://api.flutterwave.com/v3/payments');
     final headers = {
       'Authorization': 'Bearer ${flutterWaveModel.value.secretKey}',
@@ -358,8 +371,9 @@ class WalletController extends GetxController {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      ShowToastDialog.closeLoader();
       Get.to(MercadoPagoScreen(initialURl: data['data']['link']))!.then((value) {
-        if (value) {
+        if (value == true) {
           ShowToastDialog.showToast("Payment Successful!!".tr);
           walletTopUp();
         } else {
@@ -367,7 +381,8 @@ class WalletController extends GetxController {
         }
       });
     } else {
-      print('Payment initialization failed: ${response.body}');
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.".tr);
       return null;
     }
   }
@@ -386,15 +401,16 @@ class WalletController extends GetxController {
   }
 
   // payFast
-  payFastPayment({required BuildContext context, required String amount}) {
+  void payFastPayment({required BuildContext context, required String amount}) {
+    ShowToastDialog.showLoader("Please wait".tr);
     PayStackURLGen.getPayHTML(payFastSettingData: payFastModel.value, amount: amount.toString(), userModel: userModel.value).then((String? value) async {
+      ShowToastDialog.closeLoader();
       bool isDone = await Get.to(PayFastScreen(htmlData: value!, payFastSettingData: payFastModel.value));
       if (isDone) {
         Get.back();
         ShowToastDialog.showToast("Payment successfully".tr);
         walletTopUp();
       } else {
-        Get.back();
         ShowToastDialog.showToast("Payment Failed".tr);
       }
     });
@@ -419,15 +435,17 @@ class WalletController extends GetxController {
     final data = jsonDecode(response.body);
     await verifyCheckSum(checkSum: data["code"], amount: amount, orderId: orderId).then((value) {
       initiatePayment(amount: amount, orderId: orderId).then((value) {
-        String callback = "";
-        if (paytmModel.value.isSandboxEnabled == true) {
-          callback = "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
-        } else {
-          callback = "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
-        }
+        if (value != null) {
+          String callback = "";
+          if (paytmModel.value.isSandboxEnabled == true) {
+            callback = "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+          } else {
+            callback = "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+          }
 
-        GetPaymentTxtTokenModel result = value;
-        startTransaction(context, txnTokenBy: result.body.txnToken, orderId: orderId, amount: amount, callBackURL: callback, isStaging: paytmModel.value.isSandboxEnabled);
+          GetPaymentTxtTokenModel result = value;
+          startTransaction(context, txnTokenBy: result.body.txnToken, orderId: orderId, amount: amount, callBackURL: callback, isStaging: paytmModel.value.isSandboxEnabled);
+        }
       });
     });
   }
@@ -485,7 +503,7 @@ class WalletController extends GetxController {
     return data['status'];
   }
 
-  Future<GetPaymentTxtTokenModel> initiatePayment({required double amount, required orderId}) async {
+  Future<dynamic> initiatePayment({required double amount, required orderId}) async {
     String initiateURL = "${Constant.globalUrl}payments/initiatepaytmpayment";
     String callback = "";
     if (paytmModel.value.isSandboxEnabled == true) {
@@ -508,6 +526,7 @@ class WalletController extends GetxController {
     if (data["body"]["txnToken"] == null || data["body"]["txnToken"].toString().isEmpty) {
       Get.back();
       ShowToastDialog.showToast("something went wrong, please contact admin.".tr);
+      return null;
     }
     return GetPaymentTxtTokenModel.fromJson(data);
   }
@@ -519,7 +538,7 @@ class WalletController extends GetxController {
     var options = {
       'key': razorPayModel.value.razorpayKey,
       'amount': amount * 100,
-      'name': 'GoRide',
+      'name': 'Wagona',
       'order_id': orderId,
       "currency": "INR",
       'description': 'wallet Topup',
@@ -535,44 +554,40 @@ class WalletController extends GetxController {
     };
 
     try {
+      ShowToastDialog.closeLoader();
       razorPay.open(options);
     } catch (e) {
+      ShowToastDialog.closeLoader();
       debugPrint('Error: $e');
     }
   }
 
   void handlePaymentSuccess(PaymentSuccessResponse response) {
-    Get.back();
     ShowToastDialog.showToast("Payment Successful!!".tr);
     walletTopUp();
   }
 
   void handleExternalWaller(ExternalWalletResponse response) {
-    Get.back();
     ShowToastDialog.showToast("Payment Processing!! via".tr);
   }
 
   void handlePaymentError(PaymentFailureResponse response) {
-    Get.back();
     ShowToastDialog.showToast("Payment Failed!!".tr);
   }
 
   //Midtrans payment
   midtransMakePayment({required String amount, required BuildContext context}) async {
-    await createPaymentLink(amount: amount).then((url) {
-      ShowToastDialog.closeLoader();
+    ShowToastDialog.showLoader("Please wait".tr);
+    await createPaymentLink(amount: amount).then((url) async {
       if (url != '') {
-        Get.to(() => MidtransScreen(
-                  initialURl: url,
-                ))!
-            .then((value) {
-          if (value == true) {
-            ShowToastDialog.showToast("Payment Successful!!".tr);
-            walletTopUp();
-          } else {
-            ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
-          }
-        });
+        final result = await Get.to(() => MidtransScreen(initialURl: url));
+        if (result == true) {
+          ShowToastDialog.showToast("Payment Successful!!".tr);
+          walletTopUp();
+        } else {
+          ShowToastDialog.closeLoader();
+          ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
+        }
       }
     });
   }
@@ -622,8 +637,9 @@ class WalletController extends GetxController {
   orangeMakePayment({required String amount, required BuildContext context}) async {
     reset();
     var id = const Uuid().v4();
+    ShowToastDialog.showLoader("Please wait".tr);
     var paymentURL = await fetchToken(context: context, orderId: id, amount: amount, currency: 'USD');
-    ShowToastDialog.closeLoader();
+
     if (paymentURL.toString() != '') {
       Get.to(() => OrangeMoneyScreen(
                 initialURl: paymentURL,
@@ -640,6 +656,7 @@ class WalletController extends GetxController {
         }
       });
     } else {
+      ShowToastDialog.closeLoader();
       ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
     }
   }
@@ -716,23 +733,24 @@ class WalletController extends GetxController {
   }
 
   //XenditPayment
-  xenditPayment(context, amount) async {
-    await createXenditInvoice(amount: amount).then((model) {
+  Future<void> xenditPayment(context, amount) async {
+    ShowToastDialog.showLoader("Please wait".tr);
+    await createXenditInvoice(amount: amount).then((model) async {
       ShowToastDialog.closeLoader();
       if (model.id != null) {
-        Get.to(() => XenditScreen(
-                  initialURl: model.invoiceUrl ?? '',
-                  transId: model.id ?? '',
-                  apiKey: xenditModel.value.apiKey!.toString(),
-                ))!
-            .then((value) {
-          if (value == true) {
-            ShowToastDialog.showToast("Payment Successful!!".tr);
-            walletTopUp();
-          } else {
-            ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
-          }
-        });
+        final result = await Get.to(() => XenditScreen(
+              initialUrl: model.invoiceUrl ?? '',
+              transId: model.id ?? '',
+              apiKey: xenditModel.value.apiKey!.toString(),
+            ));
+
+        if (result == true) {
+          ShowToastDialog.showToast("Payment Successful!!".tr);
+          walletTopUp();
+        } else {
+          ShowToastDialog.closeLoader();
+          ShowToastDialog.showToast("Payment Failed or Cancelled!".tr);
+        }
       }
     });
   }

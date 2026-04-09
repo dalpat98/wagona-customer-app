@@ -201,7 +201,7 @@ class LoginScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: RoundedButtonFill(
-                            title: "with Google".tr,
+                            title: Platform.isIOS ? "with Google".tr : "Continue with Google".tr,
                             textColor: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
                             color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100,
                             icon: SvgPicture.asset("assets/icons/ic_google.svg"),
@@ -211,9 +211,10 @@ class LoginScreen extends StatelessWidget {
                             },
                           ),
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
+                        if (Platform.isIOS)
+                          const SizedBox(
+                            width: 10,
+                          ),
                         Platform.isIOS
                             ? Expanded(
                                 child: RoundedButtonFill(

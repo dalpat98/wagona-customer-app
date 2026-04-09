@@ -189,7 +189,7 @@ class OrderPlacingScreen extends StatelessWidget {
                                       height: 5,
                                     ),
                                     Text(
-                                      controller.orderModel.value.address!.getFullAddress(),
+                                      controller.orderModel.value.address?.getFullAddress() ?? '',
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontFamily: AppThemeData.medium,

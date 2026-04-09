@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/app/dine_in_booking/dine_in_booking_screen.dart';
 import 'package:customer/constant/constant.dart';
@@ -47,38 +46,45 @@ class DineInRestaurantDetailsController extends GetxController {
     super.onInit();
   }
 
-  orderBook() async {
+  Future<void> orderBook() async {
     ShowToastDialog.showLoader("Please wait".tr);
 
     DateTime dt = selectedDate.value.toDate();
     String hour = DateFormat("kk:mm").format(DateFormat('hh:mm a').parse((Intl.getCurrentLocale() == "en_US") ? selectedTimeSlot.value : selectedTimeSlot.value.toLowerCase()));
     dt = DateTime(dt.year, dt.month, dt.day, int.parse(hour.split(":")[0]), int.parse(hour.split(":")[1]), dt.second, dt.millisecond, dt.microsecond);
-    selectedDate.value = Timestamp.fromDate(dt);
-    DineInBookingModel dineInBookingModel = DineInBookingModel(
-        id: Constant.getUuid(),
-        author: Constant.userModel,
-        authorID: FireStoreUtils.getCurrentUid(),
-        createdAt: Timestamp.now(),
-        date: selectedDate.value,
-        status: Constant.orderPlaced,
-        vendor: vendorModel.value,
-        specialRequest: additionRequestController.value.text.isEmpty ? "" : additionRequestController.value.text,
-        vendorID: vendorModel.value.id,
-        guestEmail: Constant.userModel!.email,
-        guestFirstName: Constant.userModel!.firstName,
-        guestLastName: Constant.userModel!.lastName,
-        guestPhone: Constant.userModel!.phoneNumber,
-        occasion: selectedOccasion.value,
-        discount: selectedTimeDiscount.value,
-        discountType: selectedTimeDiscountType.value,
-        totalGuest: noOfQuantity.value.toString(),
-        firstVisit: firstVisit.value);
-    await FireStoreUtils.setBookedOrder(dineInBookingModel);
-    await SendNotification.sendFcmMessage(Constant.dineInPlaced, vendorModel.value.fcmToken.toString(), {});
-    ShowToastDialog.closeLoader();
-    Get.back();
-    Get.to(const DineInBookingScreen());
-    ShowToastDialog.showToast('Dine-In Request submitted successfully.'.tr);
+    Timestamp selectedDateTime = Timestamp.fromDate(dt);
+    if (selectedDateTime.toDate().isBefore(DateTime.now())) {
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast('Please select a future time for your Dine-In request.'.tr);
+      return;
+    } else {
+      DineInBookingModel dineInBookingModel = DineInBookingModel(
+          id: Constant.getUuid(),
+          author: Constant.userModel,
+          authorID: FireStoreUtils.getCurrentUid(),
+          createdAt: Timestamp.now(),
+          date: selectedDateTime,
+          status: Constant.orderPlaced,
+          vendor: vendorModel.value,
+          specialRequest: additionRequestController.value.text.isEmpty ? "" : additionRequestController.value.text,
+          vendorID: vendorModel.value.id,
+          guestEmail: Constant.userModel!.email,
+          guestFirstName: Constant.userModel!.firstName,
+          guestLastName: Constant.userModel!.lastName,
+          guestPhone: Constant.userModel!.phoneNumber,
+          occasion: selectedOccasion.value,
+          discount: selectedTimeDiscount.value,
+          discountType: selectedTimeDiscountType.value,
+          totalGuest: noOfQuantity.value.toString(),
+          firstVisit: firstVisit.value);
+      await FireStoreUtils.setBookedOrder(dineInBookingModel);
+      await SendNotification.sendFcmMessage(Constant.dineInPlaced, vendorModel.value.fcmToken.toString(), {});
+      ShowToastDialog.closeLoader();
+      Get.back();
+      selectedDate.value = Timestamp.now();
+      Get.to(const DineInBookingScreen());
+      ShowToastDialog.showToast('Dine-In Request submitted successfully.'.tr);
+    }
   }
 
   getRecord() {

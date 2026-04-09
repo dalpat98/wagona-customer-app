@@ -82,6 +82,8 @@ class CartController extends GetxController {
   RxDouble totalDistance = 0.0.obs;
   RxDouble deliveryCharges = 0.0.obs;
   RxDouble subTotal = 0.0.obs;
+  RxDouble packagingCharge = 0.0.obs;
+  RxDouble platformFee = 0.0.obs;
   RxDouble couponAmount = 0.0.obs;
 
   RxDouble specialDiscountAmount = 0.0.obs;
@@ -89,7 +91,14 @@ class CartController extends GetxController {
   RxString specialType = "".obs;
 
   RxDouble deliveryTips = 0.0.obs;
-  RxDouble taxAmount = 0.0.obs;
+
+  RxDouble productTaxAmount = 0.0.obs;
+  RxDouble orderTaxAmount = 0.0.obs;
+  RxDouble driverDeliveryTaxAmount = 0.0.obs;
+  RxDouble packagingTaxAmount = 0.0.obs;
+  RxDouble platformTaxAmount = 0.0.obs;
+  RxDouble totalTaxAmount = 0.0.obs;
+
   RxDouble totalAmount = 0.0.obs;
   Rx<CouponModel> selectedCouponModel = CouponModel().obs;
 
@@ -97,8 +106,8 @@ class CartController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     selectedAddress.value = Constant.selectedLocation;
-    getCartData();
     getPaymentSettings();
+    getCartData();
     super.onInit();
   }
 
@@ -161,115 +170,381 @@ class CartController extends GetxController {
   }
 
   Future<void> calculatePrice() async {
+    // Reset values
     deliveryCharges.value = 0.0;
     subTotal.value = 0.0;
     couponAmount.value = 0.0;
     specialDiscountAmount.value = 0.0;
-    taxAmount.value = 0.0;
-    totalAmount.value = 0.0;
 
+    productTaxAmount.value = 0.0;
+    orderTaxAmount.value = 0.0;
+    driverDeliveryTaxAmount.value = 0.0;
+    packagingTaxAmount.value = 0.0;
+    platformTaxAmount.value = 0.0;
+    totalTaxAmount.value = 0.0;
+
+    totalAmount.value = 0.0;
+    packagingCharge.value = 0.0;
+    platformFee.value = 0.0;
+
+    /// ---------------- DELIVERY CHARGES ----------------
     if (cartItem.isNotEmpty) {
       if (selectedFoodType.value == "Delivery") {
         totalDistance.value = double.parse(Constant.getDistance(
-            lat1: selectedAddress.value.location!.latitude.toString(),
-            lng1: selectedAddress.value.location!.longitude.toString(),
-            lat2: vendorModel.value.latitude.toString(),
-            lng2: vendorModel.value.longitude.toString()));
+          lat1: selectedAddress.value.location!.latitude.toString(),
+          lng1: selectedAddress.value.location!.longitude.toString(),
+          lat2: vendorModel.value.latitude.toString(),
+          lng2: vendorModel.value.longitude.toString(),
+        ));
+
         if (vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true) {
           deliveryCharges.value = 0.0;
         } else if (deliveryChargeModel.value.vendorCanModify == false) {
-          if (totalDistance.value > deliveryChargeModel.value.minimumDeliveryChargesWithinKm!) {
-            deliveryCharges.value = totalDistance.value * deliveryChargeModel.value.deliveryChargesPerKm!;
-          } else {
-            deliveryCharges.value = (deliveryChargeModel.value.minimumDeliveryCharges)!.toDouble();
-          }
+          deliveryCharges.value = totalDistance.value > deliveryChargeModel.value.minimumDeliveryChargesWithinKm!
+              ? totalDistance.value * deliveryChargeModel.value.deliveryChargesPerKm!
+              : deliveryChargeModel.value.minimumDeliveryCharges!.toDouble();
         } else {
-          if (vendorModel.value.deliveryCharge != null) {
-            if (totalDistance.value > vendorModel.value.deliveryCharge!.minimumDeliveryChargesWithinKm!) {
-              deliveryCharges.value = (totalDistance.value * vendorModel.value.deliveryCharge!.deliveryChargesPerKm!).toDouble();
-            } else {
-              deliveryCharges.value = vendorModel.value.deliveryCharge!.minimumDeliveryCharges!.toDouble();
-            }
-          } else {
-            if (totalDistance.value > deliveryChargeModel.value.minimumDeliveryChargesWithinKm!) {
-              deliveryCharges.value = (totalDistance.value * deliveryChargeModel.value.deliveryChargesPerKm!).toDouble();
-            } else {
-              deliveryCharges.value = deliveryChargeModel.value.minimumDeliveryCharges!.toDouble();
-            }
-          }
+          final charge = vendorModel.value.deliveryCharge ?? deliveryChargeModel.value;
+          deliveryCharges.value = totalDistance.value > charge.minimumDeliveryChargesWithinKm! ? totalDistance.value * charge.deliveryChargesPerKm! : charge.minimumDeliveryCharges!.toDouble();
         }
-      } else {
-        deliveryCharges.value = 0.0;
       }
     }
 
+    /// ---------------- PACKAGING & PLATFORM ----------------
+    packagingCharge.value = vendorModel.value.packagingCharge != null ? double.parse(vendorModel.value.packagingCharge.toString()) : 0.0;
+
+    platformFee.value = Constant.calculatePlatFormMeModel(platFromFeeModel: Constant.platformFeeModel);
+
+    /// ---------------- SUBTOTAL ----------------
     for (var element in cartItem) {
-      if (double.parse(element.discountPrice.toString()) <= 0) {
-        subTotal.value = subTotal.value +
-            double.parse(element.price.toString()) * double.parse(element.quantity.toString()) +
-            (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString()));
-      } else {
-        subTotal.value = subTotal.value +
-            double.parse(element.discountPrice.toString()) * double.parse(element.quantity.toString()) +
-            (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString()));
-      }
+      final price = double.parse((element.discountPrice != null && double.parse(element.discountPrice.toString()) > 0) ? element.discountPrice.toString() : element.price.toString());
+
+      final qty = double.parse(element.quantity.toString());
+      final extras = double.parse(element.extrasPrice.toString());
+
+      subTotal.value += (price * qty) + (extras * qty);
     }
 
-    if (freeDeliveryByAdminModel.value.isEnableFreeDelivery == true && (deliveryCharges.value != 0.0)) {
-      if (totalDistance.value <= double.parse("${freeDeliveryByAdminModel.value.freeDeliveryDistance ?? 0.0}")) {
-        isEnableFreeDeliveryByAdmin.value = true;
-      } else if (subTotal.value > double.parse("${freeDeliveryByAdminModel.value.freeDeliveryOver ?? 0.0}")) {
-        isEnableFreeDeliveryByAdmin.value = true;
-      }
-    }
-
+    /// ---------------- COUPON ----------------
     if (selectedCouponModel.value.id != null) {
-      couponAmount.value = Constant.calculateDiscount(amount: subTotal.value.toString(), offerModel: selectedCouponModel.value);
+      couponAmount.value = Constant.calculateDiscount(
+        amount: subTotal.value.toString(),
+        offerModel: selectedCouponModel.value,
+      );
     }
 
+    /// ---------------- SPECIAL DISCOUNT ----------------
     if (vendorModel.value.specialDiscountEnable == true && Constant.specialDiscountOffer == true) {
       final now = DateTime.now();
-      var day = DateFormat('EEEE', 'en_US').format(now);
-      var date = DateFormat('dd-MM-yyyy').format(now);
+      final day = DateFormat('EEEE', 'en_US').format(now);
+      final date = DateFormat('dd-MM-yyyy').format(now);
+
       for (var element in vendorModel.value.specialDiscount!) {
         if (day == element.day.toString()) {
-          if (element.timeslot!.isNotEmpty) {
-            for (var element in element.timeslot!) {
-              if (element.discountType == "delivery") {
-                var start = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${element.from}");
-                var end = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${element.to}");
-                if (isCurrentDateInRange(start, end)) {
-                  specialDiscount.value = double.parse(element.discount.toString());
-                  specialType.value = element.type.toString();
-                  if (element.type == "percentage") {
-                    specialDiscountAmount.value = subTotal * specialDiscount.value / 100;
-                  } else {
-                    specialDiscountAmount.value = specialDiscount.value;
-                  }
-                }
+          for (var slot in element.timeslot ?? []) {
+            if (slot.discountType == "delivery") {
+              final start = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${slot.from}");
+              final end = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${slot.to}");
+
+              if (isCurrentDateInRange(start, end)) {
+                specialDiscount.value = double.parse(slot.discount.toString());
+                specialType.value = slot.type.toString();
+
+                specialDiscountAmount.value = slot.type == "percentage" ? (subTotal.value * specialDiscount.value / 100) : specialDiscount.value;
               }
             }
           }
         }
       }
-    } else {
-      specialDiscount.value = double.parse("0");
-      specialType.value = "amount";
     }
 
-    if (Constant.taxList != null) {
-      for (var element in Constant.taxList!) {
-        taxAmount.value = taxAmount.value + Constant.calculateTax(amount: (subTotal.value - couponAmount.value - specialDiscountAmount.value).toString(), taxModel: element);
+    /// ---------------- DISCOUNT RATIO ----------------
+    final totalDiscount = couponAmount.value + specialDiscountAmount.value;
+    double discountRatio = 0.0;
+
+    if (subTotal.value > 0 && totalDiscount > 0) {
+      discountRatio = totalDiscount / subTotal.value;
+    }
+
+    /// ---------------- PRODUCT TAX (AFTER DISCOUNT) ----------------
+    if (Constant.taxScope == "product") {
+      for (var element in cartItem) {
+        final price = double.parse((element.discountPrice != null && double.parse(element.discountPrice.toString()) > 0) ? element.discountPrice.toString() : element.price.toString());
+
+        final qty = double.parse(element.quantity.toString());
+        final extras = double.parse(element.extrasPrice.toString());
+
+        final itemAmount = (price * qty) + (extras * qty);
+        final discountedItemAmount = itemAmount - (itemAmount * discountRatio);
+
+        for (var taxElement in element.taxSetting!) {
+          if (taxElement.type == "fix") {
+            productTaxAmount.value += Constant.calculateTax(
+                  amount: discountedItemAmount.toString(),
+                  taxModel: taxElement,
+                ) *
+                qty;
+          } else {
+            productTaxAmount.value += Constant.calculateTax(
+              amount: discountedItemAmount.toString(),
+              taxModel: taxElement,
+            );
+          }
+        }
       }
     }
 
-    if (isEnableFreeDeliveryByAdmin.value == false) {
-      totalAmount.value = (subTotal.value - couponAmount.value - specialDiscountAmount.value) + taxAmount.value + deliveryCharges.value + deliveryTips.value;
-    } else {
-      totalAmount.value = (subTotal.value - couponAmount.value - specialDiscountAmount.value) + taxAmount.value;
+    /// ---------------- ORDER TAX ----------------
+    if (Constant.taxScope == "order") {
+      for (var taxElement in Constant.orderProductTaxList ?? []) {
+        orderTaxAmount.value += Constant.calculateTax(
+          amount: (subTotal.value - totalDiscount).toString(),
+          taxModel: taxElement,
+        );
+      }
     }
+
+    /// ---------------- DELIVERY TAX ----------------
+    if (selectedFoodType.value != 'TakeAway' && vendorModel.value.isSelfDelivery != true) {
+      for (var taxElement in Constant.driverDeliveryTaxList ?? []) {
+        driverDeliveryTaxAmount.value += Constant.calculateTax(
+          amount: deliveryCharges.value.toString(),
+          taxModel: taxElement,
+        );
+      }
+    }
+
+    /// ---------------- PACKAGING TAX ----------------
+    if (Constant.packagingChargeEnable == true && packagingCharge.value > 0) {
+      for (var taxElement in Constant.packagingTaxList ?? []) {
+        packagingTaxAmount.value += Constant.calculateTax(
+          amount: packagingCharge.value.toString(),
+          taxModel: taxElement,
+        );
+      }
+    }
+
+    /// ---------------- PLATFORM TAX ----------------
+    if (Constant.platformFeeModel?.enable == true && platformFee.value > 0) {
+      for (var taxElement in Constant.platformTaxList ?? []) {
+        platformTaxAmount.value += Constant.calculateTax(
+          amount: platformFee.value.toString(),
+          taxModel: taxElement,
+        );
+      }
+    }
+
+    /// ---------------- TOTAL ----------------
+    totalTaxAmount.value = productTaxAmount.value + orderTaxAmount.value + driverDeliveryTaxAmount.value + packagingTaxAmount.value + platformTaxAmount.value;
+
+    totalAmount.value =
+        (subTotal.value - totalDiscount) + totalTaxAmount.value + (isEnableFreeDeliveryByAdmin.value ? 0 : deliveryCharges.value) + deliveryTips.value + packagingCharge.value + platformFee.value;
+
     getCashback();
   }
+
+  // Future<void> calculatePrice() async {
+  //   deliveryCharges.value = 0.0;
+  //   subTotal.value = 0.0;
+  //   couponAmount.value = 0.0;
+  //   specialDiscountAmount.value = 0.0;
+
+  //   productTaxAmount.value = 0.0;
+  //   orderTaxAmount.value = 0.0;
+  //   driverDeliveryTaxAmount.value = 0.0;
+  //   packagingTaxAmount.value = 0.0;
+  //   totalTaxAmount.value = 0.0;
+  //   platformTaxAmount.value = 0.0;
+
+  //   totalAmount.value = 0.0;
+  //   packagingCharge.value = 0.0;
+  //   platformFee.value = 0.0;
+
+  //   if (cartItem.isNotEmpty) {
+  //     if (selectedFoodType.value == "Delivery") {
+  //       totalDistance.value = double.parse(Constant.getDistance(
+  //           lat1: selectedAddress.value.location!.latitude.toString(),
+  //           lng1: selectedAddress.value.location!.longitude.toString(),
+  //           lat2: vendorModel.value.latitude.toString(),
+  //           lng2: vendorModel.value.longitude.toString()));
+  //       if (vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true) {
+  //         deliveryCharges.value = 0.0;
+  //       } else if (deliveryChargeModel.value.vendorCanModify == false) {
+  //         if (totalDistance.value > deliveryChargeModel.value.minimumDeliveryChargesWithinKm!) {
+  //           deliveryCharges.value = totalDistance.value * deliveryChargeModel.value.deliveryChargesPerKm!;
+  //         } else {
+  //           deliveryCharges.value = (deliveryChargeModel.value.minimumDeliveryCharges)!.toDouble();
+  //         }
+  //       } else {
+  //         if (vendorModel.value.deliveryCharge != null) {
+  //           if (totalDistance.value > vendorModel.value.deliveryCharge!.minimumDeliveryChargesWithinKm!) {
+  //             deliveryCharges.value = (totalDistance.value * vendorModel.value.deliveryCharge!.deliveryChargesPerKm!).toDouble();
+  //           } else {
+  //             deliveryCharges.value = vendorModel.value.deliveryCharge!.minimumDeliveryCharges!.toDouble();
+  //           }
+  //         } else {
+  //           if (totalDistance.value > deliveryChargeModel.value.minimumDeliveryChargesWithinKm!) {
+  //             deliveryCharges.value = (totalDistance.value * deliveryChargeModel.value.deliveryChargesPerKm!).toDouble();
+  //           } else {
+  //             deliveryCharges.value = deliveryChargeModel.value.minimumDeliveryCharges!.toDouble();
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       deliveryCharges.value = 0.0;
+  //     }
+  //   }
+
+  //   packagingCharge.value = vendorModel.value.packagingCharge != null ? double.parse(vendorModel.value.packagingCharge.toString()) : 0.0;
+
+  //   platformFee.value = Constant.calculatePlatFormMeModel(platFromFeeModel: Constant.platformFeeModel);
+
+  //   for (var element in cartItem) {
+  //     if (double.parse(element.discountPrice.toString()) <= 0) {
+  //       subTotal.value = subTotal.value +
+  //           double.parse(element.price.toString()) * double.parse(element.quantity.toString()) +
+  //           (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString()));
+
+  //       if (Constant.taxScope == "product") {
+  //         for (var taxElement in element.taxSetting!) {
+  //           if (taxElement.type == "fix") {
+  //             productTaxAmount.value = productTaxAmount.value +
+  //                 Constant.calculateTax(
+  //                         amount: (double.parse(element.price.toString()) * double.parse(element.quantity.toString()) +
+  //                                 (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString())))
+  //                             .toString(),
+  //                         taxModel: taxElement) *
+  //                     double.parse(element.quantity.toString());
+  //           } else {
+  //             productTaxAmount.value = productTaxAmount.value +
+  //                 Constant.calculateTax(
+  //                     amount: (double.parse(element.price.toString()) * double.parse(element.quantity.toString()) +
+  //                             (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString())))
+  //                         .toString(),
+  //                     taxModel: taxElement);
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       subTotal.value = subTotal.value +
+  //           double.parse(element.discountPrice.toString()) * double.parse(element.quantity.toString()) +
+  //           (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString()));
+  //       if (Constant.taxScope == "product") {
+  //         // ignore: unused_local_variable
+
+  //         for (var taxElement in element.taxSetting!) {
+  //           if (taxElement.type == "fix") {
+  //             productTaxAmount.value = productTaxAmount.value +
+  //                 Constant.calculateTax(
+  //                         amount: (double.parse(element.price.toString()) * double.parse(element.quantity.toString()) +
+  //                                 (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString())))
+  //                             .toString(),
+  //                         taxModel: taxElement) *
+  //                     double.parse(element.quantity.toString());
+  //           } else {
+  //             productTaxAmount.value = productTaxAmount.value +
+  //                 Constant.calculateTax(
+  //                     amount: (double.parse(element.price.toString()) * double.parse(element.quantity.toString()) +
+  //                             (double.parse(element.extrasPrice.toString()) * double.parse(element.quantity.toString())))
+  //                         .toString(),
+  //                     taxModel: taxElement);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   if (freeDeliveryByAdminModel.value.isEnableFreeDelivery == true && (deliveryCharges.value != 0.0)) {
+  //     if (totalDistance.value <= double.parse("${freeDeliveryByAdminModel.value.freeDeliveryDistance ?? 0.0}")) {
+  //       isEnableFreeDeliveryByAdmin.value = true;
+  //     } else if (subTotal.value > double.parse("${freeDeliveryByAdminModel.value.freeDeliveryOver ?? 0.0}")) {
+  //       isEnableFreeDeliveryByAdmin.value = true;
+  //     }
+  //   }
+
+  //   if (selectedCouponModel.value.id != null) {
+  //     couponAmount.value = Constant.calculateDiscount(amount: subTotal.value.toString(), offerModel: selectedCouponModel.value);
+  //   }
+
+  //   if (vendorModel.value.specialDiscountEnable == true && Constant.specialDiscountOffer == true) {
+  //     final now = DateTime.now();
+  //     var day = DateFormat('EEEE', 'en_US').format(now);
+  //     var date = DateFormat('dd-MM-yyyy').format(now);
+  //     for (var element in vendorModel.value.specialDiscount!) {
+  //       if (day == element.day.toString()) {
+  //         if (element.timeslot!.isNotEmpty) {
+  //           for (var element in element.timeslot!) {
+  //             if (element.discountType == "delivery") {
+  //               var start = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${element.from}");
+  //               var end = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${element.to}");
+  //               if (isCurrentDateInRange(start, end)) {
+  //                 specialDiscount.value = double.parse(element.discount.toString());
+  //                 specialType.value = element.type.toString();
+  //                 if (element.type == "percentage") {
+  //                   specialDiscountAmount.value = subTotal * specialDiscount.value / 100;
+  //                 } else {
+  //                   specialDiscountAmount.value = specialDiscount.value;
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   } else {
+  //     specialDiscount.value = double.parse("0");
+  //     specialType.value = "amount";
+  //   }
+
+  //   if (Constant.taxScope == "order") {
+  //     for (var taxElement in Constant.orderProductTaxList ?? []) {
+  //       orderTaxAmount.value = orderTaxAmount.value + Constant.calculateTax(amount: (subTotal.value - couponAmount.value - specialDiscountAmount.value).toString(), taxModel: taxElement);
+  //     }
+  //   }
+
+  //   if (selectedFoodType.value != 'TakeAway' && vendorModel.value.isSelfDelivery != true) {
+  //     for (var taxElement in Constant.driverDeliveryTaxList ?? []) {
+  //       driverDeliveryTaxAmount.value = driverDeliveryTaxAmount.value + Constant.calculateTax(amount: (deliveryCharges.value).toString(), taxModel: taxElement);
+  //     }
+  //   } else {
+  //     driverDeliveryTaxAmount.value = 0.0;
+  //   }
+
+  //   if (Constant.packagingChargeEnable == true) {
+  //     if (packagingCharge.value != 0.0) {
+  //       for (var taxElement in Constant.packagingTaxList ?? []) {
+  //         packagingTaxAmount.value = packagingTaxAmount.value + Constant.calculateTax(amount: (packagingCharge.value).toString(), taxModel: taxElement);
+  //       }
+  //     }
+  //   } else {
+  //     packagingTaxAmount.value = 0.0;
+  //   }
+  //   if (Constant.platformFeeModel?.enable == true) {
+  //     if (platformFee.value != 0.0) {
+  //       for (var taxElement in Constant.platformTaxList ?? []) {
+  //         platformTaxAmount.value = platformTaxAmount.value + Constant.calculateTax(amount: (platformFee.value).toString(), taxModel: taxElement);
+  //       }
+  //     }
+  //   } else {
+  //     platformTaxAmount.value = 0.0;
+  //   }
+
+  //   print("::productTaxAmount.value ${productTaxAmount.value}");
+  //   print("::orderTaxAmount.value ${orderTaxAmount.value}");
+  //   print("::driverDeliveryTaxAmount.value ${driverDeliveryTaxAmount.value}");
+  //   print("::packagingTaxAmount.value ${packagingTaxAmount.value}");
+  //   log("::packagingTaxAmount.value ${productTaxAmount.value} + ${orderTaxAmount.value} + ${driverDeliveryTaxAmount.value} + ${packagingTaxAmount.value} + ${platformTaxAmount.value}");
+  //   totalTaxAmount.value = productTaxAmount.value + orderTaxAmount.value + driverDeliveryTaxAmount.value + packagingTaxAmount.value + platformTaxAmount.value;
+
+  //   print("::totalTaxAmounttotalTaxAmount.value ${totalTaxAmount.value}");
+  //   if (isEnableFreeDeliveryByAdmin.value == false) {
+  //     totalAmount.value =
+  //         (subTotal.value - couponAmount.value - specialDiscountAmount.value) + totalTaxAmount.value + deliveryCharges.value + deliveryTips.value + packagingCharge.value + platformFee.value;
+  //   } else {
+  //     totalAmount.value = (subTotal.value - couponAmount.value - specialDiscountAmount.value) + totalTaxAmount.value + packagingCharge.value + platformFee.value;
+  //   }
+  //   getCashback();
+  // }
 
   Future<void> getCashback() async {
     if (Constant.isCashbackActive == true) {
@@ -348,10 +623,12 @@ class CartController extends GetxController {
   List<CartProductModel> tempProduc = [];
 
   Future<void> placeOrder() async {
+    ShowToastDialog.showLoader("Please wait".tr);
     if (selectedPaymentMethod.value == PaymentGateway.wallet.name) {
       if (double.parse(userModel.value.walletAmount.toString()) >= totalAmount.value) {
         setOrder();
       } else {
+        ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("You don't have sufficient wallet balance to place order".tr);
       }
     } else {
@@ -360,8 +637,8 @@ class CartController extends GetxController {
   }
 
   Future<void> setOrder() async {
+    ShowToastDialog.closeLoader();
     ShowToastDialog.showLoader("Please wait".tr);
-
     if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && vendorModel.value.subscriptionPlan != null) {
       await FireStoreUtils.getVendorById(vendorModel.value.id!).then((vender) async {
         if (vender?.subscriptionTotalOrders == '0' || vender?.subscriptionTotalOrders == null) {
@@ -394,7 +671,6 @@ class CartController extends GetxController {
     orderModel.status = Constant.orderPlaced;
     orderModel.discount = couponAmount.value;
     orderModel.couponId = selectedCouponModel.value.id;
-    orderModel.taxSetting = Constant.taxList;
     orderModel.paymentMethod = selectedPaymentMethod.value;
     orderModel.products = cartItem;
     orderModel.specialDiscount = specialDiscountMap;
@@ -407,6 +683,15 @@ class CartController extends GetxController {
     orderModel.scheduleTime = deliveryType.value == "schedule".tr ? Timestamp.fromDate(scheduleDateTime.value) : null;
     orderModel.cashback = bestCashback.value.id == null ? null : bestCashback.value;
     orderModel.isFreeDelivery = isEnableFreeDeliveryByAdmin.value;
+
+    orderModel.taxSetting = Constant.taxScope == "order" ? Constant.orderProductTaxList : [];
+    orderModel.driverDeliveryTax = Constant.driverDeliveryTaxList;
+    orderModel.packagingTax = Constant.packagingTaxList;
+    orderModel.platformTax = Constant.platformTaxList;
+    orderModel.taxScope = Constant.taxScope;
+    orderModel.platformFee = platformFee.value.toString();
+    orderModel.isPosOrder = false;
+
     if (selectedPaymentMethod.value == PaymentGateway.wallet.name) {
       WalletTransactionModel transactionModel = WalletTransactionModel(
           id: Constant.getUuid(),
@@ -463,9 +748,9 @@ class CartController extends GetxController {
       );
       await FireStoreUtils.setCashbackRedeemModel(cashbackRedeemModel);
     }
+
     await FireStoreUtils.setOrder(orderModel).then(
       (value) async {
-        ShowToastDialog.closeLoader();
         await FireStoreUtils.getUserProfile(orderModel.vendor!.author.toString()).then(
           (value) async {
             if (value != null) {
@@ -478,6 +763,7 @@ class CartController extends GetxController {
           },
         );
         await Constant.sendOrderEmail(orderModel: orderModel);
+        ShowToastDialog.closeLoader();
         Get.off(const OrderPlacingScreen(), arguments: {"orderModel": orderModel});
       },
     );
@@ -498,7 +784,7 @@ class CartController extends GetxController {
   Rx<OrangeMoney> orangeMoneyModel = OrangeMoney().obs;
   Rx<Xendit> xenditModel = Xendit().obs;
 
-  getPaymentSettings() async {
+  Future<void> getPaymentSettings() async {
     await FireStoreUtils.getPaymentSettingsData().then(
       (value) {
         stripeModel.value = StripeModel.fromJson(jsonDecode(Preferences.getString(Preferences.stripeSettings)));
@@ -558,10 +844,12 @@ class CartController extends GetxController {
   Future<void> stripeMakePayment({required String amount}) async {
     log(double.parse(amount).toStringAsFixed(0));
     try {
+      ShowToastDialog.showLoader("Please wait".tr);
       Map<String, dynamic>? paymentIntentData = await createStripeIntent(amount: amount);
       log("stripe Responce====>$paymentIntentData");
       if (paymentIntentData!.containsKey("error")) {
         Get.back();
+        ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
       } else {
         await Stripe.instance.initPaymentSheet(
@@ -580,11 +868,13 @@ class CartController extends GetxController {
                     primary: AppThemeData.primary300,
                   ),
                 ),
-                merchantDisplayName: 'GoRide'));
+                merchantDisplayName: 'Wagona'));
+        ShowToastDialog.closeLoader();
         displayStripePaymentSheet(amount: amount);
       }
     } catch (e, s) {
       log("$e \n$s");
+      ShowToastDialog.closeLoader();
       ShowToastDialog.showToast("exception:$e \n$s");
     }
   }
@@ -625,12 +915,13 @@ class CartController extends GetxController {
 
       return jsonDecode(response.body);
     } catch (e) {
+      ShowToastDialog.closeLoader();
       log(e.toString());
     }
   }
 
   //mercadoo
-  mercadoPagoMakePayment({required BuildContext context, required String amount}) async {
+  Future<Null> mercadoPagoMakePayment({required BuildContext context, required String amount}) async {
     final headers = {
       'Authorization': 'Bearer ${mercadoPagoModel.value.accessToken}',
       'Content-Type': 'application/json',
@@ -663,8 +954,9 @@ class CartController extends GetxController {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
+      ShowToastDialog.closeLoader();
       Get.to(MercadoPagoScreen(initialURl: data['init_point']))!.then((value) {
-        if (value) {
+        if (value == true) {
           ShowToastDialog.showToast("Payment Successful!!".tr);
           placeOrder();
         } else {
@@ -672,13 +964,17 @@ class CartController extends GetxController {
         }
       });
     } else {
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.".tr);
       print('Error creating preference: ${response.body}');
       return null;
     }
   }
 
 //Paypal
-  paypalPaymentSheet(String amount, context) {
+  void paypalPaymentSheet(String amount, context) {
+    String amountData = double.parse(amount).toStringAsFixed(Constant.currencyModel?.decimalDigits ?? 2);
+    ShowToastDialog.closeLoader();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) => UsePaypal(
@@ -690,9 +986,9 @@ class CartController extends GetxController {
             transactions: [
               {
                 "amount": {
-                  "total": amount,
+                  "total": amountData,
                   "currency": "USD",
-                  "details": {"subtotal": amount}
+                  "details": {"subtotal": amountData}
                 },
               }
             ],
@@ -714,34 +1010,38 @@ class CartController extends GetxController {
   }
 
   ///PayStack Payment Method
-  payStackPayment(String totalAmount) async {
-    await PayStackURLGen.payStackURLGen(amount: (double.parse(totalAmount) * 100).toString(), currency: "ZAR", secretKey: payStackModel.value.secretKey.toString(), userModel: userModel.value)
+  Future<void> payStackPayment(String totalAmount) async {
+    ShowToastDialog.showLoader("Please wait".tr);
+    await PayStackURLGen.payStackURLGen(amount: (double.parse(totalAmount) * 100).toStringAsFixed(0), currency: "ZAR", secretKey: payStackModel.value.secretKey.toString(), userModel: userModel.value)
         .then((value) async {
       if (value != null) {
+        ShowToastDialog.closeLoader();
         PayStackUrlModel payStackModel0 = value;
-        Get.to(PayStackScreen(
-          secretKey: payStackModel.value.secretKey.toString(),
-          callBackUrl: payStackModel.value.callbackURL.toString(),
-          initialURl: payStackModel0.data.authorizationUrl,
-          amount: totalAmount,
-          reference: payStackModel0.data.reference,
-        ))!
-            .then((value) {
-          if (value) {
+        Get.to<bool>(() => PayStackScreen(
+              secretKey: payStackModel.value.secretKey ?? '',
+              callBackUrl: payStackModel.value.callbackURL ?? '',
+              initialURl: payStackModel0.data.authorizationUrl,
+              amount: totalAmount,
+              reference: payStackModel0.data.reference,
+            ))?.then((value) {
+          if (value == true) {
             ShowToastDialog.showToast("Payment Successful!!".tr);
             placeOrder();
           } else {
-            ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
+            ShowToastDialog.closeLoader();
+            ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
           }
         });
       } else {
+        ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
       }
     });
   }
 
   //flutter wave Payment Method
-  flutterWaveInitiatePayment({required BuildContext context, required String amount}) async {
+  Future<Null> flutterWaveInitiatePayment({required BuildContext context, required String amount}) async {
+    ShowToastDialog.showLoader("Please wait".tr);
     final url = Uri.parse('https://api.flutterwave.com/v3/payments');
     final headers = {
       'Authorization': 'Bearer ${flutterWaveModel.value.secretKey}',
@@ -769,8 +1069,9 @@ class CartController extends GetxController {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      ShowToastDialog.closeLoader();
       Get.to(MercadoPagoScreen(initialURl: data['data']['link']))!.then((value) {
-        if (value) {
+        if (value == true) {
           ShowToastDialog.showToast("Payment Successful!!".tr);
           placeOrder();
         } else {
@@ -778,14 +1079,15 @@ class CartController extends GetxController {
         }
       });
     } else {
-      print('Payment initialization failed: ${response.body}');
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.".tr);
       return null;
     }
   }
 
   String? _ref;
 
-  setRef() {
+  void setRef() {
     maths.Random numRef = maths.Random();
     int year = DateTime.now().year;
     int refNumber = numRef.nextInt(20000);
@@ -797,22 +1099,23 @@ class CartController extends GetxController {
   }
 
   // payFast
-  payFastPayment({required BuildContext context, required String amount}) {
+  void payFastPayment({required BuildContext context, required String amount}) {
+    ShowToastDialog.showLoader("Please wait".tr);
     PayStackURLGen.getPayHTML(payFastSettingData: payFastModel.value, amount: amount.toString(), userModel: userModel.value).then((String? value) async {
+      ShowToastDialog.closeLoader();
       bool isDone = await Get.to(PayFastScreen(htmlData: value!, payFastSettingData: payFastModel.value));
       if (isDone) {
-        Get.back();
         ShowToastDialog.showToast("Payment successfully".tr);
         placeOrder();
       } else {
-        Get.back();
+        ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("Payment Failed".tr);
       }
     });
   }
 
   ///Paytm payment function
-  getPaytmCheckSum(context, {required double amount}) async {
+  Future<void> getPaytmCheckSum(context, {required double amount}) async {
     final String orderId = DateTime.now().millisecondsSinceEpoch.toString();
     String getChecksum = "${Constant.globalUrl}payments/getpaytmchecksum";
 
@@ -830,15 +1133,17 @@ class CartController extends GetxController {
     final data = jsonDecode(response.body);
     await verifyCheckSum(checkSum: data["code"], amount: amount, orderId: orderId).then((value) {
       initiatePayment(amount: amount, orderId: orderId).then((value) {
-        String callback = "";
-        if (paytmModel.value.isSandboxEnabled == true) {
-          callback = "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
-        } else {
-          callback = "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
-        }
+        if (value != null) {
+          String callback = "";
+          if (paytmModel.value.isSandboxEnabled == true) {
+            callback = "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+          } else {
+            callback = "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+          }
 
-        GetPaymentTxtTokenModel result = value;
-        startTransaction(context, txnTokenBy: result.body.txnToken, orderId: orderId, amount: amount, callBackURL: callback, isStaging: paytmModel.value.isSandboxEnabled);
+          GetPaymentTxtTokenModel result = value;
+          startTransaction(context, txnTokenBy: result.body.txnToken, orderId: orderId, amount: amount, callBackURL: callback, isStaging: paytmModel.value.isSandboxEnabled);
+        }
       });
     });
   }
@@ -896,7 +1201,7 @@ class CartController extends GetxController {
     return data['status'];
   }
 
-  Future<GetPaymentTxtTokenModel> initiatePayment({required double amount, required orderId}) async {
+  Future<dynamic> initiatePayment({required double amount, required orderId}) async {
     String initiateURL = "${Constant.globalUrl}payments/initiatepaytmpayment";
     String callback = "";
     if (paytmModel.value.isSandboxEnabled == true) {
@@ -917,8 +1222,8 @@ class CartController extends GetxController {
     log(response.body);
     final data = jsonDecode(response.body);
     if (data["body"]["txnToken"] == null || data["body"]["txnToken"].toString().isEmpty) {
-      Get.back();
       ShowToastDialog.showToast("something went wrong, please contact admin.".tr);
+      return null;
     }
     return GetPaymentTxtTokenModel.fromJson(data);
   }
@@ -930,7 +1235,7 @@ class CartController extends GetxController {
     var options = {
       'key': razorPayModel.value.razorpayKey,
       'amount': amount * 100,
-      'name': 'GoRide',
+      'name': 'Wagona',
       'order_id': orderId,
       "currency": "INR",
       'description': 'wallet Topup',
@@ -946,25 +1251,24 @@ class CartController extends GetxController {
     };
 
     try {
+      ShowToastDialog.closeLoader();
       razorPay.open(options);
     } catch (e) {
+      ShowToastDialog.closeLoader();
       debugPrint('Error: $e');
     }
   }
 
   void handlePaymentSuccess(PaymentSuccessResponse response) {
-    Get.back();
     ShowToastDialog.showToast("Payment Successful!!".tr);
     placeOrder();
   }
 
   void handleExternalWaller(ExternalWalletResponse response) {
-    Get.back();
     ShowToastDialog.showToast("Payment Processing!! via".tr);
   }
 
   void handlePaymentError(PaymentFailureResponse response) {
-    Get.back();
     ShowToastDialog.showToast("Payment Failed!!".tr);
   }
 
@@ -974,21 +1278,18 @@ class CartController extends GetxController {
   }
 
   //Midtrans payment
-  midtransMakePayment({required String amount, required BuildContext context}) async {
-    await createPaymentLink(amount: amount).then((url) {
+  Future<void> midtransMakePayment({required String amount, required BuildContext context}) async {
+    ShowToastDialog.showLoader("Please wait".tr);
+    await createPaymentLink(amount: amount).then((url) async {
       ShowToastDialog.closeLoader();
       if (url != '') {
-        Get.to(() => MidtransScreen(
-                  initialURl: url,
-                ))!
-            .then((value) {
-          if (value == true) {
-            ShowToastDialog.showToast("Payment Successful!!".tr);
-            placeOrder();
-          } else {
-            ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
-          }
-        });
+        final result = await Get.to(() => MidtransScreen(initialURl: url));
+        if (result == true) {
+          ShowToastDialog.showToast("Payment Successful!!".tr);
+          placeOrder();
+        } else {
+          ShowToastDialog.showToast("Payment Failed or Cancelled!".tr);
+        }
       }
     });
   }
@@ -1035,11 +1336,11 @@ class CartController extends GetxController {
   static String orderId = '';
   static String amount = '';
 
-  orangeMakePayment({required String amount, required BuildContext context}) async {
+  Future<void> orangeMakePayment({required String amount, required BuildContext context}) async {
     reset();
     var id = const Uuid().v4();
+    ShowToastDialog.showLoader("Please wait".tr);
     var paymentURL = await fetchToken(context: context, orderId: id, amount: amount, currency: 'USD');
-    ShowToastDialog.closeLoader();
     if (paymentURL.toString() != '') {
       Get.to(() => OrangeMoneyScreen(
                 initialURl: paymentURL,
@@ -1057,6 +1358,7 @@ class CartController extends GetxController {
         }
       });
     } else {
+      ShowToastDialog.closeLoader();
       ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
     }
   }
@@ -1134,24 +1436,24 @@ class CartController extends GetxController {
   }
 
   //XenditPayment
-  xenditPayment(context, amount) async {
-    await createXenditInvoice(amount: amount).then((model) {
+  Future<void> xenditPayment(context, amount) async {
+    ShowToastDialog.showLoader("Please wait".tr);
+    await createXenditInvoice(amount: amount).then((model) async {
       ShowToastDialog.closeLoader();
       if (model.id != null) {
-        Get.to(() => XenditScreen(
-                  initialURl: model.invoiceUrl ?? '',
-                  transId: model.id ?? '',
-                  apiKey: xenditModel.value.apiKey!.toString(),
-                ))!
-            .then((value) {
-          if (value == true) {
-            ShowToastDialog.showToast("Payment Successful!!".tr);
-            placeOrder();
-            ();
-          } else {
-            ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
-          }
-        });
+        final result = await Get.to(() => XenditScreen(
+              initialUrl: model.invoiceUrl ?? '',
+              transId: model.id ?? '',
+              apiKey: xenditModel.value.apiKey!.toString(),
+            ));
+
+        if (result == true) {
+          ShowToastDialog.showToast("Payment Successful!!".tr);
+          placeOrder();
+        } else {
+          ShowToastDialog.closeLoader();
+          ShowToastDialog.showToast("Payment Failed or Cancelled!".tr);
+        }
       }
     });
   }

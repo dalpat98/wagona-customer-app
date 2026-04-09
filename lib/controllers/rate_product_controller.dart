@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +12,6 @@ import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -70,13 +70,13 @@ class RateProductController extends GetxController {
           if (value != null) {
             productModel.value = value;
             if (ratingModel.value.id != null) {
-              productReviewCount.value = value.reviewsCount! - 1;
-              productReviewSum.value = value.reviewsSum! - ratings.value;
+              productReviewCount.value = ((value.reviewsCount ?? 0.0) - 1.0);
+              productReviewSum.value = ((value.reviewsSum ?? 0.0) - ratings.value);
 
               if (value.reviewAttributes != null) {
                 value.reviewAttributes!.forEach((key, value) {
                   ReviewsAttribute reviewsAttributeModel = ReviewsAttribute.fromJson(value);
-                  reviewsAttributeModel.reviewsCount = reviewsAttributeModel.reviewsCount! - 1;
+                  reviewsAttributeModel.reviewsCount = ((reviewsAttributeModel.reviewsCount ?? 0.0) - 1);
                   reviewsAttributeModel.reviewsSum = reviewsAttributeModel.reviewsSum! - reviewAttribute[key];
                   reviewProductAttributes.addEntries([MapEntry(key, reviewsAttributeModel.toJson())]);
                 });
@@ -97,8 +97,8 @@ class RateProductController extends GetxController {
           if (value != null) {
             vendorModel.value = value;
             if (ratingModel.value.id != null) {
-              vendorReviewCount.value = value.reviewsCount! - 1;
-              vendorReviewSum.value = value.reviewsSum! - ratings.value;
+              vendorReviewCount.value = ((value.reviewsCount ?? 0.0) - 1.0);
+              vendorReviewSum.value = ((value.reviewsSum ?? 0.0) - ratings.value);
             } else {
               vendorReviewCount.value = double.parse(value.reviewsCount.toString());
               vendorReviewSum.value = double.parse(value.reviewsSum.toString());
@@ -122,14 +122,19 @@ class RateProductController extends GetxController {
     isLoading.value = false;
   }
 
-  saveRating() async {
+  Future<void> saveRating() async {
     if (ratings.value != 0.0) {
       ShowToastDialog.showLoader("Please wait".tr);
-      productModel.value.reviewsCount = productReviewCount.value + 1;
-      productModel.value.reviewsSum = productReviewSum.value + ratings.value;
+      log("reviewsCount :11:: ${productReviewCount.value}+1.0 :: ${((productReviewCount.value) + 1.0)}");
+      productModel.value.reviewsCount = ((productReviewCount.value) + 1.0);
+      log("reviewsCount :22:: ${productReviewSum.value}+${ratings.value} :: ${(productReviewSum.value + ratings.value)}");
+      productModel.value.reviewsSum = (productReviewSum.value + ratings.value);
+      log("reviewsCount :33:: ${reviewProductAttributes}");
       productModel.value.reviewAttributes = reviewProductAttributes;
 
-      vendorModel.value.reviewsCount = vendorReviewCount.value + 1;
+      log("reviewsCount :44:: ${vendorReviewCount.value}+1.0 :: ${((vendorReviewCount.value) + 1.0)}");
+      vendorModel.value.reviewsCount = ((vendorReviewCount.value) + 1.0);
+      log("reviewsCount :55:: ${vendorReviewSum.value}+${ratings.value} :: ${vendorReviewSum.value + ratings.value}");
       vendorModel.value.reviewsSum = vendorReviewSum.value + ratings.value;
 
       if (reviewProductAttributes.isEmpty) {
@@ -140,8 +145,8 @@ class RateProductController extends GetxController {
       } else {
         reviewProductAttributes.forEach((key, value) {
           ReviewsAttribute reviewsAttributeModel = ReviewsAttribute.fromJson(value);
-          reviewsAttributeModel.reviewsCount = reviewsAttributeModel.reviewsCount! + 1;
-          reviewsAttributeModel.reviewsSum = reviewsAttributeModel.reviewsSum! + reviewAttribute[key];
+          reviewsAttributeModel.reviewsCount = ((reviewsAttributeModel.reviewsCount ?? 0.0) + 1.0);
+          reviewsAttributeModel.reviewsSum = ((reviewsAttributeModel.reviewsSum ?? 0.0) + reviewAttribute[key]);
           reviewProductAttributes.addEntries([MapEntry(key, reviewsAttributeModel.toJson())]);
         });
       }
@@ -178,8 +183,10 @@ class RateProductController extends GetxController {
       await FireStoreUtils.setProduct(productModel.value);
       ShowToastDialog.closeLoader();
       Get.back();
+      ShowToastDialog.showToast("Review submitted successfully".tr);
     } else {
       ShowToastDialog.showToast("Please add rate for food item.".tr);
+      ShowToastDialog.closeLoader();
     }
   }
 
@@ -192,8 +199,12 @@ class RateProductController extends GetxController {
       if (image == null) return;
       images.add(image);
       Get.back();
-    } on PlatformException catch (e) {
-      ShowToastDialog.showToast("Failed to Pick : \n $e");
+    } catch (e) {
+      if (source == ImageSource.camera) {
+        ShowToastDialog.showToast("Camera access is not enabled. Please allow camera permission.");
+      } else {
+        ShowToastDialog.showToast("Storage permission is not enabled. Please allow it.");
+      }
     }
   }
 }

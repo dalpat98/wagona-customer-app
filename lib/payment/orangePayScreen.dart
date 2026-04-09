@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/models/payment_model/orange_money.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -71,11 +72,12 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageFinished: ((url) {
-            setState(() {
-              isLoading = false;
-            });
-          }),
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {
+            ShowToastDialog.closeLoader();
+          },
           onNavigationRequest: (NavigationRequest navigation) async {
             return NavigationDecision.navigate;
           },
@@ -90,9 +92,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
     required String payToken,
     required String accessToken,
   }) async {
-    String apiUrl = widget.orangePay.isSandbox == true
-        ? 'https://api.orange.com/orange-money-webpay/dev/v1/transactionstatus'
-        : 'https://api.orange.com/orange-money-webpay/cm/v1/transactionstatus';
+    String apiUrl = widget.orangePay.isSandbox == true ? 'https://api.orange.com/orange-money-webpay/dev/v1/transactionstatus' : 'https://api.orange.com/orange-money-webpay/cm/v1/transactionstatus';
     Map<String, String> requestBody = {
       "order_id": orderId,
       "amount": amount, // "OUV",

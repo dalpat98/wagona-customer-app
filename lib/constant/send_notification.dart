@@ -94,31 +94,48 @@ class SendNotification {
     }
   }
 
-  static Future<bool> sendChatFcmMessage(String title, String message, String token, Map<String, dynamic>? payload) async {
+  static Future<bool> sendChatFcmMessage({
+    required String title,
+    required String message,
+    required String token,
+    Map<String, dynamic>? payload,
+  }) async {
     try {
-      final String accessToken = await getAccessToken();
-      final response = await http.post(
-        Uri.parse('https://fcm.googleapis.com/v1/projects/${Constant.senderId}/messages:send'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode(
-          <String, dynamic>{
-            'message': {
-              'token': token,
-              'notification': {'body': message, 'title': title},
-              'data': payload,
-            }
-          },
-        ),
+      final accessToken = await getAccessToken();
+
+      final uri = Uri.parse(
+        'https://fcm.googleapis.com/v1/projects/${Constant.senderId}/messages:send',
       );
-      debugPrint("Notification=======>");
-      debugPrint(response.statusCode.toString());
-      debugPrint(response.body);
-      return true;
-    } catch (e) {
-      print(e);
+
+      final body = {
+        'message': {
+          'token': token,
+          'notification': {
+            'title': title,
+            'body': message,
+          },
+          if (payload != null && payload.isNotEmpty) 'data': payload.map((k, v) => MapEntry(k, v.toString())),
+        }
+      };
+
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      debugPrint('FCM Status Code: ${response.statusCode}');
+      debugPrint('FCM Response: ${response.body}');
+
+      return response.statusCode == 200;
+    } catch (e, stack) {
+      debugPrint('sendChatFcmMessage error: $e');
+      debugPrintStack(stackTrace: stack);
       return false;
     }
   }

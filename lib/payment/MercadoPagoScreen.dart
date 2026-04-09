@@ -26,7 +26,7 @@ class _MercadoPagoScreenState extends State<MercadoPagoScreen> {
     super.initState();
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -34,13 +34,16 @@ class _MercadoPagoScreenState extends State<MercadoPagoScreen> {
         NavigationDelegate(
           onProgress: (int progress) {},
           onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest navigation) async {
             debugPrint("--->2 ${navigation.url}");
-            if (navigation.url.contains("${Constant.globalUrl}payment/success")) {
+            if (navigation.url.contains("${Constant.globalUrl}payment/success?status=cancelled")) {
+              debugPrint("--->3 ${navigation.url}");
+              Get.back(result: false);
+            } else if (navigation.url.contains("${Constant.globalUrl}payment/success")) {
               Get.back(result: true);
-            }
-            if (navigation.url.contains("${Constant.globalUrl}payment/failure") || navigation.url.contains("${Constant.globalUrl}payment/pending")) {
+            } else if (navigation.url.contains("${Constant.globalUrl}payment/failure") || navigation.url.contains("${Constant.globalUrl}payment/pending")) {
               Get.back(result: false);
             }
             return NavigationDecision.navigate;

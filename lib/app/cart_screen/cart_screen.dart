@@ -10,7 +10,6 @@ import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/cart_controller.dart';
 import 'package:customer/models/cart_product_model.dart';
 import 'package:customer/models/product_model.dart';
-import 'package:customer/models/tax_model.dart';
 import 'package:customer/models/user_model.dart';
 import 'package:customer/payment/createRazorPayOrderModel.dart';
 import 'package:customer/payment/rozorpayConroller.dart';
@@ -80,7 +79,10 @@ class CartScreen extends StatelessWidget {
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  SvgPicture.asset("assets/icons/ic_send_one.svg"),
+                                                  SvgPicture.asset(
+                                                    "assets/icons/ic_send_one.svg",
+                                                    colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                                  ),
                                                   const SizedBox(
                                                     width: 10,
                                                   ),
@@ -140,7 +142,6 @@ class CartScreen extends StatelessWidget {
                                   FireStoreUtils.getProductById(cartProductModel.id!.split('~').first).then((value) {
                                     productModel = value;
                                   });
-                                  print("cartItem[index] :: ${cartItem[index].extras} ::${cartItem[index].extrasPrice}");
                                   return InkWell(
                                     onTap: () async {
                                       await FireStoreUtils.getVendorById(productModel!.vendorID.toString()).then(
@@ -221,10 +222,24 @@ class CartScreen extends StatelessWidget {
                                                               ),
                                                             ],
                                                           ),
+                                                    if (Constant.taxScope == "product")
+                                                      cartProductModel.taxSetting?.isEmpty == true
+                                                          ? SizedBox()
+                                                          : Text(
+                                                              "${'Tax:'.tr} ${Constant.getTaxDisplayText(cartProductModel.taxSetting)}",
+                                                              maxLines: 2,
+                                                              overflow: TextOverflow.ellipsis,
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: themeChange.getThem() ? AppThemeData.secondary300 : AppThemeData.secondary300,
+                                                                fontFamily: AppThemeData.semiBold,
+                                                              ),
+                                                            )
                                                   ],
                                                 ),
                                               ),
                                               Container(
+                                                width: Responsive.width(22, context),
                                                 decoration: ShapeDecoration(
                                                   color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
                                                   shape: RoundedRectangleBorder(
@@ -233,7 +248,7 @@ class CartScreen extends StatelessWidget {
                                                   ),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                                                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 5),
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -244,7 +259,7 @@ class CartScreen extends StatelessWidget {
                                                           },
                                                           child: const Icon(Icons.remove)),
                                                       Padding(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8),
                                                         child: Text(
                                                           cartProductModel.quantity.toString(),
                                                           textAlign: TextAlign.start,
@@ -260,7 +275,7 @@ class CartScreen extends StatelessWidget {
                                                       ),
                                                       InkWell(
                                                           onTap: () {
-                                                            if (productModel!.itemAttribute != null) {
+                                                            if (productModel?.itemAttribute != null) {
                                                               if (productModel!.itemAttribute!.variants!
                                                                   .where((element) => element.variantSku == cartProductModel.variantInfo!.variantSku)
                                                                   .isNotEmpty) {
@@ -281,14 +296,14 @@ class CartScreen extends StatelessWidget {
                                                                   ShowToastDialog.showToast("Out of stock".tr);
                                                                 }
                                                               } else {
-                                                                if ((productModel!.quantity ?? 0) > (cartProductModel.quantity ?? 0) || productModel!.quantity == -1) {
+                                                                if ((productModel?.quantity ?? 0) > (cartProductModel.quantity ?? 0) || productModel!.quantity == -1) {
                                                                   controller.addToCart(cartProductModel: cartProductModel, isIncrement: true, quantity: cartProductModel.quantity! + 1);
                                                                 } else {
                                                                   ShowToastDialog.showToast("Out of stock".tr);
                                                                 }
                                                               }
                                                             } else {
-                                                              if ((productModel!.quantity ?? 0) > (cartProductModel.quantity ?? 0) || productModel!.quantity == -1) {
+                                                              if ((productModel?.quantity ?? 0) > (cartProductModel.quantity ?? 0) || productModel!.quantity == -1) {
                                                                 controller.addToCart(cartProductModel: cartProductModel, isIncrement: true, quantity: cartProductModel.quantity! + 1);
                                                               } else {
                                                                 ShowToastDialog.showToast("Out of stock".tr);
@@ -438,7 +453,7 @@ class CartScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${'Delivery Type'.tr} (${controller.selectedFoodType.value})".tr,
+                                "${'Delivery Type'.tr} ${'(${controller.selectedFoodType.value})'.tr}".tr,
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontFamily: AppThemeData.semiBold,
@@ -491,10 +506,10 @@ class CartScreen extends StatelessWidget {
                                             ),
                                             Radio(
                                               value: controller.deliveryType.value,
-                                              groupValue: "instant".tr,
+                                              groupValue: "instant",
                                               activeColor: AppThemeData.primary300,
                                               onChanged: (value) {
-                                                controller.deliveryType.value = "instant".tr;
+                                                controller.deliveryType.value = "instant";
                                               },
                                             )
                                           ],
@@ -512,7 +527,7 @@ class CartScreen extends StatelessWidget {
                                 ),
                                 child: InkWell(
                                   onTap: () {
-                                    controller.deliveryType.value = "schedule".tr;
+                                    controller.deliveryType.value = "schedule";
                                     BottomPicker.dateTime(
                                       onSubmit: (index) {
                                         controller.scheduleDateTime.value = index;
@@ -557,10 +572,10 @@ class CartScreen extends StatelessWidget {
                                         ),
                                         Radio(
                                           value: controller.deliveryType.value,
-                                          groupValue: "schedule".tr,
+                                          groupValue: "schedule",
                                           activeColor: AppThemeData.primary300,
                                           onChanged: (value) {
-                                            controller.deliveryType.value = "schedule".tr;
+                                            controller.deliveryType.value = "schedule";
                                             BottomPicker.dateTime(
                                               initialDateTime: controller.scheduleDateTime.value,
                                               onSubmit: (index) {
@@ -676,8 +691,6 @@ class CartScreen extends StatelessWidget {
                                     BoxShadow(
                                       color: Color(0x14000000),
                                       blurRadius: 52,
-                                      offset: Offset(0, 0),
-                                      spreadRadius: 0,
                                     )
                                   ],
                                 ),
@@ -685,275 +698,159 @@ class CartScreen extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "Item totals".tr,
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                fontFamily: AppThemeData.regular,
-                                                color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            Constant.amountShow(amount: controller.subTotal.value.toString()),
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(
-                                              fontFamily: AppThemeData.regular,
-                                              color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
+                                      /// Item Total
+                                      amountRow(
+                                        title: "Item totals",
+                                        amount: Constant.amountShow(amount: controller.subTotal.value.toString()),
+                                        isDark: themeChange.getThem(),
                                       ),
-                                      const SizedBox(
-                                        height: 10,
+
+                                      const SizedBox(height: 10),
+
+                                      /// Coupon Discount
+                                      amountRow(
+                                        title: "Coupon Discount",
+                                        amount: "- (${Constant.amountShow(amount: controller.couponAmount.value.toString())})",
+                                        isDark: themeChange.getThem(),
+                                        amountColor: AppThemeData.danger300,
                                       ),
-                                      controller.selectedFoodType.value == 'TakeAway'
-                                          ? const SizedBox()
-                                          : Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    "Delivery Fee".tr,
-                                                    textAlign: TextAlign.start,
-                                                    style: TextStyle(
-                                                      fontFamily: AppThemeData.regular,
-                                                      color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
-                                                      fontSize: 16,
-                                                    ),
-                                                  ),
-                                                ),
-                                                ((controller.vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true) ||
-                                                        controller.isEnableFreeDeliveryByAdmin.value == true)
-                                                    ? Text(
-                                                        'Free Delivery'.tr,
-                                                        textAlign: TextAlign.start,
-                                                        style: TextStyle(
-                                                          fontFamily: AppThemeData.regular,
-                                                          color: AppThemeData.success400,
-                                                          fontSize: 16,
-                                                        ),
-                                                      )
-                                                    : Text(
-                                                        Constant.amountShow(amount: controller.deliveryCharges.value.toString()),
-                                                        textAlign: TextAlign.start,
-                                                        style: TextStyle(
-                                                          fontFamily: AppThemeData.regular,
-                                                          color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                                          fontSize: 16,
-                                                        ),
-                                                      ),
-                                              ],
-                                            ),
-                                      const SizedBox(
-                                        height: 10,
+
+                                      /// Special Discount
+                                      if (controller.vendorModel.value.specialDiscountEnable == true && Constant.specialDiscountOffer == true) ...[
+                                        const SizedBox(height: 10),
+                                        amountRow(
+                                          title: "Special Discount",
+                                          amount: "- (${Constant.amountShow(amount: controller.specialDiscountAmount.value.toString())})",
+                                          isDark: themeChange.getThem(),
+                                          amountColor: AppThemeData.danger300,
+                                        ),
+                                      ],
+
+                                      const SizedBox(height: 10),
+
+                                      /// Packaging
+                                      amountRow(
+                                        title: "Packaging charge",
+                                        amount: Constant.amountShow(amount: controller.packagingCharge.value.toString()),
+                                        isDark: themeChange.getThem(),
                                       ),
-                                      MySeparator(color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "Coupon Discount".tr,
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                fontFamily: AppThemeData.regular,
-                                                color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            "- (${Constant.amountShow(amount: controller.couponAmount.value.toString())})",
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(
-                                              fontFamily: AppThemeData.regular,
-                                              color: themeChange.getThem() ? AppThemeData.danger300 : AppThemeData.danger300,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      controller.vendorModel.value.specialDiscountEnable == true && Constant.specialDiscountOffer == true
-                                          ? Column(
-                                              children: [
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        "Special Discount".tr,
-                                                        textAlign: TextAlign.start,
-                                                        style: TextStyle(
-                                                          fontFamily: AppThemeData.regular,
-                                                          color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
-                                                          fontSize: 16,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      "- (${Constant.amountShow(amount: controller.specialDiscountAmount.value.toString())})",
-                                                      textAlign: TextAlign.start,
+
+                                      sectionDivider(themeChange.getThem()),
+
+                                      /// Delivery Fee
+                                      if (controller.selectedFoodType.value != 'TakeAway')
+                                        amountRow(
+                                          title: "Delivery Fee",
+                                          isDark: themeChange.getThem(),
+                                          trailing:
+                                              ((controller.vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true) || controller.isEnableFreeDeliveryByAdmin.value == true)
+                                                  ? Text(
+                                                      'Free Delivery'.tr,
                                                       style: TextStyle(
                                                         fontFamily: AppThemeData.regular,
-                                                        color: themeChange.getThem() ? AppThemeData.danger300 : AppThemeData.danger300,
+                                                        color: AppThemeData.success400,
                                                         fontSize: 16,
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            )
-                                          : const SizedBox(),
-                                      ((controller.selectedFoodType.value == 'TakeAway' || (controller.vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true)) ||
-                                              controller.isEnableFreeDeliveryByAdmin.value == true)
-                                          ? const SizedBox()
-                                          : Column(
-                                              children: [
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: [
-                                                          Text(
-                                                            "Delivery Tips".tr,
-                                                            textAlign: TextAlign.start,
-                                                            style: TextStyle(
-                                                              fontFamily: AppThemeData.regular,
-                                                              color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
-                                                              fontSize: 16,
-                                                            ),
-                                                          ),
-                                                          controller.deliveryTips.value == 0
-                                                              ? const SizedBox()
-                                                              : InkWell(
-                                                                  onTap: () {
-                                                                    controller.deliveryTips.value = 0;
-                                                                    controller.calculatePrice();
-                                                                  },
-                                                                  child: Text(
-                                                                    "Remove".tr,
-                                                                    textAlign: TextAlign.start,
-                                                                    style: TextStyle(
-                                                                      fontFamily: AppThemeData.medium,
-                                                                      color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      Constant.amountShow(amount: controller.deliveryTips.toString()),
-                                                      textAlign: TextAlign.start,
+                                                    )
+                                                  : Text(
+                                                      Constant.amountShow(amount: controller.deliveryCharges.value.toString()),
                                                       style: TextStyle(
                                                         fontFamily: AppThemeData.regular,
                                                         color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                                         fontSize: 16,
                                                       ),
                                                     ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      MySeparator(color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      ListView.builder(
-                                        itemCount: Constant.taxList!.length,
-                                        shrinkWrap: true,
-                                        padding: EdgeInsets.zero,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        itemBuilder: (context, index) {
-                                          TaxModel taxModel = Constant.taxList![index];
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 5),
-                                            child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    "${taxModel.title.toString()} (${taxModel.type == "fix" ? Constant.amountShow(amount: taxModel.tax) : "${taxModel.tax}%"})",
-                                                    textAlign: TextAlign.start,
+                                          amount: '',
+                                        ),
+
+                                      /// Delivery Tips
+                                      if (!(controller.selectedFoodType.value == 'TakeAway' ||
+                                          controller.isEnableFreeDeliveryByAdmin.value == true ||
+                                          (controller.vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true))) ...[
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Delivery Tips".tr,
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.regular,
                                                       color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
                                                       fontSize: 16,
                                                     ),
                                                   ),
-                                                ),
-                                                Text(
-                                                  Constant.amountShow(
-                                                      amount: Constant.calculateTax(
-                                                              amount: (double.parse(controller.subTotal.value.toString()) - controller.couponAmount.value - controller.specialDiscountAmount.value)
-                                                                  .toString(),
-                                                              taxModel: taxModel)
-                                                          .toString()),
-                                                  textAlign: TextAlign.start,
-                                                  style: TextStyle(
-                                                    fontFamily: AppThemeData.regular,
-                                                    color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ],
+                                                  if (controller.deliveryTips.value != 0)
+                                                    InkWell(
+                                                      onTap: () {
+                                                        controller.deliveryTips.value = 0;
+                                                        controller.calculatePrice();
+                                                      },
+                                                      child: Text(
+                                                        "Remove".tr,
+                                                        style: TextStyle(
+                                                          fontFamily: AppThemeData.medium,
+                                                          color: AppThemeData.primary300,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
                                             ),
-                                          );
-                                        },
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "To Pay".tr,
-                                              textAlign: TextAlign.start,
+                                            Text(
+                                              Constant.amountShow(amount: controller.deliveryTips.toString()),
                                               style: TextStyle(
                                                 fontFamily: AppThemeData.regular,
-                                                color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
+                                                color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                                 fontSize: 16,
                                               ),
                                             ),
-                                          ),
-                                          Text(
-                                            Constant.amountShow(amount: controller.totalAmount.value.toString()),
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(
-                                              fontFamily: AppThemeData.regular,
-                                              color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
+                                      ],
+                                      if (!(controller.selectedFoodType.value == 'TakeAway' ||
+                                          controller.isEnableFreeDeliveryByAdmin.value == true ||
+                                          (controller.vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true)))
+                                        sectionDivider(themeChange.getThem()),
+
+                                      /// Platform Fee
+                                      amountRow(
+                                        title: "Platform fee",
+                                        amount: Constant.amountShow(amount: controller.platformFee.value.toString()),
+                                        isDark: themeChange.getThem(),
+                                      ),
+
+                                      sectionDivider(themeChange.getThem()),
+
+                                      /// Tax
+                                      InkWell(
+                                        onTap: () {
+                                          showBillBifurcationDialog(context, themeChange.getThem(), controller);
+                                        },
+                                        child: amountRow(
+                                            title: "Tax amount",
+                                            amount: Constant.amountShow(amount: controller.totalTaxAmount.value.toString()),
+                                            isDark: themeChange.getThem(),
+                                            textColour: AppThemeData.secondary300,
+                                            underline: true),
+                                      ),
+
+                                      sectionDivider(themeChange.getThem()),
+
+                                      /// To Pay
+                                      amountRow(
+                                        title: "To Pay",
+                                        amount: Constant.amountShow(amount: controller.totalAmount.value.toString()),
+                                        amountColor: AppThemeData.primary300,
+                                        isDark: themeChange.getThem(),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
+                              )
                             ],
                           ),
                         ),
@@ -1212,11 +1109,11 @@ class CartScreen extends StatelessWidget {
                                     controller.freeDeliveryByAdminModel.value.isEnableFreeDelivery == true &&
                                     controller.selectedFoodType.value != 'TakeAway'
                                 ? 200
-                                : 150
+                                : 170
                             : controller.freeDeliveryByAdminModel.value.isEnableFreeDelivery == true &&
                                     controller.isEnableFreeDeliveryByAdmin.value == false &&
                                     controller.selectedFoodType.value != 'TakeAway'
-                                ? 150
+                                ? 170
                                 : 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1281,7 +1178,7 @@ class CartScreen extends StatelessWidget {
                                       )),
                                     ),
                                     Text(
-                                      "Buy ${Constant.amountShow(amount: "${double.parse("${controller.freeDeliveryByAdminModel.value.freeDeliveryOver ?? 0.0}") - controller.subTotal.value}")} ${"more for free delivery".tr}",
+                                      "${'Buy'.tr} ${Constant.amountShow(amount: "${double.parse("${controller.freeDeliveryByAdminModel.value.freeDeliveryOver ?? 0.0}") - controller.subTotal.value}")} ${"more for free delivery".tr}",
                                       style: TextStyle(
                                         color: AppThemeData.primary300,
                                         fontFamily: AppThemeData.semiBold,
@@ -1358,14 +1255,28 @@ class CartScreen extends StatelessWidget {
                                                   padding: const EdgeInsets.only(top: 4),
                                                   child: Container(width: 60, height: 12, color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
                                                 )
-                                              : Text(
-                                                  controller.selectedPaymentMethod.value,
-                                                  textAlign: TextAlign.start,
-                                                  style: TextStyle(
-                                                    fontFamily: AppThemeData.semiBold,
-                                                    color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                                    fontSize: 16,
-                                                  ),
+                                              : Row(
+                                                  children: [
+                                                    Text(
+                                                      controller.selectedPaymentMethod.value,
+                                                      textAlign: TextAlign.start,
+                                                      style: TextStyle(
+                                                        fontFamily: AppThemeData.semiBold,
+                                                        color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Text(
+                                                      "(Change)".tr,
+                                                      textAlign: TextAlign.start,
+                                                      style: TextStyle(
+                                                        fontFamily: AppThemeData.semiBold,
+                                                        color: AppThemeData.primary300,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                         ],
                                       ),
@@ -1398,7 +1309,22 @@ class CartScreen extends StatelessWidget {
                                       ShowToastDialog.showToast("The total price must be greater than or equal to the special discount value for the code to apply. Please review your cart total.".tr);
                                       return;
                                     }
+                                    if (Constant.statusCheckOpenORClose(vendorModel: controller.vendorModel.value) != true) {
+                                      ShowToastDialog.showToast("The restaurant is closed at the moment. Please try placing your order later.".tr);
+                                      return;
+                                    }
                                     if (controller.isOrderPlaced.value == false) {
+                                      ShowToastDialog.showLoader("Please wait".tr);
+                                      bool? isZoneAvailable = await FireStoreUtils.getNearbyVendor(
+                                          latitude: controller.selectedAddress.value.location!.latitude!,
+                                          longitude: controller.selectedAddress.value.location!.longitude!,
+                                          vendor: controller.vendorModel.value);
+
+                                      if (isZoneAvailable == false) {
+                                        ShowToastDialog.closeLoader();
+                                        ShowToastDialog.showToast("The selected product is not available at your delivery address.".tr);
+                                        return;
+                                      }
                                       controller.isOrderPlaced.value = true;
                                       await controller.getCashback();
                                       if (controller.selectedPaymentMethod.value == PaymentGateway.stripe.name) {
@@ -1412,7 +1338,7 @@ class CartScreen extends StatelessWidget {
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.flutterWave.name) {
                                         controller.flutterWaveInitiatePayment(context: context, amount: controller.totalAmount.value.toString());
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.payFast.name) {
-                                        controller.payFastPayment(context: context, amount: controller.totalAmount.value.toString());
+                                        controller.payFastPayment(context: context, amount: controller.totalAmount.value.toStringAsFixed(2));
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.paytm.name) {
                                         controller.getPaytmCheckSum(context, amount: double.parse(controller.totalAmount.value.toString()));
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.cod.name) {
@@ -1422,15 +1348,15 @@ class CartScreen extends StatelessWidget {
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.midTrans.name) {
                                         controller.midtransMakePayment(context: context, amount: controller.totalAmount.value.toString());
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.orangeMoney.name) {
-                                        controller.orangeMakePayment(context: context, amount: controller.totalAmount.value.toString());
+                                        controller.orangeMakePayment(context: context, amount: controller.totalAmount.value.toStringAsFixed(2));
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.xendit.name) {
                                         controller.xenditPayment(context, controller.totalAmount.value.toString());
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name) {
+                                        ShowToastDialog.showLoader("Please wait".tr);
                                         RazorPayController()
                                             .createOrderRazorPay(amount: double.parse(controller.totalAmount.value.toString()), razorpayModel: controller.razorPayModel.value)
                                             .then((value) {
                                           if (value == null) {
-                                            Get.back();
                                             ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
                                           } else {
                                             CreateRazorPayOrderModel result = value;
@@ -1440,6 +1366,7 @@ class CartScreen extends StatelessWidget {
                                       } else {
                                         controller.isOrderPlaced.value = false;
                                         ShowToastDialog.showToast("Please select payment method".tr);
+                                        ShowToastDialog.closeLoader();
                                       }
                                       controller.isOrderPlaced.value = false;
                                     }
@@ -1454,6 +1381,173 @@ class CartScreen extends StatelessWidget {
                   ),
           );
         });
+  }
+
+  void showBillBifurcationDialog(BuildContext context, bool isDark, CartController controller) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: isDark ? AppThemeData.grey900 : AppThemeData.grey50,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 10), // 🔥 KEY FIX
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: SizedBox(
+            width: Responsive.width(100, context), // ✅ 90% width
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: 10),
+                  Text(
+                    "Tax Details".tr,
+                    style: TextStyle(
+                      fontFamily: AppThemeData.medium,
+                      fontSize: 18,
+                      color: isDark ? AppThemeData.grey50 : AppThemeData.grey900,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  sectionDivider(isDark),
+                  const SizedBox(height: 5),
+                  Constant.taxScope == 'product'
+                      ? amountRow(
+                          title: "Tax on item total".tr,
+                          amount: Constant.amountShow(
+                            amount: controller.productTaxAmount.value.toString(),
+                          ),
+                          isDark: isDark,
+                        )
+                      : amountRow(
+                          title: "Tax on Order Total".tr,
+                          amount: Constant.amountShow(
+                            amount: controller.orderTaxAmount.value.toString(),
+                          ),
+                          isDark: isDark,
+                        ),
+                  if (controller.selectedFoodType.value != 'TakeAway' && controller.vendorModel.value.isSelfDelivery != true) sectionDivider(isDark),
+                  if (controller.selectedFoodType.value != 'TakeAway' && controller.vendorModel.value.isSelfDelivery != true)
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: Constant.driverDeliveryTaxList!.length,
+                      itemBuilder: (context, index) {
+                        return amountRow(
+                          title: "${Constant.driverDeliveryTaxList?[index].title} ${'Tax on Delivery Fee'.tr}",
+                          amount: Constant.amountShow(
+                              amount: Constant.calculateTax(
+                            taxModel: Constant.driverDeliveryTaxList![index],
+                            amount: (controller.deliveryCharges.value).toString(),
+                          ).toString()),
+                          isDark: isDark,
+                        );
+                      },
+                    ),
+                  sectionDivider(isDark),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: Constant.packagingTaxList!.length,
+                    itemBuilder: (context, index) {
+                      return amountRow(
+                        title: "${Constant.packagingTaxList![index].title} ${'Tax on Packaging Fee'.tr}",
+                        amount: controller.packagingCharge.value == 0.0
+                            ? Constant.amountShow(amount: '0')
+                            : Constant.amountShow(
+                                amount: Constant.calculateTax(
+                                taxModel: Constant.packagingTaxList![index],
+                                amount: controller.packagingCharge.value.toString(),
+                              ).toString()),
+                        isDark: isDark,
+                      );
+                    },
+                  ),
+                  if (Constant.packagingTaxList!.isNotEmpty) sectionDivider(isDark),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: Constant.platformTaxList!.length,
+                    itemBuilder: (context, index) {
+                      return amountRow(
+                        title: "${Constant.platformTaxList![index].title} ${'Tax on Platform Fee'.tr}",
+                        amount: controller.platformFee.value == 0.0
+                            ? Constant.amountShow(amount: '0')
+                            : Constant.amountShow(
+                                amount: Constant.calculateTax(
+                                taxModel: Constant.platformTaxList![index],
+                                amount: controller.platformFee.value.toString(),
+                              ).toString()),
+                        isDark: isDark,
+                      );
+                    },
+                  ),
+                  if (Constant.platformTaxList!.isNotEmpty) sectionDivider(isDark),
+                  amountRow(
+                    title: "Total Tax Amount".tr,
+                    amount: Constant.amountShow(amount: controller.totalTaxAmount.value.toString()),
+                    amountColor: AppThemeData.primary300,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text("Close".tr),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget amountRow({
+    required String title,
+    required String amount,
+    required bool isDark,
+    Color? textColour,
+    Color? amountColor,
+    bool? underline,
+    Widget? trailing,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            title.tr,
+            style: TextStyle(
+                fontFamily: AppThemeData.regular,
+                color: textColour ?? (isDark ? AppThemeData.grey300 : AppThemeData.grey600),
+                fontSize: 16,
+                decoration: underline == true ? TextDecoration.underline : TextDecoration.none),
+          ),
+        ),
+        trailing ??
+            Text(
+              amount,
+              style: TextStyle(
+                fontFamily: AppThemeData.regular,
+                color: amountColor ?? (isDark ? AppThemeData.grey50 : AppThemeData.grey900),
+                fontSize: 16,
+              ),
+            ),
+      ],
+    );
+  }
+
+  Widget sectionDivider(bool isDark) {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        MySeparator(color: isDark ? AppThemeData.grey700 : AppThemeData.grey200),
+        const SizedBox(height: 10),
+      ],
+    );
   }
 
   Padding cardDecoration(CartController controller, PaymentGateway value, themeChange, String image) {
@@ -1480,7 +1574,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  tipsDialog(CartController controller, themeChange) {
+  Dialog tipsDialog(CartController controller, themeChange) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       insetPadding: const EdgeInsets.all(10),

@@ -1,4 +1,5 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/signup_controller.dart';
 import 'package:customer/themes/app_them_data.dart';
@@ -114,13 +115,18 @@ class SignupScreen extends StatelessWidget {
                           FilteringTextInputFormatter.allow(RegExp('[0-9]')),
                         ],
                         prefix: CountryCodePicker(
+                          onInit: (value) {
+                            controller.countryCodeEditingController.value.text = value?.dialCode ?? Constant.defaultCountryCode;
+                            controller.countryISOCodeEditingController.value.text = value?.code ?? Constant.defaultCountryCode;
+                          },
                           enabled: controller.type.value == "mobileNumber" ? false : true,
                           onChanged: (value) {
                             controller.countryCodeEditingController.value.text = value.dialCode.toString();
+                            controller.countryISOCodeEditingController.value.text = value.code.toString();
                           },
                           dialogTextStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontWeight: FontWeight.w500, fontFamily: AppThemeData.medium),
                           dialogBackgroundColor: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
-                          initialSelection: controller.countryCodeEditingController.value.text,
+                          initialSelection: controller.countryISOCodeEditingController.value.text,
                           comparator: (a, b) => b.name!.compareTo(a.name.toString()),
                           textStyle: TextStyle(fontSize: 14, color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.medium),
                           searchDecoration: InputDecoration(iconColor: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900),

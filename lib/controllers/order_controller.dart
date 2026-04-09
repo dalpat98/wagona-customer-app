@@ -44,4 +44,15 @@ class OrderController extends GetxController {
     cartProvider.addToCart(Get.context!, cartProductModel, cartProductModel.quantity!);
     update();
   }
+
+  Future<bool> hasAnyPublishedProduct(List<CartProductModel>? products) async {
+    if (products == null || products.isEmpty) return false;
+    for (final item in products) {
+      final product = await FireStoreUtils.getProductById(item.id ?? '');
+      if (product == null || product.publish == false) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

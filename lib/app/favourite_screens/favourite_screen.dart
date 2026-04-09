@@ -204,7 +204,9 @@ class FavouriteScreen extends StatelessWidget {
                                                         onTap: () {
                                                           if (vendorModel.zoneId == Constant.selectedZone!.id) {
                                                             ShowToastDialog.closeLoader();
-                                                            Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
+                                                            Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel})?.then((value) async {
+                                                              await controller.getData();
+                                                            });
                                                           } else {
                                                             ShowToastDialog.closeLoader();
                                                             ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
@@ -505,7 +507,9 @@ class FavouriteScreen extends StatelessWidget {
                                                                       if (value != null) {
                                                                         if (value.zoneId == Constant.selectedZone!.id) {
                                                                           ShowToastDialog.closeLoader();
-                                                                          Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": value});
+                                                                          Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": value})?.then((value) {
+                                                                            controller.getData();
+                                                                          });
                                                                         } else {
                                                                           ShowToastDialog.closeLoader();
                                                                           ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);

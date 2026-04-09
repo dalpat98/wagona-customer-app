@@ -217,7 +217,7 @@ class DineInBookingScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            orderModel.status.toString(),
+                            orderModel.status.toString().tr,
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: Constant.statusColor(status: orderModel.status.toString()),

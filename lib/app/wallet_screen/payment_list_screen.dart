@@ -72,8 +72,7 @@ class PaymentListScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
-                      decoration:
-                          BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50),
+                      decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50),
                       child: Column(
                         children: [
                           Visibility(
@@ -164,11 +163,9 @@ class PaymentListScreen extends StatelessWidget {
                         } else if (controller.selectedPaymentMethod.value == PaymentGateway.xendit.name) {
                           controller.xenditPayment(context, controller.topUpAmountController.value.text);
                         } else if (controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name) {
-                          RazorPayController()
-                              .createOrderRazorPay(amount: double.parse(controller.topUpAmountController.value.text), razorpayModel: controller.razorPayModel.value)
-                              .then((value) {
+                          ShowToastDialog.showLoader("Please wait".tr);
+                          RazorPayController().createOrderRazorPay(amount: double.parse(controller.topUpAmountController.value.text), razorpayModel: controller.razorPayModel.value).then((value) {
                             if (value == null) {
-                              Get.back();
                               ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
                             } else {
                               CreateRazorPayOrderModel result = value;
@@ -179,6 +176,7 @@ class PaymentListScreen extends StatelessWidget {
                           ShowToastDialog.showToast("Please select payment method".tr);
                         }
                       } else {
+                        ShowToastDialog.closeLoader();
                         ShowToastDialog.showToast("${'Please Enter minimum amount of'.tr} ${Constant.amountShow(amount: Constant.minimumAmountToDeposit)}");
                       }
                     }

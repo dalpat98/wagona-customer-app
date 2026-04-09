@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:badges/badges.dart' as badges;
 import 'package:customer/app/address_screens/address_list_screen.dart';
 import 'package:customer/app/advertisement_screens/all_advertisement_screen.dart';
@@ -38,6 +37,8 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:customer/widget/osm_map/map_picker_page.dart';
+import 'package:customer/widget/place_picker/location_picker_screen.dart';
+import 'package:customer/widget/place_picker/selected_location_model.dart';
 import 'package:customer/widget/restaurant_image_view.dart';
 import 'package:customer/widget/video_widget.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:latlong2/latlong.dart' as location;
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -227,31 +227,20 @@ class HomeScreen extends StatelessWidget {
                                                                     Get.back();
                                                                   }
                                                                 } else {
-                                                                  Navigator.push(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                      builder: (context) => PlacePicker(
-                                                                        apiKey: Constant.mapAPIKey,
-                                                                        onPlacePicked: (result) async {
-                                                                          ShippingAddress addressModel = ShippingAddress();
-                                                                          addressModel.addressAs = "Home";
-                                                                          addressModel.locality = result.formattedAddress!.toString();
-                                                                          addressModel.location = UserLocation(latitude: result.geometry!.location.lat, longitude: result.geometry!.location.lng);
-                                                                          Constant.selectedLocation = addressModel;
-                                                                          controller.getData();
-                                                                          Get.back();
-                                                                        },
-                                                                        initialPosition: const LatLng(-33.8567844, 151.213108),
-                                                                        useCurrentLocation: true,
-                                                                        selectInitialPosition: true,
-                                                                        usePinPointingSearch: true,
-                                                                        usePlaceDetailSearch: true,
-                                                                        zoomGesturesEnabled: true,
-                                                                        zoomControlsEnabled: true,
-                                                                        resizeToAvoidBottomInset: false, // only works in page mode, less flickery, remove if wrong offsets
-                                                                      ),
-                                                                    ),
-                                                                  );
+                                                                  Get.to(LocationPickerScreen())!.then((value) async {
+                                                                    if (value != null) {
+                                                                      SelectedLocationModel selectedLocationModel = value;
+
+                                                                      ShippingAddress addressModel = ShippingAddress();
+                                                                      addressModel.addressAs = "Home";
+                                                                      addressModel.locality = Constant.formatAddress(selectedLocation: selectedLocationModel);
+                                                                      addressModel.location =
+                                                                          UserLocation(latitude: selectedLocationModel.latLng!.latitude, longitude: selectedLocationModel.latLng!.longitude);
+                                                                      Constant.selectedLocation = addressModel;
+                                                                      controller.getData();
+                                                                      Get.back();
+                                                                    }
+                                                                  });
                                                                 }
                                                               } catch (e) {
                                                                 await placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
@@ -741,7 +730,7 @@ class HomeScreen extends StatelessWidget {
                     underline: const SizedBox(),
                     value: controller.selectedOrderTypeValue.value.tr,
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    items: <String>['Delivery', 'TakeAway'].map((String value) {
+                    items: <String>['Delivery'.tr, 'TakeAway'.tr].map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(
@@ -2412,7 +2401,7 @@ class MapView extends StatelessWidget {
                                         16);
                                   } else {
                                     CameraUpdate cameraUpdate = CameraUpdate.newCameraPosition(CameraPosition(
-                                      zoom: 18,
+                                      zoom: 15,
                                       target: LatLng(
                                         controller.homeController.allNearestRestaurant[value].latitude!,
                                         controller.homeController.allNearestRestaurant[value].longitude!,

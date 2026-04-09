@@ -7,14 +7,14 @@ import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/widget/osm_map/map_picker_page.dart';
+import 'package:customer/widget/place_picker/location_picker_screen.dart';
+import 'package:customer/widget/place_picker/selected_location_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../themes/text_field_widget.dart';
@@ -107,7 +107,7 @@ class AddressListScreen extends StatelessWidget {
                     },
                     child: Row(
                       children: [
-                        SvgPicture.asset("assets/icons/ic_plus.svg"),
+                        SvgPicture.asset("assets/icons/ic_plus.svg", colorFilter: ColorFilter.mode(themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300, BlendMode.srcIn)),
                         const SizedBox(
                           width: 10,
                         ),
@@ -361,32 +361,22 @@ class AddressListScreen extends StatelessWidget {
                                     controller.location.value = UserLocation(latitude: lat, longitude: lng);
                                   }
                                 } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PlacePicker(
-                                        apiKey: Constant.mapAPIKey,
-                                        onPlacePicked: (result) {
-                                          controller.localityEditingController.value.text = result.formattedAddress!.toString();
-                                          controller.location.value = UserLocation(latitude: result.geometry!.location.lat, longitude: result.geometry!.location.lng);
-                                          Get.back();
-                                        },
-                                        initialPosition: const LatLng(-33.8567844, 151.213108),
-                                        useCurrentLocation: true,
-                                        selectInitialPosition: true,
-                                        usePinPointingSearch: true,
-                                        usePlaceDetailSearch: true,
-                                        zoomGesturesEnabled: true,
-                                        zoomControlsEnabled: true,
-                                        resizeToAvoidBottomInset: false, // only works in page mode, less flickery, remove if wrong offsets
-                                      ),
-                                    ),
-                                  );
+                                  Get.to(LocationPickerScreen())!.then((value) async {
+                                    if (value != null) {
+                                      SelectedLocationModel selectedLocationModel = value;
+
+                                      controller.localityEditingController.value.text = Constant.formatAddress(selectedLocation: selectedLocationModel);
+                                      controller.location.value = UserLocation(latitude: selectedLocationModel.latLng!.latitude, longitude: selectedLocationModel.latLng!.longitude);
+                                    }
+                                  });
                                 }
                               },
                               child: Row(
                                 children: [
-                                  SvgPicture.asset("assets/icons/ic_focus.svg"),
+                                  SvgPicture.asset(
+                                    "assets/icons/ic_focus.svg",
+                                    colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                  ),
                                   const SizedBox(
                                     width: 10,
                                   ),
@@ -451,11 +441,11 @@ class AddressListScreen extends StatelessWidget {
                                               child: Row(
                                                 children: [
                                                   SvgPicture.asset(
-                                                    controller.saveAsList[index] == "Home".tr
+                                                    controller.saveAsList[index] == "Home"
                                                         ? "assets/icons/ic_home_add.svg"
-                                                        : controller.saveAsList[index] == "Work".tr
+                                                        : controller.saveAsList[index] == "Work"
                                                             ? "assets/icons/ic_work.svg"
-                                                            : controller.saveAsList[index] == "Hotel".tr
+                                                            : controller.saveAsList[index] == "Hotel"
                                                                 ? "assets/icons/ic_building.svg"
                                                                 : "assets/icons/ic_location.svg",
                                                     width: 18,

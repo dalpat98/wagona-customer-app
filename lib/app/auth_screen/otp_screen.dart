@@ -104,6 +104,7 @@ class OtpScreen extends StatelessWidget {
                                     UserModel userModel = UserModel();
                                     userModel.id = value.user!.uid;
                                     userModel.countryCode = controller.countryCode.value;
+                                    userModel.countryISOCode = controller.countryISOCode.value;
                                     userModel.phoneNumber = controller.phoneNumber.value;
                                     userModel.fcmToken = fcmToken;
                                     userModel.provider = 'phone';
@@ -146,6 +147,7 @@ class OtpScreen extends StatelessWidget {
                                         UserModel userModel = UserModel();
                                         userModel.id = value.user!.uid;
                                         userModel.countryCode = controller.countryCode.value;
+                                        userModel.countryISOCode = controller.countryISOCode.value;
                                         userModel.phoneNumber = controller.phoneNumber.value;
                                         userModel.fcmToken = fcmToken;
                                         userModel.provider = 'phone';

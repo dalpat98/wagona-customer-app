@@ -234,8 +234,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                                   ),
                                                   Text(
                                                     Constant.calculateReview(
-                                                        reviewCount: controller.vendorModel.value.reviewsCount!.toStringAsFixed(0),
-                                                        reviewSum: controller.vendorModel.value.reviewsSum.toString()),
+                                                        reviewCount: controller.vendorModel.value.reviewsCount!.toStringAsFixed(0), reviewSum: controller.vendorModel.value.reviewsSum.toString()),
                                                     style: TextStyle(
                                                       color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
                                                       fontFamily: AppThemeData.semiBold,
@@ -378,7 +377,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                                       color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
                                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                                     ),
-                                                    child: Image.asset("assets/images/ic_table.gif")),
+                                                    child: Image.asset(themeChange.getThem() ? "assets/images/ic_table_dark.gif" : "assets/images/ic_table.gif")),
                                                 const SizedBox(width: 10),
                                                 Expanded(
                                                   child: Column(
@@ -441,7 +440,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                                     ),
                                                     child: Padding(
                                                       padding: const EdgeInsets.all(4),
-                                                      child: Image.asset("assets/images/food_delivery.gif"),
+                                                      child: Image.asset(themeChange.getThem() ? "assets/images/food_delivery_dark.gif" : "assets/images/food_delivery.gif"),
                                                     )),
                                                 const SizedBox(width: 10),
                                                 Expanded(
@@ -571,8 +570,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                                 ),
                                                 InkWell(
                                                   onTap: () {
-                                                    launchUrl(Constant.createCoordinatesUrl(controller.vendorModel.value.latitude ?? 0.0,
-                                                        controller.vendorModel.value.longitude ?? 0.0, controller.vendorModel.value.title));
+                                                    launchUrl(Constant.createCoordinatesUrl(
+                                                        controller.vendorModel.value.latitude ?? 0.0, controller.vendorModel.value.longitude ?? 0.0, controller.vendorModel.value.title));
                                                   },
                                                   child: Text(
                                                     "View on Map".tr,

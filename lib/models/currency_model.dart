@@ -4,20 +4,20 @@ class CurrencyModel {
   Timestamp? createdAt;
   String? symbol;
   String? code;
-  bool? enable;
+  bool? isActive;
   bool? symbolAtRight;
   String? name;
   int? decimalDigits;
   String? id;
   Timestamp? updatedAt;
 
-  CurrencyModel({this.createdAt, this.symbol, this.code, this.enable, this.symbolAtRight, this.name, this.decimalDigits, this.id, this.updatedAt});
+  CurrencyModel({this.createdAt, this.symbol, this.code, this.isActive, this.symbolAtRight, this.name, this.decimalDigits, this.id, this.updatedAt});
 
   CurrencyModel.fromJson(Map<String, dynamic> json) {
     createdAt = json['createdAt'];
     symbol = json['symbol'];
     code = json['code'];
-    enable = json['enable'];
+    isActive = json['isActive'];
     symbolAtRight = json['symbolAtRight'];
     name = json['name'];
     decimalDigits = json['decimal_degits'] != null ? (json['decimal_degits'] is num ? (json['decimal_degits'] as num).toInt() : int.tryParse(json['decimal_degits'].toString()) ?? 0) : 0;
@@ -30,7 +30,7 @@ class CurrencyModel {
     data['createdAt'] = createdAt;
     data['symbol'] = symbol;
     data['code'] = code;
-    data['enable'] = enable;
+    data['isActive'] = isActive;
     data['symbolAtRight'] = symbolAtRight;
     data['name'] = name;
     data['decimal_degits'] = decimalDigits;

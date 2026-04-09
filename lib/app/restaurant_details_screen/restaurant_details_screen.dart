@@ -52,7 +52,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${cartItem.length} items',
+                            '${cartItem.length} ${'items'.tr}',
                             style: TextStyle(
                               fontFamily: AppThemeData.medium,
                               color: AppThemeData.grey50,
@@ -60,7 +60,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'View Cart',
+                            'View Cart'.tr,
                             style: TextStyle(
                               fontFamily: AppThemeData.semiBold,
                               color: AppThemeData.grey50,
@@ -465,7 +465,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                   child: Row(
                                                     crossAxisAlignment: CrossAxisAlignment.center,
                                                     children: [
-                                                      Image.asset("assets/images/ic_table.gif"),
+                                                      Image.asset(themeChange.getThem() ? "assets/images/ic_table_dark.gif" : "assets/images/ic_table.gif"),
                                                       const SizedBox(width: 10),
                                                       Expanded(
                                                         child: Column(
@@ -1681,6 +1681,8 @@ class ProductDetailsView extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ClipRRect(
                             borderRadius: const BorderRadius.all(Radius.circular(16)),
@@ -1711,9 +1713,12 @@ class ProductDetailsView extends StatelessWidget {
                           ),
                           Expanded(
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
                                       child: Text(

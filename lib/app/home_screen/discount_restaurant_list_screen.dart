@@ -28,7 +28,7 @@ class DiscountRestaurantListScreen extends StatelessWidget {
               centerTitle: false,
               titleSpacing: 0,
               title: Text(
-                controller.title.value,
+                controller.title.value.tr,
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,

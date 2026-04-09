@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:customer/payment/paystack/paystack_url_genrater.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:flutter/material.dart';
@@ -28,15 +27,13 @@ class _PayStackScreenState extends State<PayStackScreen> {
     super.initState();
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
+          onProgress: (int progress) {},
           onPageStarted: (String url) {},
           onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {},
@@ -44,11 +41,7 @@ class _PayStackScreenState extends State<PayStackScreen> {
             debugPrint("--->2${navigation.url}");
             debugPrint("--->2" "${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}");
             if (navigation.url == 'https://foodieweb.siswebapp.com/success?trxref=${widget.reference}&reference=${widget.reference}' ||
-                navigation.url == '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') {
-              final isDone = await PayStackURLGen.verifyTransaction(secretKey: widget.secretKey, reference: widget.reference, amount: widget.amount);
-              Get.back(result: isDone);
-            }
-            if ((navigation.url == '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') ||
+                (navigation.url == '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') ||
                 (navigation.url == "https://hello.pstk.xyz/callback") ||
                 (navigation.url == 'https://standard.paystack.co/close') ||
                 (navigation.url == 'https://talazo.app/login')) {

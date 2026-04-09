@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/app/chat_screens/chat_screen.dart';
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/constant.dart';
@@ -38,7 +37,7 @@ class RestaurantInboxScreen extends StatelessWidget {
         ),
       ),
       body: FirestorePagination(
-        query: FirebaseFirestore.instance
+        query: FireStoreUtils.fireStore
             .collection(CollectionName.chat)
             .where("sender_receiver_id", arrayContains: FireStoreUtils.getCurrentUid())
             .where('chatType', isEqualTo: Constant.userRoleVendor)

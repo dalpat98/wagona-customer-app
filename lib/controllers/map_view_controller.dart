@@ -27,51 +27,35 @@ class MapViewController extends GetxController {
     super.onInit();
   }
 
-  addMarkerSetup() async {
+  Future<void> addMarkerSetup() async {
     if (Constant.selectedMapType == "osm") {
-      departureOsmIcon = Image.asset("assets/images/map_selected.png",
-          width: 30, height: 30); //OSM
+      departureOsmIcon = Image.asset("assets/images/map_selected.png", width: 30, height: 30); //OSM
 
       for (var element in homeController.allNearestRestaurant) {
         osmMarker.add(flutterMap.Marker(
-          point: location.LatLng(
-              element.latitude ?? 0.0, element.longitude ?? 0.0),
+          point: location.LatLng(element.latitude ?? 0.0, element.longitude ?? 0.0),
           width: 40,
           height: 40,
           child: GestureDetector(
             onTap: () {
-              Get.to(const RestaurantDetailsScreen(),
-                  arguments: {"vendorModel": element});
+              Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": element});
             },
             child: departureOsmIcon,
           ),
         ));
       }
     } else {
-      final Uint8List parking = await Constant()
-          .getBytesFromAsset("assets/images/map_selected.png", 20);
+      final Uint8List parking = await Constant().getBytesFromAsset("assets/images/map_selected.png", 20);
       parkingMarker = BitmapDescriptor.bytes(parking);
       for (var element in homeController.allNearestRestaurant) {
-        addMarker(
-            latitude: element.latitude,
-            longitude: element.longitude,
-            id: element.id.toString(),
-            rotation: 0,
-            descriptor: parkingMarker!,
-            title: element.title.toString());
+        addMarker(latitude: element.latitude, longitude: element.longitude, id: element.id.toString(), rotation: 0, descriptor: parkingMarker!, title: element.title.toString());
       }
     }
   }
 
   RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
 
-  addMarker(
-      {required double? latitude,
-      required double? longitude,
-      required String id,
-      required BitmapDescriptor descriptor,
-      required double? rotation,
-      required String title}) {
+  void addMarker({required double? latitude, required double? longitude, required String id, required BitmapDescriptor descriptor, required double? rotation, required String title}) {
     MarkerId markerId = MarkerId(id);
     Marker marker = Marker(
       markerId: markerId,
@@ -79,11 +63,8 @@ class MapViewController extends GetxController {
       infoWindow: InfoWindow(
         title: title,
         onTap: () {
-          int index = homeController.allNearestRestaurant
-              .indexWhere((p0) => p0.id == id);
-          Get.to(const RestaurantDetailsScreen(), arguments: {
-            "vendorModel": homeController.allNearestRestaurant[index]
-          });
+          int index = homeController.allNearestRestaurant.indexWhere((p0) => p0.id == id);
+          Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": homeController.allNearestRestaurant[index]});
         },
       ),
       position: LatLng(latitude ?? 0.0, longitude ?? 0.0),

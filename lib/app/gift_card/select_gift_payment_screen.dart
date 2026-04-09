@@ -175,8 +175,7 @@ class SelectGiftPaymentScreen extends StatelessWidget {
           ),
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
-                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50, borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20),
@@ -210,11 +209,9 @@ class SelectGiftPaymentScreen extends StatelessWidget {
                   } else if (controller.selectedPaymentMethod.value == PaymentGateway.wallet.name) {
                     controller.placeOrder();
                   } else if (controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name) {
-                    RazorPayController()
-                        .createOrderRazorPay(amount: double.parse(controller.amountController.value.text), razorpayModel: controller.razorPayModel.value)
-                        .then((value) {
+                    ShowToastDialog.showLoader("Please wait".tr);
+                    RazorPayController().createOrderRazorPay(amount: double.parse(controller.amountController.value.text), razorpayModel: controller.razorPayModel.value).then((value) {
                       if (value == null) {
-                        Get.back();
                         ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
                       } else {
                         CreateRazorPayOrderModel result = value;
@@ -223,6 +220,7 @@ class SelectGiftPaymentScreen extends StatelessWidget {
                     });
                   } else {
                     ShowToastDialog.showToast("Please select payment method".tr);
+                    ShowToastDialog.closeLoader();
                   }
                 },
               ),

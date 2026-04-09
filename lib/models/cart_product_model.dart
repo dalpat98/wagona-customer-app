@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:customer/models/tax_model.dart';
+
 class CartProductModel {
   String? id;
   String? categoryId;
@@ -12,20 +14,9 @@ class CartProductModel {
   String? extrasPrice;
   List<dynamic>? extras;
   VariantInfo? variantInfo;
+  List<TaxModel>? taxSetting;
 
-  CartProductModel({
-    this.id,
-    this.categoryId,
-    this.name,
-    this.photo,
-    this.price,
-    this.discountPrice,
-    this.vendorID,
-    this.quantity,
-    this.extrasPrice,
-    this.variantInfo,
-    this.extras,
-  });
+  CartProductModel({this.id, this.categoryId, this.name, this.photo, this.price, this.discountPrice, this.vendorID, this.quantity, this.extrasPrice, this.variantInfo, this.extras, this.taxSetting});
 
   CartProductModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -49,6 +40,14 @@ class CartProductModel {
         : "String" == json['variant_info'].runtimeType.toString()
             ? VariantInfo.fromJson(jsonDecode(json['variant_info']))
             : VariantInfo.fromJson(json['variant_info']);
+
+    taxSetting = json['taxSetting'] == null
+        ? []
+        : json['taxSetting'] is String
+            ? (jsonDecode(json['taxSetting']) as List).map((e) => TaxModel.fromJson(e)).toList()
+            : json['taxSetting'] is List
+                ? (json['taxSetting'] as List).map((e) => TaxModel.fromJson(e)).toList()
+                : [];
   }
 
   Map<String, dynamic> toJson() {
@@ -66,6 +65,8 @@ class CartProductModel {
     if (variantInfo != null) {
       data['variant_info'] = variantInfo?.toJson(); // Handle null value
     }
+    // ✅ Convert List<Map> to String
+    data['taxSetting'] = taxSetting == null ? [] : taxSetting!.map((e) => e.toJson()).toList();
     return data;
   }
 }
@@ -81,7 +82,7 @@ class VariantInfo {
 
   VariantInfo.fromJson(Map<String, dynamic> json) {
     variantId = json['variant_id'] ?? '';
-    variantPrice = json['variant_price'] ?? '';
+    variantPrice = json['variant_price'].toString();
     variantSku = json['variant_sku'] ?? '';
     variantImage = json['variant_image'] ?? '';
     variantOptions = json['variant_options'] ?? {};

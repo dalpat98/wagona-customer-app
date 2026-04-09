@@ -9,6 +9,7 @@ import 'package:customer/services/database_helper.dart';
 import 'package:customer/services/localization_service.dart';
 import 'package:customer/themes/styles.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,21 +20,24 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    name: 'default',
+  // Initialize Firebase app depending on environment
+  // Initialize the correct Firebase app
+  FirebaseApp firebaseApp = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  await Firebase.initializeApp(
-    name: 'stagging',
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  if (currentEnv == FirebaseEnv.defaultDb) {
+    // Initialize FirestoreUtils with default DB
+    FireStoreUtils.instance.init(firebaseApp);
+  } else {
+    FireStoreUtils.instance.init(firebaseApp, databaseId: 'staging'); // pass databaseId if named DB
+  }
 
   await FirebaseAppCheck.instance.activate(
     webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
     androidProvider: AndroidProvider.playIntegrity,
     appleProvider: AppleProvider.appAttest,
   );
+
   DatabaseHelper.instance;
   await Preferences.initPref();
   runApp(

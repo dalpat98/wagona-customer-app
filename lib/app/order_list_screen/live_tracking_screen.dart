@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as flutterMap;
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart' as location;
 import 'package:provider/provider.dart';
 
 class LiveTrackingScreen extends StatelessWidget {
@@ -32,7 +33,7 @@ class LiveTrackingScreen extends StatelessWidget {
                     ? flutterMap.FlutterMap(
                         mapController: controller.osmMapController,
                         options: flutterMap.MapOptions(
-                          initialCenter: controller.current.value,
+                          initialCenter: location.LatLng(controller.driverUserModel.value.location?.latitude ?? 20.5937, controller.driverUserModel.value.location?.longitude ?? 78.9629),
                           initialZoom: 10,
                         ),
                         children: [
@@ -40,28 +41,7 @@ class LiveTrackingScreen extends StatelessWidget {
                             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                             userAgentPackageName: Platform.isAndroid ? 'com.wagona.customer.android' : 'com.wagona.customer.ios',
                           ),
-                          flutterMap.MarkerLayer(
-                            markers: [
-                              flutterMap.Marker(
-                                point: controller.current.value,
-                                width: 50,
-                                height: 50,
-                                child: Image.asset('assets/images/food_delivery.png'),
-                              ),
-                              flutterMap.Marker(
-                                point: controller.source.value,
-                                width: 50,
-                                height: 50,
-                                child: Image.asset('assets/images/pickup.png'),
-                              ),
-                              flutterMap.Marker(
-                                point: controller.destination.value,
-                                width: 50,
-                                height: 50,
-                                child: Image.asset('assets/images/dropoff.png'),
-                              ),
-                            ],
-                          ),
+                          flutterMap.MarkerLayer(markers: controller.orderModel.value.id == null ? [] : controller.osmMarkers),
                           if (controller.routePoints.isNotEmpty)
                             flutterMap.PolylineLayer(
                               polylines: [
@@ -76,20 +56,18 @@ class LiveTrackingScreen extends StatelessWidget {
                       )
                     : Obx(
                         () => GoogleMap(
+                          padding: EdgeInsets.only(top: 300),
                           myLocationEnabled: true,
                           myLocationButtonEnabled: true,
                           mapType: MapType.terrain,
                           zoomControlsEnabled: false,
                           polylines: Set<Polyline>.of(controller.polyLines.values),
-                          padding: const EdgeInsets.only(
-                            top: 22.0,
-                          ),
                           markers: Set<Marker>.of(controller.markers.values),
                           onMapCreated: (GoogleMapController mapController) {
                             controller.mapController = mapController;
                           },
                           initialCameraPosition: CameraPosition(
-                            zoom: 15,
+                            zoom: 16,
                             target: LatLng(controller.driverUserModel.value.location?.latitude != null ? controller.driverUserModel.value.location?.latitude ?? 45.521563 : 45.521563,
                                 controller.driverUserModel.value.location?.longitude != null ? controller.driverUserModel.value.location?.longitude ?? 45.521563 : 45.521563),
                           ),

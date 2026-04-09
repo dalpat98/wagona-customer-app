@@ -17,6 +17,9 @@ class OrderModel {
   Timestamp? createdAt;
   Timestamp? triggerDelivery;
   List<TaxModel>? taxSetting;
+  List<TaxModel>? driverDeliveryTax;
+  List<TaxModel>? packagingTax;
+  List<TaxModel>? platformTax;
   String? paymentMethod;
   List<CartProductModel>? products;
   String? adminCommissionType;
@@ -35,6 +38,9 @@ class OrderModel {
   List<dynamic>? rejectedByDrivers;
   CashbackModel? cashback;
   bool? isFreeDelivery;
+  bool? isPosOrder;
+  String? taxScope;
+  String? platformFee;
 
   OrderModel(
       {this.address,
@@ -65,7 +71,13 @@ class OrderModel {
       this.takeAway,
       this.rejectedByDrivers,
       this.cashback,
-      this.isFreeDelivery});
+      this.isFreeDelivery,
+      this.driverDeliveryTax,
+      this.packagingTax,
+      this.platformTax,
+      this.taxScope,
+      this.platformFee,
+      this.isPosOrder});
 
   OrderModel.fromJson(Map<String, dynamic> json) {
     address = json['address'] != null ? ShippingAddress.fromJson(json['address']) : null;
@@ -78,12 +90,6 @@ class OrderModel {
     estimatedTimeToPrepare = json['estimatedTimeToPrepare'];
     createdAt = json['createdAt'];
     triggerDelivery = json['triggerDelevery'] ?? Timestamp.now();
-    if (json['taxSetting'] != null) {
-      taxSetting = <TaxModel>[];
-      json['taxSetting'].forEach((v) {
-        taxSetting!.add(TaxModel.fromJson(v));
-      });
-    }
     paymentMethod = json['payment_method'];
     if (json['products'] != null) {
       products = <CartProductModel>[];
@@ -107,6 +113,34 @@ class OrderModel {
     rejectedByDrivers = json['rejectedByDrivers'] ?? [];
     cashback = json['cashback'] != null ? CashbackModel.fromJson(json['cashback']) : null;
     isFreeDelivery = json['isFreeDelivery'] ?? false;
+    if (json['taxSetting'] != null) {
+      taxSetting = <TaxModel>[];
+      json['taxSetting'].forEach((v) {
+        taxSetting!.add(TaxModel.fromJson(v));
+      });
+    }
+    if (json['platformTax'] != null) {
+      platformTax = <TaxModel>[];
+      json['platformTax'].forEach((v) {
+        platformTax!.add(TaxModel.fromJson(v));
+      });
+    }
+    if (json['packagingTax'] != null) {
+      packagingTax = <TaxModel>[];
+      json['packagingTax'].forEach((v) {
+        packagingTax!.add(TaxModel.fromJson(v));
+      });
+    }
+
+    if (json['driverDeliveryTax'] != null) {
+      driverDeliveryTax = <TaxModel>[];
+      json['driverDeliveryTax'].forEach((v) {
+        driverDeliveryTax!.add(TaxModel.fromJson(v));
+      });
+    }
+    taxScope = json['taxScope'];
+    platformFee = json['platformFee'];
+    isPosOrder = json['isPosOrder'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
@@ -123,9 +157,6 @@ class OrderModel {
     data['estimatedTimeToPrepare'] = estimatedTimeToPrepare;
     data['createdAt'] = createdAt;
     data['triggerDelivery'] = triggerDelivery;
-    if (taxSetting != null) {
-      data['taxSetting'] = taxSetting!.map((v) => v.toJson()).toList();
-    }
     data['payment_method'] = paymentMethod;
     if (products != null) {
       data['products'] = products!.map((v) => v.toJson()).toList();
@@ -152,6 +183,21 @@ class OrderModel {
     data['rejectedByDrivers'] = rejectedByDrivers;
     data['cashback'] = cashback?.toJson();
     data['isFreeDelivery'] = isFreeDelivery ?? false;
+    if (taxSetting != null) {
+      data['taxSetting'] = taxSetting!.map((v) => v.toJson()).toList();
+    }
+    if (platformTax != null) {
+      data['platformTax'] = platformTax!.map((v) => v.toJson()).toList();
+    }
+    if (packagingTax != null) {
+      data['packagingTax'] = packagingTax!.map((v) => v.toJson()).toList();
+    }
+    if (driverDeliveryTax != null) {
+      data['driverDeliveryTax'] = driverDeliveryTax!.map((v) => v.toJson()).toList();
+    }
+    data['taxScope'] = taxScope;
+    data['platformFee'] = platformFee;
+    data['isPosOrder'] = isPosOrder ?? false;
     return data;
   }
 }

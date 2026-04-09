@@ -84,6 +84,7 @@ class MapPickerPage extends StatelessWidget {
                   child: TextField(
                     controller: searchController,
                     decoration: InputDecoration(
+                      fillColor: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.surface,
                       hintText: 'Search location...'.tr,
                       contentPadding: EdgeInsets.all(12),
                       border: InputBorder.none,
@@ -98,7 +99,7 @@ class MapPickerPage extends StatelessWidget {
                   return Container(
                     margin: const EdgeInsets.only(top: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.surface,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: ListView.builder(
@@ -129,7 +130,7 @@ class MapPickerPage extends StatelessWidget {
       bottomNavigationBar: Obx(() {
         return Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.white,
+          color: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -148,7 +149,7 @@ class MapPickerPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 2.0),
                   child: Text(
                     "${controller.pickedPlace.value!.address}\n(${controller.pickedPlace.value!.coordinates.latitude.toStringAsFixed(5)}, ${controller.pickedPlace.value!.coordinates.longitude.toStringAsFixed(5)})",
-                    style: const TextStyle(fontSize: 13),
+                    style: TextStyle(fontSize: 13, color: themeChange.getThem() ? AppThemeData.surface : AppThemeData.primary600),
                   ),
                 ),
               const SizedBox(height: 10),

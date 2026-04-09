@@ -46,7 +46,8 @@ class DatabaseHelper {
       quantity $intType,
       extras_price $textType,
       extras $textType,
-      variant_info $textType NULL
+      variant_info $textType NULL,
+      taxSetting $textType NULL
     )
     ''');
     print('Table cart_products created'); // Debugging
@@ -59,7 +60,8 @@ class DatabaseHelper {
       'cart_products',
       product.toJson()
         ..['variant_info'] = jsonEncode(product.variantInfo)
-        ..['extras'] = jsonEncode(product.extras),
+        ..['extras'] = jsonEncode(product.extras)
+        ..['taxSetting'] = jsonEncode(product.taxSetting),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -73,13 +75,26 @@ class DatabaseHelper {
   }
 
   Future<void> updateCartProduct(CartProductModel product) async {
-    log(product.toJson().toString());
     final db = await instance.database;
+
+    final Map<String, dynamic> data = {
+      'id': product.id,
+      'category_id': product.categoryId,
+      'name': product.name,
+      'photo': product.photo,
+      'price': product.price,
+      'discountPrice': product.discountPrice,
+      'vendorID': product.vendorID,
+      'quantity': product.quantity,
+      'extras_price': product.extrasPrice,
+      'variant_info': jsonEncode(product.variantInfo ?? {}),
+      'extras': jsonEncode(product.extras ?? []),
+      'taxSetting': jsonEncode(product.taxSetting ?? []),
+    };
+
     await db.update(
       'cart_products',
-      product.toJson()
-        ..['variant_info'] = jsonEncode(product.variantInfo)
-        ..['extras'] = jsonEncode(product.extras),
+      data,
       where: 'id = ?',
       whereArgs: [product.id],
     );

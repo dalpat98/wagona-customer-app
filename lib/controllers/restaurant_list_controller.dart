@@ -21,22 +21,24 @@ class RestaurantListController extends GetxController {
   }
 
   Future<void> getArgument() async {
-    dynamic argumentData = Get.arguments;
-    if (argumentData != null) {
-      vendorList.value = argumentData['vendorList'];
-      List<VendorModel> vendordata = argumentData['vendorList'];
+    final argumentData = Get.arguments;
+
+    if (argumentData != null && argumentData['vendorList'] != null) {
+      final List<VendorModel> vendordata = List<VendorModel>.from(argumentData['vendorList']);
+
       vendordata.sort((a, b) {
         final aOpen = Constant.statusCheckOpenORClose(vendorModel: a);
         final bOpen = Constant.statusCheckOpenORClose(vendorModel: b);
         if (aOpen == bOpen) return 0;
         return aOpen ? -1 : 1;
       });
+
+      vendorList.value = vendordata;
       vendorSearchList.value = vendordata;
       title.value = argumentData['title'] ?? "Restaurants";
     }
 
     await getFavouriteRestaurant();
-
     isLoading.value = false;
   }
 

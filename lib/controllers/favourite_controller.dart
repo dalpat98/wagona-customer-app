@@ -24,7 +24,8 @@ class FavouriteController extends GetxController {
     super.onInit();
   }
 
-  getData() async {
+  Future<void> getData() async {
+    reset();
     if (Constant.userModel != null) {
       await FireStoreUtils.getFavouriteRestaurant().then(
         (value) {
@@ -46,7 +47,6 @@ class FavouriteController extends GetxController {
                 if (value.subscriptionTotalOrders == "-1") {
                   favouriteVendorData.add(value);
                 } else {
-                  print("Restaurant :: ${value.title.toString()}");
                   if ((value.subscriptionExpiryDate != null && value.subscriptionExpiryDate!.toDate().isBefore(DateTime.now()) == false) || value.subscriptionPlan?.expiryDay == '-1') {
                     if (value.subscriptionTotalOrders != '0') {
                       favouriteVendorData.add(value);
@@ -71,7 +71,7 @@ class FavouriteController extends GetxController {
       for (var element in favouriteItemList) {
         await FireStoreUtils.getProductById(element.productId.toString()).then(
           (value) async {
-            if (value != null) {
+            if (value != null && value.publish == true) {
               if (Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) {
                 await FireStoreUtils.fireStore.collection(CollectionName.vendors).doc(value.vendorID.toString()).get().then((value1) async {
                   if (value1.exists) {
@@ -100,7 +100,33 @@ class FavouriteController extends GetxController {
         );
       }
     }
-
+    List<ProductModel> favouriteFoodData = favouriteFoodList;
+    List<VendorModel> favouriteVendorData = favouriteVendorList;
+    favouriteFoodList.value = removeDuplicateFoods(favouriteFoodData);
+    favouriteVendorList.value = removeDuplicateVendor(favouriteVendorData);
     isLoading.value = false;
+  }
+
+  List<ProductModel> removeDuplicateFoods(List<ProductModel> favouriteFoodList) {
+    final seenIds = <String>{};
+    return favouriteFoodList.where((food) {
+      return seenIds.add(food.id!);
+    }).toList();
+  }
+
+  List<VendorModel> removeDuplicateVendor(List<VendorModel> favouriteFoodVendor) {
+    final seenIds = <String>{};
+    return favouriteFoodVendor.where((food) {
+      return seenIds.add(food.id!);
+    }).toList();
+  }
+
+  void reset() {
+    favouriteRestaurant.value = true;
+    favouriteList.value = [];
+    favouriteVendorList.value = [];
+    favouriteItemList.value = [];
+    favouriteFoodList.value = [];
+    isLoading.value = true;
   }
 }

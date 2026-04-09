@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'dart:developer';
-
 import 'package:customer/models/payment_model/pay_fast_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +35,8 @@ class _PayFastScreenState extends State<PayFastScreen> {
           onProgress: (int progress) {
             // Update loading bar.
           },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest navigation) async {
             if (kDebugMode) {

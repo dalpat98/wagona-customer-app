@@ -13,7 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class HelpSupportController extends GetxController {
   Rx<TextEditingController> messageController = TextEditingController().obs;
   Rx<UserModel> userModel = UserModel().obs;
-  final ScrollController scrollController = ScrollController();
+  Rx<ScrollController> scrollController = ScrollController().obs;
 
   @override
   void onInit() {
@@ -80,5 +80,6 @@ class HelpSupportController extends GetxController {
     }
 
     await FireStoreUtils.addChat(conversationModel);
+    Timer(const Duration(milliseconds: 500), () => scrollController.value.jumpTo(scrollController.value.position.minScrollExtent));
   }
 }

@@ -261,18 +261,20 @@ class LoginController extends GetxController {
 
       final email = appleCredential.email;
 
-      UserModel? userModel = await FireStoreUtils.getUserByEmail(email!);
+      if (email != null) {
+        UserModel? userModel = await FireStoreUtils.getUserByEmail(email);
 
-      if (userModel?.provider != "google" && userModel?.provider != "apple" && userModel?.provider != null) {
-        ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("The account already exists for that email.".tr);
-        return null;
-      }
+        if (userModel?.provider != "google" && userModel?.provider != "apple" && userModel?.provider != null) {
+          ShowToastDialog.closeLoader();
+          ShowToastDialog.showToast("The account already exists for that email.".tr);
+          return null;
+        }
 
-      if ((userModel?.provider == "google" || userModel?.provider == "apple") && userModel?.role != Constant.userRoleCustomer) {
-        ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("The account already exists for that email.".tr);
-        return null;
+        if ((userModel?.provider == "google" || userModel?.provider == "apple") && userModel?.role != Constant.userRoleCustomer) {
+          ShowToastDialog.closeLoader();
+          ShowToastDialog.showToast("The account already exists for that email.".tr);
+          return null;
+        }
       }
 
       final oauthCredential = OAuthProvider("apple.com").credential(

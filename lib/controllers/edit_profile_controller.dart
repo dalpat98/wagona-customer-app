@@ -5,7 +5,6 @@ import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/models/user_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -70,8 +69,12 @@ class EditProfileController extends GetxController {
       if (image == null) return;
       Get.back();
       profileImage.value = image.path;
-    } on PlatformException catch (e) {
-      ShowToastDialog.showToast("${"failed_to_pick".tr} : \n $e");
+    } catch (e) {
+      if (source == ImageSource.camera) {
+        ShowToastDialog.showToast("Camera access is not enabled. Please allow camera permission.");
+      } else {
+        ShowToastDialog.showToast("Storage permission is not enabled. Please allow it.");
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ class UserModel {
   String? profilePictureURL;
   String? fcmToken;
   String? countryCode;
+  String? countryISOCode;
   String? phoneNumber;
   num? walletAmount;
   bool? active;
@@ -45,6 +46,7 @@ class UserModel {
       this.profilePictureURL,
       this.fcmToken,
       this.countryCode,
+      this.countryISOCode,
       this.phoneNumber,
       this.walletAmount,
       this.createdAt,
@@ -77,6 +79,7 @@ class UserModel {
     profilePictureURL = json['profilePictureURL'];
     fcmToken = json['fcmToken'];
     countryCode = json['countryCode'];
+    countryISOCode = json['countryISOCode'];
     phoneNumber = json['phoneNumber'];
     walletAmount = json['wallet_amount'] ?? 0;
     createdAt = json['createdAt'];
@@ -116,6 +119,7 @@ class UserModel {
     data['profilePictureURL'] = profilePictureURL;
     data['fcmToken'] = fcmToken;
     data['countryCode'] = countryCode;
+    data['countryISOCode'] = countryISOCode;
     data['phoneNumber'] = phoneNumber;
     data['wallet_amount'] = walletAmount ?? 0;
     data['createdAt'] = createdAt;

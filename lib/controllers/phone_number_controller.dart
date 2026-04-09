@@ -1,4 +1,5 @@
 import 'package:customer/app/auth_screen/otp_screen.dart';
+import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,8 @@ import 'package:get/get.dart';
 
 class PhoneNumberController extends GetxController {
   Rx<TextEditingController> phoneNUmberEditingController = TextEditingController().obs;
-  Rx<TextEditingController> countryCodeEditingController = TextEditingController().obs;
+  Rx<TextEditingController> countryCodeEditingController = TextEditingController(text: Constant.defaultCountryCode).obs;
+  Rx<TextEditingController> countryISOCodeEditingController = TextEditingController(text: Constant.defaultCountryCode).obs;
 
   Future<void> sendCode() async {
     ShowToastDialog.showLoader("Please wait".tr);
@@ -27,6 +29,7 @@ class PhoneNumberController extends GetxController {
               ShowToastDialog.closeLoader();
               Get.to(const OtpScreen(), arguments: {
                 "countryCode": countryCodeEditingController.value.text,
+                "countryISOCode": countryISOCodeEditingController.value.text,
                 "phoneNumber": phoneNUmberEditingController.value.text,
                 "verificationId": verificationId,
               });

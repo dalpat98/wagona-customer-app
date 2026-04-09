@@ -9,6 +9,7 @@ import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/gift_cards_model.dart';
+import 'package:customer/firebase_options.dart';
 import 'package:customer/models/AttributesModel.dart';
 import 'package:customer/models/BannerModel.dart';
 import 'package:customer/models/admin_commission.dart';
@@ -17,6 +18,7 @@ import 'package:customer/models/cashbackModel.dart';
 import 'package:customer/models/cashback_redeem_model.dart';
 import 'package:customer/models/conversation_model.dart';
 import 'package:customer/models/coupon_model.dart';
+import 'package:customer/models/currency_model.dart';
 import 'package:customer/models/dine_in_booking_model.dart';
 import 'package:customer/models/email_template_model.dart';
 import 'package:customer/models/favourite_item_model.dart';
@@ -41,6 +43,7 @@ import 'package:customer/models/payment_model/razorpay_model.dart';
 import 'package:customer/models/payment_model/stripe_model.dart';
 import 'package:customer/models/payment_model/wallet_setting_model.dart';
 import 'package:customer/models/payment_model/xendit.dart';
+import 'package:customer/models/platform_fee_model.dart';
 import 'package:customer/models/product_model.dart';
 import 'package:customer/models/rating_model.dart';
 import 'package:customer/models/referral_model.dart';
@@ -57,16 +60,33 @@ import 'package:customer/utils/preferences.dart';
 import 'package:customer/widget/geoflutterfire/src/geoflutterfire.dart';
 import 'package:customer/widget/geoflutterfire/src/models/point.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_compress/video_compress.dart';
 
+enum FirebaseEnv { defaultDb, staging }
+
+/// Change this to switch between default / staging
+const FirebaseEnv currentEnv = FirebaseEnv.defaultDb;
+
 class FireStoreUtils {
-  static FirebaseFirestore fireStore = FirebaseFirestore.instance;
+  FireStoreUtils._privateConstructor();
+
+  static final FireStoreUtils instance = FireStoreUtils._privateConstructor();
+
+  static late FirebaseFirestore fireStore;
+
+  /// Initialize Firestore with a FirebaseApp and optional databaseId
+  void init(FirebaseApp app, {String? databaseId}) {
+    fireStore = FirebaseFirestore.instanceFor(app: app, databaseId: databaseId);
+  }
 
   static String getCurrentUid() {
     return FirebaseAuth.instance.currentUser!.uid;
@@ -80,6 +100,15 @@ class FireStoreUtils {
       isLogin = false;
     }
     return isLogin;
+  }
+
+  static Future<bool> isMaintenanceMode() async {
+    bool isMaintenance = false;
+    await fireStore.collection(CollectionName.settings).doc('maintenance_mode_settings').get().then((value) async {
+      isMaintenance = value.data()?['customerApp'] == true;
+      log("isMaintenance :: $isMaintenance");
+    });
+    return isMaintenance;
   }
 
   static Future<bool> userExistOrNot(String uid) async {
@@ -117,6 +146,24 @@ class FireStoreUtils {
     UserModel? userModel;
     try {
       QuerySnapshot snapshot = await fireStore.collection(CollectionName.users).where('email', isEqualTo: email).limit(1).get();
+
+      if (snapshot.docs.isNotEmpty) {
+        userModel = UserModel.fromJson(snapshot.docs.first.data() as Map<String, dynamic>);
+      } else {
+        userModel = null; // No user found
+      }
+    } catch (error) {
+      log("Failed to get user by email: $error");
+      userModel = null;
+    }
+
+    return userModel;
+  }
+
+  static Future<UserModel?> getUserByEmailRole(String email) async {
+    UserModel? userModel;
+    try {
+      QuerySnapshot snapshot = await fireStore.collection(CollectionName.users).where('role', isEqualTo: Constant.userRoleCustomer).where('email', isEqualTo: email).limit(1).get();
 
       if (snapshot.docs.isNotEmpty) {
         userModel = UserModel.fromJson(snapshot.docs.first.data() as Map<String, dynamic>);
@@ -195,10 +242,19 @@ class FireStoreUtils {
     return isAdded;
   }
 
-  Future<void> getSettings() async {
+  static Future<void> getSettings() async {
     try {
-      FirebaseFirestore.instance.collection(CollectionName.settings).doc('restaurant').get().then((value) {
+      await FireStoreUtils.fireStore.collection(CollectionName.currencies).where("isActive", isEqualTo: true).get().then((value) async {
+        if (value.docs.isNotEmpty) {
+          Constant.currencyModel = CurrencyModel.fromJson(value.docs.first.data());
+        } else {
+          Constant.currencyModel = CurrencyModel(id: "", code: "USD", decimalDigits: 2, isActive: true, name: "US Dollar", symbol: "\$", symbolAtRight: false);
+        }
+      });
+
+      fireStore.collection(CollectionName.settings).doc('restaurant').get().then((value) {
         Constant.isSubscriptionModelApplied = value.data()!['subscription_model'];
+        Constant.packagingChargeEnable = value.data()!['packagingChargeEnable'];
       });
 
       fireStore.collection(CollectionName.settings).doc("RestaurantNearBy").snapshots().listen((event) {
@@ -209,10 +265,12 @@ class FireStoreUtils {
         }
       });
 
-      await FirebaseFirestore.instance.collection(CollectionName.settings).doc("globalSettings").get().then((value) {
+      await fireStore.collection(CollectionName.settings).doc("globalSettings").get().then((value) async {
+        Constant.defaultCountryCode = value.data()?["defaultCountryCode"] ?? '';
         Constant.isEnableAdsFeature = value.data()?['isEnableAdsFeature'] ?? false;
         Constant.isSelfDeliveryFeature = value.data()!['isSelfDelivery'] ?? false;
         AppThemeData.primary300 = Color(int.parse(value.data()!['app_customer_color'].replaceFirst("#", "0xff")));
+        Constant.taxScope = value.data()?['taxScope'] ?? "";
       });
 
       fireStore.collection(CollectionName.settings).doc("googleMapKey").snapshots().listen((event) {
@@ -231,13 +289,6 @@ class FireStoreUtils {
       fireStore.collection(CollectionName.settings).doc("cashbackOffer").get().then((event) {
         if (event.exists) {
           Constant.isCashbackActive = event.data()?["isEnable"] ?? false;
-        }
-      });
-
-      fireStore.collection(CollectionName.settings).doc("DriverNearBy").get().then((event) {
-        if (event.exists) {
-          Constant.selectedMapType = event.data()!["selectedMapType"];
-          Constant.mapType = event.data()!["mapType"];
         }
       });
 
@@ -276,15 +327,21 @@ class FireStoreUtils {
       });
 
       fireStore.collection(CollectionName.settings).doc('story').get().then((value) {
-        Constant.storyEnable = value.data()!['isEnabled'];
+        Constant.storyEnable = value.data()?['isEnabled'] ?? false;
+      });
+
+      fireStore.collection(CollectionName.settings).doc('adminSettings').get().then((value) {
+        if (value.data() != null) {
+          Constant.platformFeeModel = PlatformFeeModel.fromJson(value.data()!);
+        }
       });
 
       fireStore.collection(CollectionName.settings).doc('referral_amount').get().then((value) {
-        Constant.referralAmount = value.data()!['referralAmount'];
+        Constant.referralAmount = '${value.data()?['referralAmount'] ?? '0.0'}';
       });
 
       fireStore.collection(CollectionName.settings).doc('placeHolderImage').get().then((value) {
-        Constant.placeholderImage = value.data()!['image'];
+        Constant.placeholderImage = value.data()?['image'] ?? '';
       });
 
       fireStore.collection(CollectionName.settings).doc("emailSetting").get().then((value) {
@@ -295,11 +352,11 @@ class FireStoreUtils {
 
       fireStore.collection(CollectionName.settings).doc("specialDiscountOffer").get().then((dineinresult) {
         if (dineinresult.exists) {
-          Constant.specialDiscountOffer = dineinresult.data()!["isEnable"];
+          Constant.specialDiscountOffer = dineinresult.data()?["isEnable"] ?? false;
         }
       });
 
-      await FirebaseFirestore.instance.collection(CollectionName.settings).doc("DineinForRestaurant").get().then((value) {
+      await fireStore.collection(CollectionName.settings).doc("DineinForRestaurant").get().then((value) {
         Constant.isEnabledForCustomer = value['isEnabledForCustomer'] ?? false;
       });
 
@@ -495,10 +552,10 @@ class FireStoreUtils {
       getNearestVendorController = StreamController<List<VendorModel>>.broadcast();
       List<VendorModel> vendorList = [];
       Query<Map<String, dynamic>> query = isDining == true
-          ? fireStore.collection(CollectionName.vendors).where('zoneId', isEqualTo: Constant.selectedZone!.id.toString()).where("enabledDiveInFuture", isEqualTo: true)
-          : fireStore.collection(CollectionName.vendors).where('zoneId', isEqualTo: Constant.selectedZone!.id.toString());
+          ? fireStore.collection(CollectionName.vendors).where('zoneId', isEqualTo: Constant.selectedZone?.id.toString()).where("enabledDiveInFuture", isEqualTo: true)
+          : fireStore.collection(CollectionName.vendors).where('zoneId', isEqualTo: Constant.selectedZone?.id.toString());
 
-      GeoFirePoint center = Geoflutterfire().point(latitude: Constant.selectedLocation.location!.latitude ?? 0.0, longitude: Constant.selectedLocation.location!.longitude ?? 0.0);
+      GeoFirePoint center = Geoflutterfire().point(latitude: Constant.selectedLocation.location?.latitude ?? 0.0, longitude: Constant.selectedLocation.location?.longitude ?? 0.0);
       String field = 'g';
 
       Stream<List<DocumentSnapshot>> stream = Geoflutterfire().collection(collectionRef: query).within(center: center, radius: double.parse(Constant.radius), field: field, strictMode: true);
@@ -513,9 +570,7 @@ class FireStoreUtils {
               vendorList.add(vendorModel);
             } else {
               if ((vendorModel.subscriptionExpiryDate != null && vendorModel.subscriptionExpiryDate!.toDate().isBefore(DateTime.now()) == false) || vendorModel.subscriptionPlan?.expiryDay == "-1") {
-                if (vendorModel.subscriptionTotalOrders != '0') {
-                  vendorList.add(vendorModel);
-                }
+                vendorList.add(vendorModel);
               }
             }
           } else {
@@ -845,6 +900,7 @@ class FireStoreUtils {
   static Future<List<TaxModel>?> getTaxList() async {
     List<TaxModel> taxList = [];
     List<Placemark> placeMarks = await placemarkFromCoordinates(Constant.selectedLocation.location!.latitude!, Constant.selectedLocation.location!.longitude!);
+    log("placeMarks.first.country :: ${placeMarks.first.country}");
     await fireStore.collection(CollectionName.tax).where('country', isEqualTo: placeMarks.first.country).where('enable', isEqualTo: true).get().then((value) {
       for (var element in value.docs) {
         TaxModel taxModel = TaxModel.fromJson(element.data());
@@ -950,8 +1006,6 @@ class FireStoreUtils {
         OrderModel taxModel = OrderModel.fromJson(element.data());
         list.add(taxModel);
       }
-    }).catchError((error) {
-      log(error.toString());
     });
     return list;
   }
@@ -1078,7 +1132,7 @@ class FireStoreUtils {
     return giftCardsOrderList;
   }
 
-  static sendTopUpMail({required String amount, required String paymentMethod, required String tractionId}) async {
+  static Future<void> sendTopUpMail({required String amount, required String paymentMethod, required String tractionId}) async {
     EmailTemplateModel? emailTemplateModel = await FireStoreUtils.getEmailTemplates(Constant.walletTopup);
 
     String newString = emailTemplateModel!.message.toString();
@@ -1131,7 +1185,7 @@ class FireStoreUtils {
       await fireStore.collection(CollectionName.users).doc(FireStoreUtils.getCurrentUid()).delete();
 
       // delete user  from firebase auth
-      await FirebaseAuth.instance.currentUser?.delete().then((value) {
+      await deleteAuthUser(FireStoreUtils.getCurrentUid()).then((value) {
         isDelete = true;
       });
     } catch (e, s) {
@@ -1139,6 +1193,44 @@ class FireStoreUtils {
       return false;
     }
     return isDelete;
+  }
+
+  static Future<bool> deleteAuthUser(String uid) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("❌ No user is logged in.");
+        return false;
+      }
+
+      final idToken = await user.getIdToken();
+      final projectId = DefaultFirebaseOptions.currentPlatform.projectId;
+      final url = Uri.parse('https://us-central1-$projectId.cloudfunctions.net/deleteUser');
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'data': {'uid': uid}, // 👈 matches your Cloud Function structure
+        }),
+      );
+
+      print("Response [${response.statusCode}]: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return decoded['result']?['success'] == true || decoded['success'] == true;
+      } else {
+        print("⚠️ Cloud Function failed: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("❌ Error deleting driver: $e");
+      return false;
+    }
   }
 
   static Future<Url> uploadChatImageToFireStorage(File image, BuildContext context) async {
@@ -1358,10 +1450,11 @@ class FireStoreUtils {
   }
 
   static late StreamSubscription<QuerySnapshot> adminChatSeenSubscription;
+
   static void setSeen() {
     final currentUserId = FireStoreUtils.getCurrentUid();
 
-    adminChatSeenSubscription = FirebaseFirestore.instance
+    adminChatSeenSubscription = fireStore
         .collection(CollectionName.chat)
         .doc(currentUserId)
         .collection("thread")
@@ -1386,8 +1479,9 @@ class FireStoreUtils {
   }
 
   static late StreamSubscription<QuerySnapshot> orderChatSeenSubscription;
+
   static void setSeenChatForOrder({required String orderId}) {
-    orderChatSeenSubscription = FirebaseFirestore.instance
+    orderChatSeenSubscription = fireStore
         .collection(CollectionName.chat)
         .doc(orderId)
         .collection("thread")
@@ -1423,5 +1517,52 @@ class FireStoreUtils {
     final docId = (inboxModel.senderReceiverId?.contains('admin') == false) ? inboxModel.orderId : inboxModel.senderId;
     await collection.doc(docId).set(inboxModel.toJson());
     return inboxModel;
+  }
+
+  static Future<String?> isAddressLocationInVendorZone({
+    required double latitude,
+    required double longitude,
+    required VendorModel vendor,
+  }) async {
+    final zones = await FireStoreUtils.getZone();
+    if (zones == null || zones.isEmpty) return null;
+
+    final currentPoint = LatLng(latitude, longitude);
+
+    for (final zone in zones) {
+      if (zone.area == null) continue;
+
+      final isInside = Constant.isPointInPolygon(currentPoint, zone.area!);
+
+      if (isInside && vendor.zoneId == zone.id) {
+        return vendor.zoneId;
+      }
+    }
+
+    return null;
+  }
+
+  static Future<bool?> getNearbyVendor({
+    required double latitude,
+    required double longitude,
+    required VendorModel vendor,
+  }) async {
+    String? zoneIdData = await isAddressLocationInVendorZone(latitude: latitude, longitude: longitude, vendor: vendor);
+    if (zoneIdData == null) {
+      return false;
+    }
+    final query = fireStore.collection(CollectionName.vendors).where('id', isEqualTo: vendor.id).where('zoneId', isEqualTo: zoneIdData);
+    final GeoFirePoint center = Geoflutterfire().point(latitude: latitude, longitude: longitude);
+    const String field = 'g';
+    final List<DocumentSnapshot> vendors = await Geoflutterfire()
+        .collection(collectionRef: query)
+        .within(
+          center: center,
+          radius: double.parse(Constant.radius),
+          field: field,
+          strictMode: true,
+        )
+        .first;
+    return vendors.isNotEmpty ? true : false;
   }
 }

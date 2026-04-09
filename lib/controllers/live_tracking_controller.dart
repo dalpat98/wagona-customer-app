@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:customer/constant/collection_name.dart';
@@ -21,12 +22,21 @@ class LiveTrackingController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     addMarkerSetup();
     getArgument();
     super.onInit();
   }
 
+  @override
+  void onClose() {
+    // Clean up controllers and cancel any running animations.
+    mapController = null;
+    _cancelGoogleAnim();
+    _cancelOsmAnim();
+    super.onClose();
+  }
+
+  // ---------- existing reactive fields ----------
   Rx<OrderModel> orderModel = OrderModel().obs;
   Rx<UserModel> driverUserModel = UserModel().obs;
   RxBool isLoading = true.obs;
@@ -35,62 +45,100 @@ class LiveTrackingController extends GetxController {
   Rx<location.LatLng> current = location.LatLng(21.1800, 72.8400).obs; // Moving marker
   Rx<location.LatLng> destination = location.LatLng(21.2000, 72.8600).obs; // Destination
 
-  getArgument() async {
+  // ---------- animation helpers ----------
+  LatLng? _oldGooglePos;
+  location.LatLng? _oldOsmPos;
+
+  // Keys to cancel previous animation loops
+  int _googleAnimKey = 0;
+  int _osmAnimKey = 0;
+
+  // Anim timers / controllers
+  Timer? _googleAnimTimer;
+  Timer? _osmAnimTimer;
+
+  // Camera follow throttle
+  DateTime _lastCameraFollow = DateTime.fromMillisecondsSinceEpoch(0);
+  final Duration cameraFollowThrottle = const Duration(milliseconds: 200);
+
+  // Movement threshold (meters) below which we snap instead of animate
+  final double snapThresholdMeters = 0.5;
+
+  // ---------- initialization from arguments & Firestore listeners ----------
+  Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       orderModel.value = argumentData['orderModel'];
+      // listen to order doc
       FireStoreUtils.fireStore.collection(CollectionName.restaurantOrders).doc(orderModel.value.id).snapshots().listen((event) {
         if (event.data() != null) {
           OrderModel orderModelStream = OrderModel.fromJson(event.data()!);
           orderModel.value = orderModelStream;
-          FireStoreUtils.fireStore.collection(CollectionName.users).doc(orderModel.value.driverID).snapshots().listen((event) {
-            if (event.data() != null) {
-              driverUserModel.value = UserModel.fromJson(event.data()!);
-              if (Constant.selectedMapType != 'osm') {
-                if (orderModel.value.status == Constant.orderShipped) {
-                  getPolyline(
-                      sourceLatitude: driverUserModel.value.location!.latitude,
-                      sourceLongitude: driverUserModel.value.location!.longitude,
-                      destinationLatitude: orderModel.value.vendor!.latitude,
-                      destinationLongitude: orderModel.value.vendor!.longitude);
-                } else if (orderModel.value.status == Constant.orderInTransit) {
-                  getPolyline(
-                      sourceLatitude: driverUserModel.value.location!.latitude,
-                      sourceLongitude: driverUserModel.value.location!.longitude,
-                      destinationLatitude: orderModel.value.address!.location!.latitude,
-                      destinationLongitude: orderModel.value.address!.location!.longitude);
+
+          // listen to driver doc inside order listener
+          if (orderModel.value.driverID != null && orderModel.value.driverID!.isNotEmpty) {
+            FireStoreUtils.fireStore.collection(CollectionName.users).doc(orderModel.value.driverID).snapshots().listen((event) {
+              if (event.data() != null) {
+                driverUserModel.value = UserModel.fromJson(event.data()!);
+
+                // animate / fetch based on map type & order status
+                if (Constant.selectedMapType != 'osm') {
+                  if (orderModel.value.status == Constant.orderShipped) {
+                    getPolyline(
+                        sourceLatitude: driverUserModel.value.location!.latitude,
+                        sourceLongitude: driverUserModel.value.location!.longitude,
+                        destinationLatitude: orderModel.value.vendor!.latitude,
+                        destinationLongitude: orderModel.value.vendor!.longitude);
+                  } else if (orderModel.value.status == Constant.orderInTransit) {
+                    getPolyline(
+                        sourceLatitude: driverUserModel.value.location!.latitude,
+                        sourceLongitude: driverUserModel.value.location!.longitude,
+                        destinationLatitude: orderModel.value.address!.location!.latitude,
+                        destinationLongitude: orderModel.value.address!.location!.longitude);
+                  } else {
+                    getPolyline(
+                        sourceLatitude: orderModel.value.address!.location!.latitude,
+                        sourceLongitude: orderModel.value.address!.location!.longitude,
+                        destinationLatitude: orderModel.value.vendor!.latitude,
+                        destinationLongitude: orderModel.value.vendor!.longitude);
+                  }
+
+                  // call animation for Google (non-blocking)
                 } else {
-                  getPolyline(
-                      sourceLatitude: orderModel.value.address!.location!.latitude,
-                      sourceLongitude: orderModel.value.address!.location!.longitude,
-                      destinationLatitude: orderModel.value.vendor!.latitude,
-                      destinationLongitude: orderModel.value.vendor!.longitude);
+                  // OSM flow
+                  current.value = location.LatLng(driverUserModel.value.location!.latitude ?? 0.0, driverUserModel.value.location!.longitude ?? 0.0);
+
+                  // set source/destination logically depending on status
+                  if (orderModel.value.status == Constant.orderShipped) {
+                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
+                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
+                    awaitFetchRouteAndAnimateOSM(current.value, source.value);
+                  } else if (orderModel.value.status == Constant.orderInTransit) {
+                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
+                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
+                    awaitFetchRouteAndAnimateOSM(current.value, destination.value);
+                  } else {
+                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
+                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
+                    awaitFetchRouteAndAnimateOSM(current.value, source.value);
+                  }
                 }
-              } else {
-                if (orderModel.value.status == Constant.orderShipped) {
-                  current.value = location.LatLng(driverUserModel.value.location!.latitude ?? 0.0, driverUserModel.value.location!.longitude ?? 0.0);
-                  source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                  destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                  fetchRoute(current.value, source.value);
-                  animateToSource();
-                } else if (orderModel.value.status == Constant.orderInTransit) {
-                  current.value = location.LatLng(driverUserModel.value.location!.latitude ?? 0.0, driverUserModel.value.location!.longitude ?? 0.0);
-                  source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                  destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                  fetchRoute(current.value, destination.value);
-                  animateToSource();
-                } else {
-                  current.value = location.LatLng(driverUserModel.value.location!.latitude ?? 0.0, driverUserModel.value.location!.longitude ?? 0.0);
-                  source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                  destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                  fetchRoute(current.value, source.value);
-                  animateToSource();
-                }
+                onDriverLocationUpdate(
+                  lat: driverUserModel.value.location!.latitude,
+                  lng: driverUserModel.value.location!.longitude,
+                  rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
+                );
               }
-            }
-          });
+            });
+          }
 
           if (orderModel.value.status == Constant.orderCompleted) {
+            // ensure we cancel animations before popping
+            _cancelGoogleAnim();
+            _cancelOsmAnim();
+            if (Get.isOverlaysOpen) {
+              // just a gentle guard; your app may not need this
+            }
             Get.back();
           }
         }
@@ -98,14 +146,14 @@ class LiveTrackingController extends GetxController {
     }
 
     isLoading.value = false;
-
     update();
   }
 
-  void animateToSource() {
-    osmMapController.move(location.LatLng(driverUserModel.value.location!.latitude ?? 0.0, driverUserModel.value.location!.longitude ?? 0.0), 16);
+  Future<void> awaitFetchRouteAndAnimateOSM(location.LatLng cur, location.LatLng dest) async {
+    await fetchRoute(cur, dest);
   }
 
+  // ---------- route fetching (OSRM) ----------
   RxList<location.LatLng> routePoints = <location.LatLng>[].obs;
 
   Future<void> fetchRoute(location.LatLng source, location.LatLng destination) async {
@@ -125,14 +173,48 @@ class LiveTrackingController extends GetxController {
         final lat = coord[1];
         routePoints.add(location.LatLng(lat, lon));
       }
+      update();
     } else {
       print("Failed to get route: ${response.body}");
     }
   }
 
+  // ---------- icons & marker setup ----------
   BitmapDescriptor? departureIcon;
   BitmapDescriptor? destinationIcon;
   BitmapDescriptor? driverIcon;
+
+  void addMarkerSetup() async {
+    if (Constant.selectedMapType != 'osm') {
+      final Uint8List departure = await Constant().getBytesFromAsset('assets/images/pickup.png', 100);
+      final Uint8List destination = await Constant().getBytesFromAsset('assets/images/dropoff.png', 100);
+      final Uint8List driver = await Constant().getBytesFromAsset('assets/images/food_delivery.png', 100);
+      departureIcon = BitmapDescriptor.fromBytes(departure);
+      destinationIcon = BitmapDescriptor.fromBytes(destination);
+      driverIcon = BitmapDescriptor.fromBytes(driver);
+    } else {
+      // OSM: we use Image.asset inside marker builder (no extra setup required)
+    }
+  }
+
+  // ---------- polyline & map state for Google ----------
+  RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
+  RxMap<PolylineId, Polyline> polyLines = <PolylineId, Polyline>{}.obs;
+  PolylinePoints polylinePoints = PolylinePoints(apiKey: Constant.mapAPIKey);
+
+  void _addPolyLine(List<LatLng> polylineCoordinates) {
+    PolylineId id = const PolylineId("poly");
+    Polyline polyline = Polyline(
+      polylineId: id,
+      points: polylineCoordinates,
+      consumeTapEvents: true,
+      startCap: Cap.roundCap,
+      width: 6,
+    );
+    polyLines[id] = polyline;
+    // updateCameraLocation();
+    update();
+  }
 
   void getPolyline({required double? sourceLatitude, required double? sourceLongitude, required double? destinationLatitude, required double? destinationLongitude}) async {
     if (sourceLatitude != null && sourceLongitude != null && destinationLatitude != null && destinationLongitude != null) {
@@ -143,9 +225,7 @@ class LiveTrackingController extends GetxController {
         mode: TravelMode.driving,
       );
 
-      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        request: polylineRequest,
-      );
+      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(request: polylineRequest);
       if (result.points.isNotEmpty) {
         for (var point in result.points) {
           polylineCoordinates.add(LatLng(point.latitude, point.longitude));
@@ -153,103 +233,84 @@ class LiveTrackingController extends GetxController {
       } else {
         print(result.errorMessage.toString());
       }
+
+      // Set markers depending on order status
       if (orderModel.value.status == Constant.orderShipped) {
-        addMarker(
-            latitude: driverUserModel.value.location!.latitude,
-            longitude: driverUserModel.value.location!.longitude,
-            id: "Driver",
-            descriptor: driverIcon!,
-            rotation: double.parse(driverUserModel.value.rotation.toString()));
-        addMarker(
-          latitude: orderModel.value.vendor!.latitude,
-          longitude: orderModel.value.vendor!.longitude,
-          id: "Departure",
-          descriptor: departureIcon!,
+        _setOrUpdateMarker(
+          id: 'Driver',
+          position: LatLng(driverUserModel.value.location!.latitude!, driverUserModel.value.location!.longitude!),
+          descriptor: driverIcon,
+          rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
+        );
+        _setOrUpdateMarker(
+          id: 'Departure',
+          position: LatLng(orderModel.value.vendor!.latitude!, orderModel.value.vendor!.longitude!),
+          descriptor: departureIcon,
           rotation: 0.0,
         );
       } else if (orderModel.value.status == Constant.orderInTransit) {
-        addMarker(
-            latitude: driverUserModel.value.location!.latitude,
-            longitude: driverUserModel.value.location!.longitude,
-            id: "Driver",
-            descriptor: driverIcon!,
-            rotation: double.parse(driverUserModel.value.rotation.toString()));
-        addMarker(latitude: orderModel.value.address!.location!.latitude, longitude: orderModel.value.address!.location!.longitude, id: "Destination", descriptor: destinationIcon!, rotation: 0.0);
+        _setOrUpdateMarker(
+          id: 'Driver',
+          position: LatLng(driverUserModel.value.location!.latitude!, driverUserModel.value.location!.longitude!),
+          descriptor: driverIcon,
+          rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
+        );
+        _setOrUpdateMarker(
+          id: 'Destination',
+          position: LatLng(orderModel.value.address!.location!.latitude!, orderModel.value.address!.location!.longitude!),
+          descriptor: destinationIcon,
+          rotation: 0.0,
+        );
       } else {
-        addMarker(latitude: orderModel.value.vendor!.latitude, longitude: orderModel.value.vendor!.longitude, id: "Departure", descriptor: departureIcon!, rotation: 0.0);
-        addMarker(latitude: orderModel.value.address!.location!.latitude, longitude: orderModel.value.address!.location!.longitude, id: "Destination", descriptor: destinationIcon!, rotation: 0.0);
+        _setOrUpdateMarker(
+          id: 'Departure',
+          position: LatLng(orderModel.value.vendor!.latitude!, orderModel.value.vendor!.longitude!),
+          descriptor: departureIcon,
+          rotation: 0.0,
+        );
+        _setOrUpdateMarker(
+          id: 'Destination',
+          position: LatLng(orderModel.value.address!.location!.latitude!, orderModel.value.address!.location!.longitude!),
+          descriptor: destinationIcon,
+          rotation: 0.0,
+        );
       }
-
-      _addPolyLine(polylineCoordinates);
+      if (polylineCoordinates.isNotEmpty) {
+        _addPolyLine(polylineCoordinates);
+        update();
+      }
     }
   }
 
-  RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
+  // ---------- Google: add / update marker (small helper) ----------
+  void _setOrUpdateMarker({required String id, required LatLng position, BitmapDescriptor? descriptor, double rotation = 0.0}) {
+    final markerId = MarkerId(id);
 
-  addMarker({required double? latitude, required double? longitude, required String id, required BitmapDescriptor descriptor, required double? rotation}) {
-    MarkerId markerId = MarkerId(id);
-    Marker marker = Marker(markerId: markerId, icon: descriptor, position: LatLng(latitude ?? 0.0, longitude ?? 0.0), rotation: rotation ?? 0.0);
-    markers[markerId] = marker;
-  }
-
-  addMarkerSetup() async {
-    if (Constant.selectedMapType != 'osm') {
-      final Uint8List departure = await Constant().getBytesFromAsset('assets/images/pickup.png', 100);
-      final Uint8List destination = await Constant().getBytesFromAsset('assets/images/dropoff.png', 100);
-      final Uint8List driver = await Constant().getBytesFromAsset('assets/images/food_delivery.png', 100);
-      departureIcon = BitmapDescriptor.fromBytes(departure);
-      destinationIcon = BitmapDescriptor.fromBytes(destination);
-      driverIcon = BitmapDescriptor.fromBytes(driver, size: Size(100.0, 100.0));
-    } else {
-      // departureOsmIcon =
-      //     Image.asset("assets/images/pickup.png", width: 30, height: 30); //OSM
-      // destinationOsmIcon =
-      //     Image.asset("assets/images/dropoff.png", width: 30, height: 30); //OSM
-      // driverOsmIcon = Image.asset("assets/images/food_delivery.png",
-      //     width: 30, height: 30); //OSM
-    }
-  }
-
-  RxMap<PolylineId, Polyline> polyLines = <PolylineId, Polyline>{}.obs;
-  PolylinePoints polylinePoints = PolylinePoints(
-    apiKey: Constant.mapAPIKey,
-  );
-
-  _addPolyLine(List<LatLng> polylineCoordinates) {
-    PolylineId id = const PolylineId("poly");
-    Polyline polyline = Polyline(
-      polylineId: id,
-      points: polylineCoordinates,
-      consumeTapEvents: true,
-      startCap: Cap.roundCap,
-      width: 6,
+    // Create a marker with rotation; set flat: true so icon rotates smoothly
+    final marker = Marker(
+      markerId: markerId,
+      position: position,
+      icon: descriptor ?? BitmapDescriptor.defaultMarker,
+      rotation: rotation,
+      anchor: const Offset(0.5, 0.5),
+      flat: true,
+      zIndex: 10,
     );
-    polyLines[id] = polyline;
-    updateCameraLocation(polylineCoordinates.first, polylineCoordinates.last, mapController);
+
+    markers[markerId] = marker;
+    update();
   }
 
-  Future<void> updateCameraLocation(
-    LatLng source,
-    LatLng destination,
-    GoogleMapController? mapController,
-  ) async {
+  // ---------- Camera utilities ----------
+  Future<void> updateCameraLocation() async {
     if (mapController == null) return;
-
-    LatLngBounds bounds;
-
-    if (source.latitude > destination.latitude && source.longitude > destination.longitude) {
-      bounds = LatLngBounds(southwest: destination, northeast: source);
-    } else if (source.longitude > destination.longitude) {
-      bounds = LatLngBounds(southwest: LatLng(source.latitude, destination.longitude), northeast: LatLng(destination.latitude, source.longitude));
-    } else if (source.latitude > destination.latitude) {
-      bounds = LatLngBounds(southwest: LatLng(destination.latitude, source.longitude), northeast: LatLng(source.latitude, destination.longitude));
-    } else {
-      bounds = LatLngBounds(southwest: source, northeast: destination);
-    }
-
-    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 10);
-
-    return checkCameraLocation(cameraUpdate, mapController);
+    try {
+      await mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: LatLng(driverUserModel.value.location!.latitude!, driverUserModel.value.location!.longitude!), zoom: 15, bearing: double.parse('${driverUserModel.value.rotation!}')),
+        ),
+      );
+    } catch (_) {}
   }
 
   Future<void> checkCameraLocation(CameraUpdate cameraUpdate, GoogleMapController mapController) async {
@@ -262,144 +323,267 @@ class LiveTrackingController extends GetxController {
     }
   }
 
-//OSM
-// late MapController mapOsmController;
-// Rx<RoadInfo> roadInfo = RoadInfo().obs;
-// Map<String, GeoPoint> osmMarkers = <String, GeoPoint>{};
-// Image? departureOsmIcon; //OSM
-// Image? destinationOsmIcon; //OSM
-// Image? driverOsmIcon;
-//
-// Future<void> updateOSMCameraLocation(
-//     {required GeoPoint source, required GeoPoint destination}) async {
-//   BoundingBox bounds;
-//
-//   if (source.latitude > destination.latitude &&
-//       source.longitude > destination.longitude) {
-//     bounds = BoundingBox(
-//       north: source.latitude,
-//       south: destination.latitude,
-//       east: source.longitude,
-//       west: destination.longitude,
-//     );
-//   } else if (source.longitude > destination.longitude) {
-//     bounds = BoundingBox(
-//       north: destination.latitude,
-//       south: source.latitude,
-//       east: source.longitude,
-//       west: destination.longitude,
-//     );
-//   } else if (source.latitude > destination.latitude) {
-//     bounds = BoundingBox(
-//       north: source.latitude,
-//       south: destination.latitude,
-//       east: destination.longitude,
-//       west: source.longitude,
-//     );
-//   } else {
-//     bounds = BoundingBox(
-//       north: destination.latitude,
-//       south: source.latitude,
-//       east: destination.longitude,
-//       west: source.longitude,
-//     );
-//   }
-//
-//   await mapOsmController.zoomToBoundingBox(bounds, paddinInPixel: 100);
-// }
-//
-// setOsmMarker(
-//     {required GeoPoint departure, required GeoPoint destination}) async {
-//   WidgetsBinding.instance.addPostFrameCallback((_) async {
-//     if (osmMarkers.containsKey('Driver')) {
-//       await mapOsmController.removeMarker(osmMarkers['Driver']!);
-//     }
-//
-//     if (osmMarkers.containsKey('Source')) {
-//       await mapOsmController.removeMarker(osmMarkers['Source']!);
-//     }
-//
-//     if (osmMarkers.containsKey('Destination')) {
-//       await mapOsmController.removeMarker(osmMarkers['Destination']!);
-//     }
-//
-//     await mapOsmController
-//         .addMarker(
-//             GeoPoint(
-//                 latitude: driverUserModel.value.location!.latitude!,
-//                 longitude: driverUserModel.value.location!.longitude!),
-//             markerIcon: MarkerIcon(iconWidget: driverOsmIcon),
-//             angle: pi / 3,
-//             iconAnchor: IconAnchor(
-//               anchor: Anchor.top,
-//             ))
-//         .then((v) {
-//       osmMarkers['Driver'] = GeoPoint(
-//           latitude: driverUserModel.value.location!.latitude!,
-//           longitude: driverUserModel.value.location!.longitude!);
-//     });
-//
-//     await mapOsmController
-//         .addMarker(departure,
-//             markerIcon: MarkerIcon(iconWidget: departureOsmIcon),
-//             angle: pi / 3,
-//             iconAnchor: IconAnchor(
-//               anchor: Anchor.top,
-//             ))
-//         .then((v) {
-//       osmMarkers['Source'] = departure;
-//     });
-//
-//     await mapOsmController
-//         .addMarker(destination,
-//             markerIcon: MarkerIcon(iconWidget: destinationOsmIcon),
-//             angle: pi / 3,
-//             iconAnchor: IconAnchor(
-//               anchor: Anchor.top,
-//             ))
-//         .then((v) {
-//       osmMarkers['Destination'] = destination;
-//     });
-//   });
-//   getOSMPolyline();
-// }
-//
-// void getOSMPolyline() async {
-//   try {
-//     GeoPoint destinationLocation;
-//     if (orderModel.value.status == Constant.orderShipped) {
-//       destinationLocation = GeoPoint(
-//           latitude: orderModel.value.vendor!.latitude ?? 0,
-//           longitude: orderModel.value.vendor!.longitude ?? 0);
-//     } else {
-//       destinationLocation = GeoPoint(
-//           latitude: orderModel.value.address!.location!.latitude ?? 0,
-//           longitude: orderModel.value.address!.location!.longitude ?? 0);
-//     }
-//
-//     await mapOsmController.removeLastRoad();
-//     roadInfo.value = await mapOsmController.drawRoad(
-//       GeoPoint(
-//           latitude: driverUserModel.value.location!.latitude!,
-//           longitude: driverUserModel.value.location!.longitude!),
-//       destinationLocation,
-//       roadType: RoadType.car,
-//       roadOption: RoadOption(
-//         roadWidth: Platform.isIOS ? 50 : 10,
-//         roadColor: Colors.blue,
-//         roadBorderWidth:
-//             Platform.isIOS ? 15 : 10, // Set the road border width (outline)
-//         roadBorderColor: Colors.black, // Border color
-//         zoomInto: true,
-//       ),
-//     );
-//     mapOsmController.goToLocation(
-//       GeoPoint(
-//           latitude: driverUserModel.value.location!.latitude!,
-//           longitude: driverUserModel.value.location!.longitude!),
-//     );
-//   } catch (e) {
-//     print('Error: $e');
-//   }
-// }
+  // ---------- OSM markers ----------
+  RxList<flutterMap.Marker> osmMarkers = <flutterMap.Marker>[].obs;
+
+  void setOsmMarkers() {
+    osmMarkers.value = [
+      flutterMap.Marker(
+        point: current.value,
+        width: 45,
+        height: 45,
+        rotate: true,
+        child: Transform.rotate(
+          angle: (double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0) * (math.pi / 180),
+          child: Image.asset('assets/images/food_delivery.png'),
+        ),
+      ),
+      flutterMap.Marker(
+        point: source.value,
+        width: 40,
+        height: 40,
+        child: Image.asset('assets/images/pickup.png'),
+      ),
+      flutterMap.Marker(
+        point: destination.value,
+        width: 40,
+        height: 40,
+        child: Image.asset('assets/images/dropoff.png'),
+      ),
+    ];
+    update();
+  }
+
+  // ---------- Interpolation helpers ----------
+  LatLng _lerpLatLng(LatLng a, LatLng b, double t) {
+    return LatLng(
+      a.latitude + (b.latitude - a.latitude) * t,
+      a.longitude + (b.longitude - a.longitude) * t,
+    );
+  }
+
+  location.LatLng _lerpOsm(location.LatLng a, location.LatLng b, double t) {
+    return location.LatLng(
+      a.latitude + (b.latitude - a.latitude) * t,
+      a.longitude + (b.longitude - a.longitude) * t,
+    );
+  }
+
+  double _interpolateRotation(double start, double end, double t) {
+    double diff = (end - start) % 360;
+    if (diff < -180) diff += 360;
+    if (diff > 180) diff -= 360;
+    return (start + diff * t) % 360;
+  }
+
+  double _deg2rad(double deg) => deg * (math.pi / 180);
+
+  double _calculateDistanceMeters(double lat1, double lon1, double lat2, double lon2) {
+    const double R = 6371000; // meters
+    final double dLat = _deg2rad(lat2 - lat1);
+    final double dLon = _deg2rad(lon2 - lon1);
+    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) + math.cos(_deg2rad(lat1)) * math.cos(_deg2rad(lat2)) * math.sin(dLon / 2) * math.sin(dLon / 2);
+    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    return R * c;
+  }
+
+  // ---------- Smooth animation for Google Marker ----------
+  Future<void> animateDriverMarkerGoogle(
+      LatLng newPos, {
+        double? newRotation,
+        Duration duration = const Duration(milliseconds: 900),
+        bool followCamera = true,
+      }) async {
+    _cancelGoogleAnim();
+    final int myKey = ++_googleAnimKey;
+
+    final LatLng from = _oldGooglePos ?? newPos;
+    final double startRot = double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0;
+    final double targetRot = newRotation ?? startRot;
+
+    final double distanceMeters = _calculateDistanceMeters(from.latitude, from.longitude, newPos.latitude, newPos.longitude);
+
+    // If movement is extremely small, snap to new position (prevents jitter)
+    if (distanceMeters <= snapThresholdMeters) {
+      _setOrUpdateMarker(id: 'Driver', position: newPos, descriptor: driverIcon, rotation: targetRot);
+      _oldGooglePos = newPos;
+      driverUserModel.value.rotation = targetRot;
+      if (followCamera && DateTime.now().difference(_lastCameraFollow) > cameraFollowThrottle) {
+        _lastCameraFollow = DateTime.now();
+        try {
+          mapController?.animateCamera(CameraUpdate.newLatLng(newPos));
+        } catch (_) {}
+      }
+      return;
+    }
+
+    final int fps = 60;
+    final int totalFrames = math.max(1, ((duration.inMilliseconds / (1000 / fps))).round());
+    int frame = 0;
+
+    // animation timer
+    _googleAnimTimer = Timer.periodic(Duration(milliseconds: (1000 / fps).round()), (timer) {
+      if (myKey != _googleAnimKey) {
+        timer.cancel();
+        return;
+      }
+
+      final double tRaw = (frame / totalFrames).clamp(0.0, 1.0);
+      final double t = Curves.easeInOut.transform(tRaw);
+      final LatLng interpolated = _lerpLatLng(from, newPos, t);
+      final double rot = _interpolateRotation(startRot, targetRot, t);
+
+      // update marker with rotation; marker is flat so rotation looks good
+      final markerId = MarkerId('Driver');
+      final marker = Marker(
+        markerId: markerId,
+        position: interpolated,
+        icon: driverIcon ?? BitmapDescriptor.defaultMarker,
+        rotation: rot,
+        anchor: const Offset(0.5, 0.5),
+        flat: true,
+        zIndex: 10,
+      );
+      markers[markerId] = marker;
+      update();
+
+      // throttle camera updates
+      if (followCamera && DateTime.now().difference(_lastCameraFollow) > cameraFollowThrottle) {
+        _lastCameraFollow = DateTime.now();
+        try {
+          mapController?.animateCamera(CameraUpdate.newLatLng(interpolated));
+        } catch (_) {}
+      }
+
+      frame++;
+      if (frame > totalFrames) {
+        // final snap and finish
+        timer.cancel();
+        if (myKey == _googleAnimKey) {
+          markers[markerId] = Marker(
+            markerId: markerId,
+            position: newPos,
+            icon: driverIcon ?? BitmapDescriptor.defaultMarker,
+            rotation: targetRot,
+            anchor: const Offset(0.5, 0.5),
+            flat: true,
+            zIndex: 10,
+          );
+          _oldGooglePos = newPos;
+          driverUserModel.value.rotation = targetRot;
+          update();
+        }
+      }
+    });
+  }
+
+  void _cancelGoogleAnim() {
+    _googleAnimKey++;
+    try {
+      _googleAnimTimer?.cancel();
+    } catch (_) {}
+    _googleAnimTimer = null;
+  }
+
+  // ---------- Smooth animation for OSM marker ----------
+  Future<void> animateDriverMarkerOsm(
+      location.LatLng newPos, {
+        double? newRotation,
+        Duration duration = const Duration(milliseconds: 1000),
+        double osmZoom = 14.0,
+        bool followCamera = true,
+        int cameraUpdateEveryNthFrame = 3,
+      }) async {
+    _cancelOsmAnim();
+    final int myKey = ++_osmAnimKey;
+
+    final location.LatLng from = _oldOsmPos ?? newPos;
+
+    final double startRot = double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0;
+    final double targetRot = newRotation ?? startRot;
+
+    final double distanceMeters = _calculateDistanceMeters(from.latitude, from.longitude, newPos.latitude, newPos.longitude);
+    if (distanceMeters <= snapThresholdMeters) {
+      current.value = newPos;
+      driverUserModel.value.rotation = targetRot;
+      setOsmMarkers();
+
+      if (followCamera && DateTime.now().difference(_lastCameraFollow) > cameraFollowThrottle) {
+        _lastCameraFollow = DateTime.now();
+        try {
+          osmMapController.move(newPos, osmZoom);
+        } catch (_) {}
+      }
+
+      _oldOsmPos = newPos;
+      update();
+      return;
+    }
+
+    final int fps = 60;
+    final int totalFrames = math.max(1, ((duration.inMilliseconds / (1000 / fps))).round());
+    int frame = 0;
+
+    _osmAnimTimer = Timer.periodic(
+      Duration(milliseconds: (1000 / fps).round()),
+          (timer) async {
+        if (myKey != _osmAnimKey) {
+          timer.cancel();
+          return;
+        }
+
+        final double tRaw = (frame / totalFrames).clamp(0.0, 1.0);
+        final double t = Curves.easeInOut.transform(tRaw);
+
+        final location.LatLng interpolated = _lerpOsm(from, newPos, t);
+        final double rot = _interpolateRotation(startRot, targetRot, t);
+
+        current.value = interpolated;
+        driverUserModel.value.rotation = rot;
+
+        setOsmMarkers();
+
+        // camera update throttling
+        if (followCamera && frame % cameraUpdateEveryNthFrame == 0 && DateTime.now().difference(_lastCameraFollow) > cameraFollowThrottle) {
+          _lastCameraFollow = DateTime.now();
+          try {
+            osmMapController.move(interpolated, osmZoom);
+          } catch (_) {}
+        }
+
+        frame++;
+        if (frame > totalFrames) {
+          timer.cancel();
+          if (myKey == _osmAnimKey) {
+            current.value = newPos;
+            driverUserModel.value.rotation = targetRot;
+            _oldOsmPos = newPos;
+            setOsmMarkers();
+          }
+        }
+      },
+    );
+  }
+
+  void _cancelOsmAnim() {
+    _osmAnimKey++;
+    try {
+      _osmAnimTimer?.cancel();
+    } catch (_) {}
+    _osmAnimTimer = null;
+  }
+
+  // ---------- public wrapper: call this when driver location updates ----------
+  Future<void> onDriverLocationUpdate({double? lat, double? lng, double? rotation}) async {
+    if (lat == null || lng == null) return;
+
+    final LatLng googlePos = LatLng(lat, lng);
+    final location.LatLng osmPos = location.LatLng(lat, lng);
+
+    if (Constant.selectedMapType != 'osm') {
+      await animateDriverMarkerGoogle(googlePos, newRotation: rotation ?? (double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0));
+    } else {
+      await animateDriverMarkerOsm(osmPos, newRotation: rotation ?? (double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0));
+    }
+  }
 }

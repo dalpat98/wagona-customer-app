@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:customer/models/tax_model.dart';
 
 class ProductModel {
   int? fats;
@@ -20,42 +21,43 @@ class ProductModel {
   int? grams;
   num? reviewsCount;
   String? disPrice;
-  List<String>? photos;
+  List<dynamic>? photos;
   bool? nonveg;
   String? photo;
   String? price;
   String? categoryID;
   String? description;
   Timestamp? createdAt;
+  List<TaxModel>? taxSetting;
 
-  ProductModel({
-    this.fats,
-    this.vendorID,
-    this.veg,
-    this.publish,
-    this.addOnsTitle,
-    this.calories,
-    this.proteins,
-    this.addOnsPrice,
-    this.reviewsSum,
-    this.takeawayOption,
-    this.name,
-    this.reviewAttributes,
-    this.productSpecification,
-    this.itemAttribute,
-    this.id,
-    this.quantity,
-    this.grams,
-    this.reviewsCount,
-    this.disPrice,
-    this.photos,
-    this.nonveg,
-    this.photo,
-    this.price,
-    this.categoryID,
-    this.description,
-    this.createdAt,
-  });
+  ProductModel(
+      {this.fats,
+        this.vendorID,
+        this.veg,
+        this.publish,
+        this.addOnsTitle,
+        this.calories,
+        this.proteins,
+        this.addOnsPrice,
+        this.reviewsSum,
+        this.takeawayOption,
+        this.name,
+        this.reviewAttributes,
+        this.productSpecification,
+        this.itemAttribute,
+        this.id,
+        this.quantity,
+        this.grams,
+        this.reviewsCount,
+        this.disPrice,
+        this.photos,
+        this.nonveg,
+        this.photo,
+        this.price,
+        this.categoryID,
+        this.description,
+        this.createdAt,
+        this.taxSetting});
 
   ProductModel.fromJson(Map<String, dynamic> json) {
     fats = json['fats'];
@@ -71,21 +73,25 @@ class ProductModel {
     name = json['name'];
     reviewAttributes = json['reviewAttributes'];
     productSpecification = json['product_specification'];
-    itemAttribute = json['item_attribute'] != null
-        ? ItemAttribute.fromJson(json['item_attribute'])
-        : null;
+    itemAttribute = json['item_attribute'] != null ? ItemAttribute.fromJson(json['item_attribute']) : null;
     id = json['id'];
     quantity = json['quantity'];
     grams = json['grams'];
     reviewsCount = json['reviewsCount'] ?? 0.0;
     disPrice = json['disPrice'] ?? "0";
-    photos = json['photos'].cast<String>();
+    photos = json['photos'] ?? [];
     nonveg = json['nonveg'];
     photo = json['photo'];
     price = json['price'];
     categoryID = json['categoryID'];
     description = json['description'];
     createdAt = json['createdAt'];
+    if (json['taxSetting'] != null) {
+      taxSetting = <TaxModel>[];
+      json['taxSetting'].forEach((v) {
+        taxSetting!.add(TaxModel.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -94,15 +100,10 @@ class ProductModel {
     data['vendorID'] = vendorID;
     data['veg'] = veg;
     data['publish'] = publish;
-    if (addOnsTitle != null) {
-      data['addOnsTitle'] = addOnsTitle;
-    }
-    if (addOnsPrice != null) {
-      data['addOnsPrice'] = addOnsPrice;
-    }
+    data['addOnsTitle'] = addOnsTitle;
+    data['addOnsPrice'] = addOnsPrice;
     data['calories'] = calories;
     data['proteins'] = proteins;
-
     data['reviewsSum'] = reviewsSum;
     data['takeawayOption'] = takeawayOption;
     data['name'] = name;
@@ -123,6 +124,9 @@ class ProductModel {
     data['categoryID'] = categoryID;
     data['description'] = description;
     data['createdAt'] = createdAt;
+    if (taxSetting != null) {
+      data['taxSetting'] = taxSetting!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }

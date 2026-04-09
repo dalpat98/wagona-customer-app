@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/app/chat_screens/full_screen_image_viewer.dart';
 import 'package:customer/app/chat_screens/full_screen_video_viewer.dart';
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/constant.dart';
+import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/chat_controller.dart';
 import 'package:customer/models/conversation_model.dart';
 import 'package:customer/themes/app_them_data.dart';
@@ -71,7 +70,8 @@ class ChatScreen extends StatelessWidget {
                       FocusScope.of(context).unfocus();
                     },
                     child: FirestorePagination(
-                      controller: controller.scrollController,
+                      reverse: true,
+                      controller: controller.scrollController.value,
                       physics: const BouncingScrollPhysics(),
                       itemBuilder: (context, documentSnapshots, index) {
                         ConversationModel inboxModel = ConversationModel.fromJson(documentSnapshots[index].data() as Map<String, dynamic>);
@@ -79,7 +79,7 @@ class ChatScreen extends StatelessWidget {
                       },
                       onEmpty: Constant.showEmptyView(message: "No Conversion found".tr),
                       // orderBy is compulsory to enable pagination
-                      query: FirebaseFirestore.instance.collection(CollectionName.chat).doc(controller.orderId.value).collection("thread").orderBy('createdAt', descending: false),
+                      query: FireStoreUtils.fireStore.collection(CollectionName.chat).doc(controller.orderId.value).collection("thread").orderBy('createdAt', descending: true),
                       isLive: true,
                       viewType: ViewType.list,
                     ),
@@ -117,7 +117,7 @@ class ChatScreen extends StatelessWidget {
                                 onSubmitted: (value) async {
                                   if (controller.messageController.value.text.isNotEmpty) {
                                     controller.sendMessage(controller.messageController.value.text, null, '', 'text', controller);
-                                    Timer(const Duration(milliseconds: 500), () => controller.scrollController.jumpTo(controller.scrollController.position.maxScrollExtent));
+                                    Timer(const Duration(milliseconds: 500), () => controller.scrollController.value.jumpTo(controller.scrollController.value.position.minScrollExtent));
                                     controller.messageController.value.clear();
                                   }
                                 },
@@ -127,7 +127,7 @@ class ChatScreen extends StatelessWidget {
                               onTap: () {
                                 if (controller.messageController.value.text.isNotEmpty) {
                                   controller.sendMessage(controller.messageController.value.text, null, '', 'text', controller);
-                                  Timer(const Duration(milliseconds: 500), () => controller.scrollController.jumpTo(controller.scrollController.position.maxScrollExtent));
+                                  Timer(const Duration(milliseconds: 500), () => controller.scrollController.value.jumpTo(controller.scrollController.value.position.minScrollExtent));
                                   controller.messageController.value.clear();
                                 }
                               },
@@ -160,7 +160,7 @@ class ChatScreen extends StatelessWidget {
 
   Widget chatItemView(themeChange, bool isMe, ConversationModel data) {
     return Container(
-      padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+      padding: EdgeInsets.only(left: isMe ? 80 : 10, right: isMe ? 10 : 80, top: 10, bottom: 10),
       child: isMe
           ? Align(
               alignment: Alignment.topRight,
@@ -221,68 +221,66 @@ class ChatScreen extends StatelessWidget {
                 ],
               ),
             )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    data.messageType == "text"
-                        ? Container(
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomRight: Radius.circular(12)),
-                              color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200,
+          : Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  data.messageType == "text"
+                      ? Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomRight: Radius.circular(12)),
+                            color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          child: Text(
+                            data.message.toString(),
+                            style: TextStyle(
+                              fontFamily: AppThemeData.medium,
+                              fontSize: 16,
+                              color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            child: Text(
-                              data.message.toString(),
-                              style: TextStyle(
-                                fontFamily: AppThemeData.medium,
-                                fontSize: 16,
-                                color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
+                          ),
+                        )
+                      : data.messageType == "image"
+                          ? ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 50,
+                                maxWidth: 200,
                               ),
-                            ),
-                          )
-                        : data.messageType == "image"
-                            ? ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minWidth: 50,
-                                  maxWidth: 200,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomRight: Radius.circular(12)),
-                                  child: Stack(alignment: Alignment.center, children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.to(FullScreenImageViewer(imageUrl: data.url!.url));
-                                      },
-                                      child: Hero(
-                                        tag: data.url!.url,
-                                        child: NetworkImageWidget(
-                                          imageUrl: data.url!.url,
-                                        ),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomRight: Radius.circular(12)),
+                                child: Stack(alignment: Alignment.center, children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Get.to(FullScreenImageViewer(imageUrl: data.url!.url));
+                                    },
+                                    child: Hero(
+                                      tag: data.url!.url,
+                                      child: NetworkImageWidget(
+                                        imageUrl: data.url!.url,
                                       ),
                                     ),
-                                  ]),
-                                ))
-                            : FloatingActionButton(
-                                mini: true,
-                                heroTag: data.id,
-                                backgroundColor: AppThemeData.primary300,
-                                onPressed: () {
-                                  Get.to(FullScreenVideoViewer(heroTag: data.id.toString(), videoUrl: data.url!.url));
-                                },
-                                child: const Icon(
-                                  Icons.play_arrow,
-                                  color: Colors.white,
-                                ),
+                                  ),
+                                ]),
+                              ))
+                          : FloatingActionButton(
+                              mini: true,
+                              heroTag: data.id,
+                              backgroundColor: AppThemeData.primary300,
+                              onPressed: () {
+                                Get.to(FullScreenVideoViewer(heroTag: data.id.toString(), videoUrl: data.url!.url));
+                              },
+                              child: const Icon(
+                                Icons.play_arrow,
+                                color: Colors.white,
                               ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(DateFormat('MMM d, yyyy hh:mm aa').format(DateTime.fromMillisecondsSinceEpoch(data.createdAt!.millisecondsSinceEpoch)), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-              ],
+                            ),
+                  const SizedBox(height: 5),
+                  Text(DateFormat('MMM d, yyyy hh:mm aa').format(DateTime.fromMillisecondsSinceEpoch(data.createdAt!.millisecondsSinceEpoch)),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                ],
+              ),
             ),
     );
   }
@@ -298,10 +296,15 @@ class ChatScreen extends StatelessWidget {
           isDefaultAction: false,
           onPressed: () async {
             Get.back();
-            XFile? image = await controller.imagePicker.pickImage(source: ImageSource.gallery);
-            if (image != null) {
-              Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
-              controller.sendMessage(controller.messageController.value.text, url, '', 'image', controller);
+            try {
+              XFile? image = await controller.imagePicker.pickImage(source: ImageSource.gallery);
+              if (image != null) {
+                Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
+                controller.sendMessage(controller.messageController.value.text, url, '', 'image', controller);
+                Timer(const Duration(milliseconds: 500), () => controller.scrollController.value.jumpTo(controller.scrollController.value.position.minScrollExtent));
+              }
+            } catch (e) {
+              ShowToastDialog.showToast("Storage permission is not enabled. Please allow it.");
             }
           },
           child: Text("Choose image from gallery".tr),
@@ -324,10 +327,15 @@ class ChatScreen extends StatelessWidget {
           isDestructiveAction: false,
           onPressed: () async {
             Get.back();
-            XFile? image = await controller.imagePicker.pickImage(source: ImageSource.camera);
-            if (image != null) {
-              Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
-              controller.sendMessage(controller.messageController.value.text, url, '', 'image', controller);
+            try {
+              XFile? image = await controller.imagePicker.pickImage(source: ImageSource.camera);
+              if (image != null) {
+                Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
+                controller.sendMessage(controller.messageController.value.text, url, '', 'image', controller);
+                Timer(const Duration(milliseconds: 500), () => controller.scrollController.value.jumpTo(controller.scrollController.value.position.minScrollExtent));
+              }
+            } catch (e) {
+              ShowToastDialog.showToast("Camera access is not enabled. Please allow camera permission.");
             }
           },
           child: Text("Take a picture".tr),

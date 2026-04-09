@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/app/chat_screens/ChatVideoContainer.dart';
 import 'package:customer/app/chat_screens/full_screen_image_viewer.dart';
 import 'package:customer/app/chat_screens/full_screen_video_viewer.dart';
@@ -88,9 +87,9 @@ class HelpSupportScreen extends StatelessWidget {
                           FocusScope.of(context).unfocus();
                         },
                         child: FirestorePagination(
-                          controller: controller.scrollController,
+                          controller: controller.scrollController.value,
                           physics: const BouncingScrollPhysics(),
-                          query: FirebaseFirestore.instance.collection(CollectionName.chat).doc(FireStoreUtils.getCurrentUid()).collection('thread').orderBy(
+                          query: FireStoreUtils.fireStore.collection(CollectionName.chat).doc(FireStoreUtils.getCurrentUid()).collection('thread').orderBy(
                                 'createdAt',
                                 descending: true,
                               ),
@@ -186,7 +185,7 @@ class HelpSupportScreen extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 
     return Container(
-      padding: const EdgeInsets.only(left: 14, right: 14, top: 10, bottom: 10),
+      padding: EdgeInsets.only(left: isMe ? 80 : 10, right: isMe ? 10 : 80, top: 10, bottom: 10),
       child: isMe
           ? Align(
               alignment: Alignment.topRight,
@@ -297,102 +296,99 @@ class HelpSupportScreen extends StatelessWidget {
                 ],
               ),
             )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    data.messageType == "text"
-                        ? Container(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.75, // prevent overflow
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                              color: themeChange.getThem() ? AppThemeData.grey900 : Colors.grey.shade300,
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            child: Text(
-                              data.message.toString(),
-                              softWrap: true,
-                              maxLines: null,
-                              style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontFamily: AppThemeData.regular, fontSize: 14),
-                            ),
-                          )
-                        : data.messageType == "image"
-                            ? ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minWidth: 50,
-                                  maxWidth: 200,
-                                ),
+          : Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  data.messageType == "text"
+                      ? Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.75, // prevent overflow
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                            color: themeChange.getThem() ? AppThemeData.grey900 : Colors.grey.shade300,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          child: Text(
+                            data.message.toString(),
+                            softWrap: true,
+                            maxLines: null,
+                            style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontFamily: AppThemeData.regular, fontSize: 14),
+                          ),
+                        )
+                      : data.messageType == "image"
+                          ? ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 50,
+                                maxWidth: 200,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                                child: Stack(alignment: Alignment.center, children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Get.to(FullScreenImageViewer(
+                                        imageUrl: data.url!.url,
+                                      ));
+                                    },
+                                    child: Hero(
+                                      tag: data.url!.url,
+                                      child: CachedNetworkImage(
+                                        imageUrl: data.url!.url,
+                                        placeholder: (context, url) => Constant.loader(),
+                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                              ))
+                          : ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 50,
+                                maxWidth: 200,
+                              ),
+                              child: InkWell(
+                                onTap: () {
+                                  Get.to(FullScreenVideoViewer(
+                                    heroTag: data.id.toString(),
+                                    videoUrl: data.url!.url,
+                                  ));
+                                },
                                 child: ClipRRect(
                                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
                                   child: Stack(alignment: Alignment.center, children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.to(FullScreenImageViewer(
-                                          imageUrl: data.url!.url,
-                                        ));
-                                      },
-                                      child: Hero(
-                                        tag: data.url!.url,
-                                        child: CachedNetworkImage(
-                                          imageUrl: data.url!.url,
-                                          placeholder: (context, url) => Constant.loader(),
-                                          errorWidget: (context, url, error) => const Icon(Icons.error),
-                                        ),
+                                    Hero(
+                                      tag: data.url!.url,
+                                      child: CachedNetworkImage(
+                                        imageUrl: data.videoThumbnail ?? '',
+                                        placeholder: (context, url) => Constant.loader(),
+                                        errorWidget: (context, url, error) => const Icon(Icons.error),
                                       ),
                                     ),
+                                    Icon(Icons.play_arrow, size: 50)
                                   ]),
-                                ))
-                            : ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minWidth: 50,
-                                  maxWidth: 200,
                                 ),
-                                child: InkWell(
-                                  onTap: () {
-                                    Get.to(FullScreenVideoViewer(
-                                      heroTag: data.id.toString(),
-                                      videoUrl: data.url!.url,
-                                    ));
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                    child: Stack(alignment: Alignment.center, children: [
-                                      Hero(
-                                        tag: data.url!.url,
-                                        child: CachedNetworkImage(
-                                          imageUrl: data.videoThumbnail ?? '',
-                                          placeholder: (context, url) => Constant.loader(),
-                                          errorWidget: (context, url, error) => const Icon(Icons.error),
-                                        ),
-                                      ),
-                                      Icon(Icons.play_arrow, size: 50)
-                                    ]),
-                                  ),
-                                )),
-                  ],
-                ),
-                const SizedBox(
-                  height: 2,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Admin",
-                        style: TextStyle(
-                          color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
-                          fontFamily: AppThemeData.semiBold,
-                          fontSize: 12,
-                        )),
-                    Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
-                        style: TextStyle(fontFamily: AppThemeData.regular, fontSize: 12, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800)),
-                  ],
-                ),
-              ],
+                              )),
+                  const SizedBox(
+                    height: 2,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Admin",
+                          style: TextStyle(
+                            color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
+                            fontFamily: AppThemeData.semiBold,
+                            fontSize: 12,
+                          )),
+                      Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
+                          style: TextStyle(fontFamily: AppThemeData.regular, fontSize: 12, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800)),
+                    ],
+                  ),
+                ],
+              ),
             ),
     );
   }
@@ -412,10 +408,14 @@ class HelpSupportScreen extends StatelessWidget {
           isDefaultAction: false,
           onPressed: () async {
             Get.back();
-            XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
-            if (image != null) {
-              Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
-              controller.sendMessage(message: '', url: url, videoThumbnail: '', messageType: 'image');
+            try {
+              XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+              if (image != null) {
+                Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
+                controller.sendMessage(message: '', url: url, videoThumbnail: '', messageType: 'image');
+              }
+            } catch (e) {
+              ShowToastDialog.showToast("Storage permission is not enabled. Please allow it.");
             }
           },
           child: Text("Choose image from gallery".tr),
@@ -440,10 +440,14 @@ class HelpSupportScreen extends StatelessWidget {
           isDestructiveAction: false,
           onPressed: () async {
             Navigator.pop(context);
-            XFile? image = await _imagePicker.pickImage(source: ImageSource.camera);
-            if (image != null) {
-              Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
-              controller.sendMessage(message: '', url: url, videoThumbnail: '', messageType: 'image');
+            try {
+              XFile? image = await _imagePicker.pickImage(source: ImageSource.camera);
+              if (image != null) {
+                Url url = await FireStoreUtils.uploadChatImageToFireStorage(File(image.path), context);
+                controller.sendMessage(message: '', url: url, videoThumbnail: '', messageType: 'image');
+              }
+            } catch (e) {
+              ShowToastDialog.showToast("Camera access is not enabled. Please allow camera permission.");
             }
           },
           child: Text("Take a Photo".tr),

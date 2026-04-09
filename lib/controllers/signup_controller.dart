@@ -18,7 +18,8 @@ class SignupController extends GetxController {
   Rx<TextEditingController> lastNameEditingController = TextEditingController().obs;
   Rx<TextEditingController> emailEditingController = TextEditingController().obs;
   Rx<TextEditingController> phoneNUmberEditingController = TextEditingController().obs;
-  Rx<TextEditingController> countryCodeEditingController = TextEditingController().obs;
+  Rx<TextEditingController> countryCodeEditingController = TextEditingController(text: Constant.defaultCountryCode).obs;
+  Rx<TextEditingController> countryISOCodeEditingController = TextEditingController(text: Constant.defaultCountryCode).obs;
   Rx<TextEditingController> passwordEditingController = TextEditingController().obs;
   Rx<TextEditingController> conformPasswordEditingController = TextEditingController().obs;
   Rx<TextEditingController> referralCodeEditingController = TextEditingController().obs;
@@ -45,6 +46,7 @@ class SignupController extends GetxController {
       if (type.value == "mobileNumber") {
         phoneNUmberEditingController.value.text = userModel.value.phoneNumber.toString();
         countryCodeEditingController.value.text = userModel.value.countryCode.toString();
+        countryISOCodeEditingController.value.text = userModel.value.countryISOCode.toString();
       } else if (type.value == "google" || type.value == "apple") {
         emailEditingController.value.text = userModel.value.email ?? "";
         firstNameEditingController.value.text = userModel.value.firstName ?? "";
@@ -78,6 +80,7 @@ class SignupController extends GetxController {
       userModel.value.fcmToken = await NotificationService.getToken();
       userModel.value.active = true;
       userModel.value.countryCode = countryCodeEditingController.value.text;
+      userModel.value.countryISOCode = countryISOCodeEditingController.value.text;
       userModel.value.createdAt = Timestamp.now();
       userModel.value.appIdentifier = Platform.isAndroid ? 'android' : 'ios';
 
@@ -122,6 +125,7 @@ class SignupController extends GetxController {
           userModel.value.fcmToken = await NotificationService.getToken();
           userModel.value.active = true;
           userModel.value.countryCode = countryCodeEditingController.value.text;
+          userModel.value.countryISOCode = countryISOCodeEditingController.value.text;
           userModel.value.createdAt = Timestamp.now();
           userModel.value.appIdentifier = Platform.isAndroid ? 'android' : 'ios';
           userModel.value.provider = 'email';

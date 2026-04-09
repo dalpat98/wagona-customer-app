@@ -2,8 +2,6 @@ class CollectionName {
   static const String users = "users";
   static const String onBoarding = "on_boarding";
   static const String bookedTable = "booked_table";
-  static const String chatDriver = "chat_driver";
-  static const String chatRestaurant = "chat_restaurant";
   static const String coupons = "coupons";
   static const String currencies = "currencies";
   static const String documents = "documents";

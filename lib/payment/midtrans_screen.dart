@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -26,17 +27,18 @@ class _MidtransScreenState extends State<MidtransScreen> {
     super.initState();
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageFinished: ((url) {
+          onPageStarted: (String url) {
             setState(() {
               isLoading = false;
             });
-          }),
+            ShowToastDialog.closeLoader();
+          },
           onNavigationRequest: (NavigationRequest navigation) async {
             log("Midtrans :: ${navigation.url}");
             if (Platform.isIOS) {
@@ -81,9 +83,7 @@ class _MidtransScreenState extends State<MidtransScreen> {
                     color: Colors.white,
                   ),
                 )),
-            body: Stack(
-                alignment: Alignment.center,
-                children: [WebViewWidget(controller: controller), Visibility(visible: isLoading, child: const Center(child: CircularProgressIndicator()))])));
+            body: Stack(alignment: Alignment.center, children: [WebViewWidget(controller: controller), Visibility(visible: isLoading, child: const Center(child: CircularProgressIndicator()))])));
   }
 
   Future<void> _showMyDialog() async {

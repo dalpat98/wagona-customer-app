@@ -62,7 +62,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     textColor: AppThemeData.grey50,
                     onPress: () async {
                       if (controller.emailEditingController.value.text.trim().isEmpty) {
-                        ShowToastDialog.showToast("Please enter valid email".tr);
+                        ShowToastDialog.showToast("Please enter a valid email.".tr);
                       } else {
                         controller.forgotPassword();
                       }

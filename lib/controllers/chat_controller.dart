@@ -14,14 +14,12 @@ import 'package:uuid/uuid.dart';
 class ChatController extends GetxController {
   Rx<TextEditingController> messageController = TextEditingController().obs;
 
-  final ScrollController scrollController = ScrollController();
+  Rx<ScrollController> scrollController = ScrollController().obs;
 
   @override
   void onInit() {
     // TODO: implement onInit
-    if (scrollController.hasClients) {
-      Timer(const Duration(milliseconds: 500), () => scrollController.jumpTo(scrollController.position.maxScrollExtent));
-    }
+
     getArgument();
     super.onInit();
   }
@@ -41,15 +39,15 @@ class ChatController extends GetxController {
   Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
-      orderId.value = argumentData['orderId'];
-      senderId.value = argumentData['senderId'];
-      senderName.value = argumentData['senderName'];
+      orderId.value = argumentData['orderId'] ?? '';
+      senderId.value = argumentData['senderId'] ?? '';
+      senderName.value = argumentData['senderName'] ?? '';
       senderProfileUrl.value = argumentData['senderProfileUrl'] ?? "";
-      receivedId.value = argumentData['receivedId'];
-      receivedName.value = argumentData['receivedName'];
+      receivedId.value = argumentData['receivedId'] ?? '';
+      receivedName.value = argumentData['receivedName'] ?? '';
       receivedProfileUrl.value = argumentData['receivedProfileUrl'] ?? "";
-      token.value = argumentData['token'];
-      chatType.value = argumentData['chatType'];
+      token.value = argumentData['token'] ?? '';
+      chatType.value = argumentData['chatType'] ?? "";
       receiverUser = await FireStoreUtils.getUserProfile(receivedId.value);
     }
 
@@ -100,8 +98,13 @@ class ChatController extends GetxController {
     }
 
     await FireStoreUtils.addChat(conversationModel);
-
-    await SendNotification.sendChatFcmMessage(receivedName.value, conversationModel.message.toString(), receiverUser?.fcmToken ?? '', {});
+    print("sendChatFcmMessage ::11:: ${receivedName.value} :: ${conversationModel.message} :: ${receiverUser?.fcmToken}");
+    print("sendChatFcmMessage ::22:: ${inboxModel.type} :: ${inboxModel.chatType} :: $orderId :: ${conversationModel.senderId}");
+    await SendNotification.sendChatFcmMessage(
+        title: receivedName.value,
+        message: conversationModel.message.toString(),
+        token: receiverUser?.fcmToken ?? '',
+        payload: {'type': inboxModel.type, 'chatType': inboxModel.chatType, 'orderId': orderId, 'senderId': conversationModel.senderId});
   }
 
   final ImagePicker imagePicker = ImagePicker();

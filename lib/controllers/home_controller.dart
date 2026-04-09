@@ -6,10 +6,12 @@ import 'package:customer/models/advertisement_model.dart';
 import 'package:customer/models/coupon_model.dart';
 import 'package:customer/models/favourite_model.dart';
 import 'package:customer/models/story_model.dart';
+import 'package:customer/models/tax_model.dart';
 import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/services/cart_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
+import 'package:customer/utils/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -54,12 +56,33 @@ class HomeController extends GetxController {
 
   Future<void> getData() async {
     isLoading.value = true;
+    selectedOrderTypeValue.value = Preferences.getString(Preferences.foodDeliveryType, defaultValue: "Delivery".tr);
     await Future.wait([
+      getTaxList(),
       getVendorCategory(),
       getZone(),
       getCartData(),
     ]);
     _listenForRestaurants(); // 🔹 Stream listens in background
+  }
+
+  Future<void> getTaxList() async {
+    await FireStoreUtils.getTaxList().then(
+      (value) {
+        if (value != null) {
+          Constant.taxProductList = value.where((TaxModel taxModel) => taxModel.scope == "product").toList();
+          Constant.orderProductTaxList = value.where((TaxModel taxModel) => taxModel.scope == "order").toList();
+          Constant.driverDeliveryTaxList = value.where((TaxModel taxModel) => taxModel.scope == "delivery").toList();
+
+          if (Constant.packagingChargeEnable == true) {
+            Constant.packagingTaxList = value.where((TaxModel taxModel) => taxModel.scope == "packaging").toList();
+          }
+          if (Constant.platformFeeModel?.enable == true) {
+            Constant.platformTaxList = value.where((TaxModel taxModel) => taxModel.scope == "platform").toList();
+          }
+        }
+      },
+    );
   }
 
   // ✅ Optimized cart listening
@@ -77,7 +100,10 @@ class HomeController extends GetxController {
   void _listenForRestaurants() {
     _restaurantSubscription?.cancel();
     _restaurantSubscription = FireStoreUtils.getAllNearestRestaurant().listen((restaurants) async {
-      if (restaurants.isEmpty) return;
+      if (restaurants.isEmpty) {
+        isLoading.value = false;
+        return;
+      }
 
       // Sort by open status and rating
       restaurants.sort((a, b) {
@@ -94,8 +120,9 @@ class HomeController extends GetxController {
       // Batch update data lists (reduces rebuilds)
       allNearestRestaurant.assignAll(restaurants);
       newArrivalRestaurantList.assignAll(restaurants);
+      newArrivalRestaurantList.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+      //:: ${Constant.timestampToDate(vendorModel.createdAt!)}
       popularRestaurantList.assignAll(restaurants.take(10)); // only top 10
-
       Constant.restaurantList = allNearestRestaurant;
 
       // Filter categories used by restaurants
