@@ -47,7 +47,7 @@ class Constant {
 
   static ShippingAddress selectedLocation = ShippingAddress();
   static UserModel? userModel;
-  static const globalUrl = "https://foodie.siswebapp.com/";
+  static const globalUrl = "https://wagona.com/";
 
   static bool isZoneAvailable = false;
   static ZoneModel? selectedZone;

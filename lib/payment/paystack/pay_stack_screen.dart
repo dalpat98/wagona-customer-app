@@ -40,7 +40,7 @@ class _PayStackScreenState extends State<PayStackScreen> {
           onNavigationRequest: (NavigationRequest navigation) async {
             debugPrint("--->2${navigation.url}");
             debugPrint("--->2" "${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}");
-            if (navigation.url == 'https://foodieweb.siswebapp.com/success?trxref=${widget.reference}&reference=${widget.reference}' ||
+            if (navigation.url == 'https://wagona.com/success?trxref=${widget.reference}&reference=${widget.reference}' ||
                 (navigation.url == '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') ||
                 (navigation.url == "https://hello.pstk.xyz/callback") ||
                 (navigation.url == 'https://standard.paystack.co/close') ||
