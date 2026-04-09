@@ -9,7 +9,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>wagona</string>
+		<string>Wagona</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -17,7 +17,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>wagona</string>
+		<string>Wagona</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -38,7 +38,7 @@
 		<key>CFBundleVersion</key>
 		<string>$(CURRENT_PROJECT_VERSION)</string>
 		<key>GIDClientID</key>
-		<string>275231286183-cobqtrd7luhgnqe12fli7t18lmvva2v6.apps.googleusercontent.com</string>
+		<string>538529152282-o6qn3i38475a7ljp8p5v3t4h8tuc1qrr.apps.googleusercontent.com</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true />
 		<key>NSAppTransportSecurity</key>
