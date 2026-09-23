@@ -1797,7 +1797,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 313d69fe6529c8846813d1660b65d7d38bc16954
   FirebaseSharedSwift: 983820e9aa55d2acd6af77f9a1f252ba0afb3150
   FirebaseStorage: 27f85a11050be78601509cb450a12823dc9f5764
-  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_email_sender_method_channel: 73746cb10a45a6488bcffd30210d0376c57c7c61
   flutter_local_notifications: 643a3eda1ce1c0599413ca31672536d423dee214
   Foloosi-iOS-SDK: 7188cf80738eb29ec3742a63eeeabdf2504185c4
