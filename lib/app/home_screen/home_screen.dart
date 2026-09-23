@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:badges/badges.dart' as badges;
+import 'package:customer/widget/fade_in_section.dart';
+import 'package:customer/widget/home_skeleton.dart';
 import 'package:customer/app/address_screens/address_list_screen.dart';
 import 'package:customer/app/advertisement_screens/all_advertisement_screen.dart';
 import 'package:customer/app/auth_screen/login_screen.dart';
@@ -33,15 +35,18 @@ import 'package:customer/themes/custom_dialog_box.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/utils/preferences.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:customer/widget/osm_map/map_picker_page.dart';
 import 'package:customer/widget/place_picker/location_picker_screen.dart';
 import 'package:customer/widget/place_picker/selected_location_model.dart';
 import 'package:customer/widget/restaurant_image_view.dart';
 import 'package:customer/widget/video_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_map/flutter_map.dart' as flutterMap;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
@@ -66,15 +71,9 @@ class HomeScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
           body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: const Alignment(0.00, -3),
-                colors: [themeChange.getThem() ? AppThemeData.secondary600 : AppThemeData.secondary50, themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface],
-                end: const Alignment(0, 1),
-              ),
-            ),
+            color: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
             child: controller.isLoading.value
-                ? Constant.loader()
+                ? const HomeSkeleton()
                 : Constant.isZoneAvailable == false || controller.allNearestRestaurant.isEmpty
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -89,15 +88,15 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(
                               height: 12,
                             ),
-                            Text(
-                              "No Restaurants Found in Your Area".tr,
+                            TranslatedText(
+                              "No Restaurants Found in Your Area",
                               style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontSize: 22, fontFamily: AppThemeData.semiBold),
                             ),
                             const SizedBox(
                               height: 5,
                             ),
-                            Text(
-                              "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.".tr,
+                            TranslatedText(
+                              "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.",
                               textAlign: TextAlign.center,
                               style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.bold),
                             ),
@@ -105,7 +104,7 @@ class HomeScreen extends StatelessWidget {
                               height: 20,
                             ),
                             RoundedButtonFill(
-                              title: "Change Zone".tr,
+                              title: "Change Zone",
                               width: 55,
                               height: 5.5,
                               color: AppThemeData.primary300,
@@ -117,21 +116,24 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                       )
-                    : Padding(
-                        padding: EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top),
-                        child: controller.isListView.value == false
-                            ? const MapView()
-                            : Column(
+                    : controller.isListView.value == false
+                        ? Padding(
+                            padding: EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top),
+                            child: const MapView(),
+                          )
+                        : Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top + 8, left: 16, right: 16, bottom: 18),
+                                    decoration: BoxDecoration(
+                                      gradient: AppThemeData.brandGradientSoft,
+                                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(AppThemeData.radiusXl)),
+                                    ),
                                     child: Column(
                                       children: [
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
                                         Row(
                                           children: [
                                             InkWell(
@@ -143,17 +145,29 @@ class HomeScreen extends StatelessWidget {
                                                   dashBoardController.selectedIndex.value = 4;
                                                 }
                                               },
-                                              child: ClipOval(
-                                                child: NetworkImageWidget(
-                                                  imageUrl: Constant.userModel == null ? "" : Constant.userModel!.profilePictureURL.toString(),
-                                                  height: 40,
-                                                  width: 40,
-                                                  fit: BoxFit.cover,
-                                                  errorWidget: Image.asset(
-                                                    Constant.userPlaceHolder,
-                                                    fit: BoxFit.cover,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(2),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: AppThemeData.grey50.withOpacity(0.25),
+                                                  border: Border.all(color: AppThemeData.grey50.withOpacity(0.6), width: 1.5),
+                                                ),
+                                                child: ClipOval(
+                                                  child: SizedBox(
                                                     height: 40,
                                                     width: 40,
+                                                    child: NetworkImageWidget(
+                                                      imageUrl: Constant.userModel == null ? "" : Constant.userModel!.profilePictureURL.toString(),
+                                                      height: 40,
+                                                      width: 40,
+                                                      fit: BoxFit.cover,
+                                                      errorWidget: Image.asset(
+                                                        Constant.userPlaceHolder,
+                                                        fit: BoxFit.cover,
+                                                        height: 40,
+                                                        width: 40,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
@@ -171,22 +185,22 @@ class HomeScreen extends StatelessWidget {
                                                           onTap: () {
                                                             Get.offAll(const LoginScreen());
                                                           },
-                                                          child: Text(
-                                                            "Login".tr,
+                                                          child: TranslatedText(
+                                                            "Login",
                                                             textAlign: TextAlign.center,
-                                                            style: TextStyle(
+                                                            style: const TextStyle(
                                                               fontFamily: AppThemeData.medium,
-                                                              color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                              color: AppThemeData.primary50,
                                                               fontSize: 12,
                                                             ),
                                                           ),
                                                         )
-                                                      : Text(
+                                                      : TranslatedText(
                                                           "${Constant.userModel!.fullName()}",
                                                           textAlign: TextAlign.center,
-                                                          style: TextStyle(
+                                                          style: const TextStyle(
                                                             fontFamily: AppThemeData.medium,
-                                                            color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                            color: AppThemeData.primary50,
                                                             fontSize: 12,
                                                           ),
                                                         ),
@@ -205,11 +219,11 @@ class HomeScreen extends StatelessWidget {
                                                       } else {
                                                         Constant.checkPermission(
                                                             onTap: () async {
-                                                              ShowToastDialog.showLoader("Please wait".tr);
+                                                              ShowToastDialog.showLoader("Please wait");
                                                               ShippingAddress addressModel = ShippingAddress();
                                                               try {
                                                                 await Geolocator.requestPermission();
-                                                                await Geolocator.getCurrentPosition();
+                                                                await Geolocator.getCurrentPosition().timeout(const Duration(seconds: 8));
                                                                 ShowToastDialog.closeLoader();
                                                                 if (Constant.selectedMapType == 'osm') {
                                                                   final result = await Get.to(() => MapPickerPage());
@@ -243,7 +257,7 @@ class HomeScreen extends StatelessWidget {
                                                                   });
                                                                 }
                                                               } catch (e) {
-                                                                await placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
+                                                                await Geocoding().placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
                                                                   Placemark placeMark = valuePlaceMaker[0];
                                                                   addressModel.location = UserLocation(latitude: 19.228825, longitude: 72.854118);
                                                                   String currentLocation =
@@ -259,26 +273,33 @@ class HomeScreen extends StatelessWidget {
                                                             context: context);
                                                       }
                                                     },
-                                                    child: Text.rich(
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      TextSpan(
-                                                        children: [
-                                                          TextSpan(
-                                                            text: Constant.selectedLocation.getFullAddress(),
-                                                            style: TextStyle(
-                                                              fontFamily: AppThemeData.medium,
-                                                              overflow: TextOverflow.ellipsis,
-                                                              color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                                              fontSize: 14,
+                                                    child: ValueListenableBuilder(
+                                                        valueListenable: TranslationNotifier.refresh,
+                                                        builder: (_, __, ___) {
+                                                          return Text.rich(
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text: Constant.selectedLocation.getFullAddress().tr,
+                                                                  style: const TextStyle(
+                                                                    fontFamily: AppThemeData.semiBold,
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                    color: AppThemeData.grey50,
+                                                                    fontSize: 14,
+                                                                  ),
+                                                                ),
+                                                                WidgetSpan(
+                                                                  child: SvgPicture.asset(
+                                                                    "assets/icons/ic_down.svg",
+                                                                    colorFilter: const ColorFilter.mode(AppThemeData.grey50, BlendMode.srcIn),
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ),
-                                                          ),
-                                                          WidgetSpan(
-                                                            child: SvgPicture.asset("assets/icons/ic_down.svg"),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
+                                                          );
+                                                        }),
                                                   ),
                                                 ],
                                               ),
@@ -312,17 +333,16 @@ class HomeScreen extends StatelessWidget {
                                                     child: Container(
                                                       width: 42,
                                                       height: 42,
-                                                      decoration: ShapeDecoration(
-                                                        shape: RoundedRectangleBorder(
-                                                          side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                                          borderRadius: BorderRadius.circular(120),
-                                                        ),
+                                                      decoration: BoxDecoration(
+                                                        color: AppThemeData.grey50.withOpacity(0.22),
+                                                        shape: BoxShape.circle,
+                                                        border: Border.all(width: 1, color: AppThemeData.grey50.withOpacity(0.35)),
                                                       ),
                                                       child: Padding(
                                                         padding: const EdgeInsets.all(8.0),
                                                         child: SvgPicture.asset(
                                                           "assets/icons/ic_shoping_cart.svg",
-                                                          colorFilter: ColorFilter.mode(themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, BlendMode.srcIn),
+                                                          colorFilter: const ColorFilter.mode(AppThemeData.grey50, BlendMode.srcIn),
                                                         ),
                                                       ),
                                                     ),
@@ -333,19 +353,39 @@ class HomeScreen extends StatelessWidget {
                                           ],
                                         ),
                                         const SizedBox(
-                                          height: 10,
+                                          height: 16,
+                                        ),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: TranslatedText(
+                                            "What would you like to eat today?",
+                                            style: const TextStyle(
+                                              fontFamily: AppThemeData.extraBold,
+                                              color: AppThemeData.grey50,
+                                              fontSize: 22,
+                                              height: 1.15,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 14,
                                         ),
                                         InkWell(
                                           onTap: () {
                                             Get.to(const SearchScreen(), arguments: {"vendorList": controller.allNearestRestaurant});
                                           },
                                           child: TextFieldWidget(
-                                            hintText: 'Search the dish, restaurant, food, meals'.tr,
+                                            hintText: 'Search the dish, restaurant, food, meals',
                                             controller: null,
                                             enable: false,
                                             prefix: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                                              child: SvgPicture.asset("assets/icons/ic_search.svg"),
+                                              padding: const EdgeInsets.only(left: 14, right: 10),
+                                              child: SvgPicture.asset(
+                                                "assets/icons/ic_search.svg",
+                                                width: 20,
+                                                height: 20,
+                                                colorFilter: const ColorFilter.mode(AppThemeData.grey500, BlendMode.srcIn),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -361,49 +401,59 @@ class HomeScreen extends StatelessWidget {
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          controller.storyList.isEmpty || Constant.storyEnable == false
-                                              ? const SizedBox()
-                                              : Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                  child: StoryView(controller: controller),
-                                                ),
-                                          SizedBox(
-                                            height: controller.storyList.isEmpty ? 0 : 20,
+                                          const SizedBox(
+                                            height: 18,
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                titleView(themeChange, "Explore the Categories", () {
-                                                  Get.to(const ViewAllCategoryScreen());
-                                                }),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                CategoryView(controller: controller),
-                                              ],
+                                          FadeInSection(
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  titleView(themeChange, "Explore the Categories", () {
+                                                    Get.to(const ViewAllCategoryScreen());
+                                                  }),
+                                                  const SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  CategoryView(controller: controller),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(
-                                            height: 32,
+                                            height: 24,
                                           ),
+                                          controller.storyList.isEmpty || Constant.storyEnable == false
+                                              ? const SizedBox()
+                                              : FadeInSection(
+                                                  delayMs: 80,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
+                                                    child: StoryView(controller: controller),
+                                                  ),
+                                                ),
                                           controller.bannerModel.isEmpty
                                               ? const SizedBox()
-                                              : Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                  child: BannerView(controller: controller),
+                                              : FadeInSection(
+                                                  delayMs: 120,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                    child: BannerView(controller: controller),
+                                                  ),
                                                 ),
                                           controller.couponRestaurantList.isEmpty
                                               ? const SizedBox()
-                                              : Padding(
+                                              : FadeInSection(
+                                                  delayMs: 160,
+                                                  child: Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 16),
                                                   child: Column(
                                                     mainAxisAlignment: MainAxisAlignment.start,
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      titleView(themeChange, "Largest Discounts".tr, () {
+                                                      titleView(themeChange, "Largest Discounts", () {
                                                         Get.to(const DiscountRestaurantListScreen(),
                                                             arguments: {"vendorList": controller.couponRestaurantList, "couponList": controller.couponList, "title": "Discounts Restaurants"});
                                                       }),
@@ -413,13 +463,16 @@ class HomeScreen extends StatelessWidget {
                                                       OfferView(controller: controller),
                                                     ],
                                                   ),
+                                                  ),
                                                 ),
                                           const SizedBox(
                                             height: 28,
                                           ),
                                           controller.newArrivalRestaurantList.isEmpty
                                               ? const SizedBox()
-                                              : Container(
+                                              : FadeInSection(
+                                                  delayMs: 200,
+                                                  child: Container(
                                                   decoration: const BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/ic_new_arrival_bg.png"), fit: BoxFit.cover)),
                                                   child: Padding(
                                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -430,8 +483,8 @@ class HomeScreen extends StatelessWidget {
                                                         Row(
                                                           children: [
                                                             Expanded(
-                                                              child: Text(
-                                                                "New Arrivals".tr,
+                                                              child: TranslatedText(
+                                                                "New Arrivals",
                                                                 textAlign: TextAlign.start,
                                                                 style: TextStyle(
                                                                   fontFamily: AppThemeData.semiBold,
@@ -446,8 +499,8 @@ class HomeScreen extends StatelessWidget {
                                                                   controller.getFavouriteRestaurant();
                                                                 });
                                                               },
-                                                              child: Text(
-                                                                "View all".tr,
+                                                              child: TranslatedText(
+                                                                "View all",
                                                                 textAlign: TextAlign.center,
                                                                 style: TextStyle(
                                                                   fontFamily: AppThemeData.regular,
@@ -464,6 +517,7 @@ class HomeScreen extends StatelessWidget {
                                                       ],
                                                     ),
                                                   ),
+                                                ),
                                                 ),
                                           const SizedBox(
                                             height: 20,
@@ -495,8 +549,8 @@ class HomeScreen extends StatelessWidget {
                                                           Row(
                                                             children: [
                                                               Expanded(
-                                                                child: Text(
-                                                                  "Highlights for you".tr,
+                                                                child: TranslatedText(
+                                                                  "Highlights for you",
                                                                   textAlign: TextAlign.start,
                                                                   style: TextStyle(
                                                                     fontFamily: AppThemeData.semiBold,
@@ -511,8 +565,8 @@ class HomeScreen extends StatelessWidget {
                                                                     controller.getFavouriteRestaurant();
                                                                   });
                                                                 },
-                                                                child: Text(
-                                                                  "View all".tr,
+                                                                child: TranslatedText(
+                                                                  "View all",
                                                                   textAlign: TextAlign.center,
                                                                   style: TextStyle(
                                                                     fontFamily: AppThemeData.regular,
@@ -548,11 +602,11 @@ class HomeScreen extends StatelessWidget {
                                           Padding(
                                             padding: const EdgeInsets.symmetric(horizontal: 16),
                                             child: Container(
-                                              decoration: ShapeDecoration(
-                                                color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(120),
-                                                ),
+                                              decoration: BoxDecoration(
+                                                color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                                                borderRadius: BorderRadius.circular(120),
+                                                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey100),
+                                                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                               ),
                                               child: Padding(
                                                 padding: const EdgeInsets.all(8.0),
@@ -566,20 +620,23 @@ class HomeScreen extends StatelessWidget {
                                                         child: Container(
                                                           decoration: controller.isPopular.value == false
                                                               ? null
-                                                              : ShapeDecoration(
-                                                                  color: AppThemeData.grey900,
-                                                                  shape: RoundedRectangleBorder(
-                                                                    borderRadius: BorderRadius.circular(120),
-                                                                  ),
+                                                              : BoxDecoration(
+                                                                  gradient: AppThemeData.primaryGradient,
+                                                                  borderRadius: BorderRadius.circular(120),
+                                                                  boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
                                                                 ),
                                                           child: Padding(
                                                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                            child: Text(
-                                                              "Popular Restaurants".tr,
+                                                            child: TranslatedText(
+                                                              "Popular Restaurants",
                                                               textAlign: TextAlign.center,
                                                               style: TextStyle(
                                                                 fontFamily: AppThemeData.semiBold,
-                                                                color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                                                color: controller.isPopular.value
+                                                                    ? AppThemeData.grey50
+                                                                    : themeChange.getThem()
+                                                                        ? AppThemeData.grey400
+                                                                        : AppThemeData.grey500,
                                                               ),
                                                             ),
                                                           ),
@@ -594,16 +651,15 @@ class HomeScreen extends StatelessWidget {
                                                         child: Container(
                                                           decoration: controller.isPopular.value == true
                                                               ? null
-                                                              : ShapeDecoration(
-                                                                  color: AppThemeData.grey900,
-                                                                  shape: RoundedRectangleBorder(
-                                                                    borderRadius: BorderRadius.circular(120),
-                                                                  ),
+                                                              : BoxDecoration(
+                                                                  gradient: AppThemeData.primaryGradient,
+                                                                  borderRadius: BorderRadius.circular(120),
+                                                                  boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
                                                                 ),
                                                           child: Padding(
                                                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                            child: Text(
-                                                              "All Restaurants".tr,
+                                                            child: TranslatedText(
+                                                              "All Restaurants",
                                                               textAlign: TextAlign.center,
                                                               style: TextStyle(
                                                                 fontFamily: AppThemeData.semiBold,
@@ -611,9 +667,7 @@ class HomeScreen extends StatelessWidget {
                                                                     ? themeChange.getThem()
                                                                         ? AppThemeData.grey400
                                                                         : AppThemeData.grey500
-                                                                    : themeChange.getThem()
-                                                                        ? AppThemeData.primary300
-                                                                        : AppThemeData.primary300,
+                                                                    : AppThemeData.grey50,
                                                               ),
                                                             ),
                                                           ),
@@ -625,9 +679,15 @@ class HomeScreen extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                                            child: controller.isPopular.value ? PopularRestaurant(controller: controller) : AllRestaurant(controller: controller),
+                                          FadeInSection(
+                                            delayMs: 120,
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                                              child: controller.isPopular.value ? PopularRestaurant(controller: controller) : AllRestaurant(controller: controller),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 90,
                                           ),
                                           // controller.isPopular.value
                                           //     ? PopularRestaurant(
@@ -642,11 +702,16 @@ class HomeScreen extends StatelessWidget {
                                   )
                                 ],
                               ),
-                      ),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: Container(
-            decoration: BoxDecoration(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, borderRadius: const BorderRadius.all(Radius.circular(30))),
+            margin: const EdgeInsets.only(bottom: 78),
+            decoration: BoxDecoration(
+              color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+              borderRadius: const BorderRadius.all(Radius.circular(30)),
+              border: Border.all(color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey100),
+              boxShadow: AppThemeData.floatShadow,
+            ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Row(
@@ -728,13 +793,13 @@ class HomeScreen extends StatelessWidget {
                   DropdownButton<String>(
                     isDense: false,
                     underline: const SizedBox(),
-                    value: controller.selectedOrderTypeValue.value.tr,
+                    value: controller.selectedOrderTypeValue.value,
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    items: <String>['Delivery'.tr, 'TakeAway'.tr].map((String value) {
+                    items: <String>['Delivery', 'TakeAway'.tr].map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(
-                          value.tr,
+                        child: TranslatedText(
+                          value,
                           style: TextStyle(
                             fontFamily: AppThemeData.semiBold,
                             fontSize: 16,
@@ -753,10 +818,10 @@ class HomeScreen extends StatelessWidget {
                             context: context,
                             builder: (BuildContext context) {
                               return CustomDialogBox(
-                                title: "Alert".tr,
-                                descriptions: "Do you really want to change the delivery option? Your cart will be empty.".tr,
-                                positiveString: "Ok".tr,
-                                negativeString: "Cancel".tr,
+                                title: "Alert",
+                                descriptions: "Do you really want to change the delivery option? Your cart will be empty.",
+                                positiveString: "Ok",
+                                negativeString: "Cancel",
                                 positiveClick: () async {
                                   await Preferences.setString(Preferences.foodDeliveryType, value!);
                                   controller.selectedOrderTypeValue.value = value;
@@ -788,11 +853,12 @@ class HomeScreen extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(
-            name.tr,
+          child: TranslatedText(
+            name,
             textAlign: TextAlign.start,
             style: TextStyle(
               fontFamily: AppThemeData.bold,
+              fontSize: 20,
               color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
             ),
           ),
@@ -801,12 +867,21 @@ class HomeScreen extends StatelessWidget {
           onTap: () {
             onPress!();
           },
-          child: Text(
-            "View all".tr,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: AppThemeData.regular,
-              color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+          borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.primary50,
+              borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+            ),
+            child: TranslatedText(
+              "View all",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: AppThemeData.semiBold,
+                fontSize: 12.5,
+                color: AppThemeData.primary300,
+              ),
             ),
           ),
         )
@@ -823,6 +898,7 @@ class PopularRestaurant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return ListView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero,
@@ -840,9 +916,11 @@ class PopularRestaurant extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.only(bottom: controller.popularRestaurantList.length - 1 == index ? 60 : 20),
             child: Container(
-              decoration: ShapeDecoration(
-                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(
+                color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -897,7 +975,7 @@ class PopularRestaurant extends StatelessWidget {
                         ),
                       ),
                       Transform.translate(
-                        offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                        offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -920,8 +998,8 @@ class PopularRestaurant extends StatelessWidget {
                                         const SizedBox(
                                           width: 5,
                                         ),
-                                        Text(
-                                          "Free Delivery".tr,
+                                        TranslatedText(
+                                          "Free Delivery",
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: AppThemeData.darkGreen,
@@ -940,25 +1018,26 @@ class PopularRestaurant extends StatelessWidget {
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                              decoration: ShapeDecoration(
-                                color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
+                              decoration: BoxDecoration(
+                                color: AppThemeData.lightGreen,
+                                borderRadius: BorderRadius.circular(120),
                               ),
                               child: Row(
                                 children: [
                                   SvgPicture.asset(
                                     "assets/icons/ic_star.svg",
-                                    colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                    width: 14,
+                                    colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                   ),
                                   const SizedBox(
                                     width: 5,
                                   ),
                                   Text(
                                     "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount!.toStringAsFixed(0), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 14,
-                                      color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                      fontFamily: AppThemeData.semiBold,
+                                      color: AppThemeData.darkGreen,
+                                      fontFamily: AppThemeData.bold,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -983,7 +1062,7 @@ class PopularRestaurant extends StatelessWidget {
                                   const SizedBox(
                                     width: 5,
                                   ),
-                                  Text(
+                                  TranslatedText(
                                     "${Constant.getDistance(
                                       lat1: vendorModel.latitude.toString(),
                                       lng1: vendorModel.longitude.toString(),
@@ -1013,7 +1092,7 @@ class PopularRestaurant extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        TranslatedText(
                           vendorModel.title.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -1024,7 +1103,7 @@ class PopularRestaurant extends StatelessWidget {
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                           ),
                         ),
-                        Text(
+                        TranslatedText(
                           vendorModel.location.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -1059,12 +1138,15 @@ class AllRestaurant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return ListView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       scrollDirection: Axis.vertical,
-      itemCount: controller.allNearestRestaurant.length,
+      // Cap the cards built on home — the page is a non-lazy shrinkWrap list,
+      // so every extra card is built up-front. Full list lives behind "View all".
+      itemCount: controller.allNearestRestaurant.length > 15 ? 15 : controller.allNearestRestaurant.length,
       itemBuilder: (BuildContext context, int index) {
         VendorModel vendorModel = controller.allNearestRestaurant[index];
         bool isOpen = Constant.statusCheckOpenORClose(vendorModel: vendorModel);
@@ -1077,9 +1159,11 @@ class AllRestaurant extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.only(bottom: controller.allNearestRestaurant.length - 1 == index ? 60 : 20),
             child: Container(
-              decoration: ShapeDecoration(
-                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(
+                color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1175,7 +1259,7 @@ class AllRestaurant extends StatelessWidget {
                         ),
                       ),
                       Transform.translate(
-                        offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                        offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -1198,8 +1282,8 @@ class AllRestaurant extends StatelessWidget {
                                         const SizedBox(
                                           width: 5,
                                         ),
-                                        Text(
-                                          "Free Delivery".tr,
+                                        TranslatedText(
+                                          "Free Delivery",
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: AppThemeData.darkGreen,
@@ -1218,25 +1302,26 @@ class AllRestaurant extends StatelessWidget {
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                              decoration: ShapeDecoration(
-                                color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
+                              decoration: BoxDecoration(
+                                color: AppThemeData.lightGreen,
+                                borderRadius: BorderRadius.circular(120),
                               ),
                               child: Row(
                                 children: [
                                   SvgPicture.asset(
                                     "assets/icons/ic_star.svg",
-                                    colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                    width: 14,
+                                    colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                   ),
                                   const SizedBox(
                                     width: 5,
                                   ),
                                   Text(
                                     "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 14,
-                                      color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                      fontFamily: AppThemeData.semiBold,
+                                      color: AppThemeData.darkGreen,
+                                      fontFamily: AppThemeData.bold,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -1261,7 +1346,7 @@ class AllRestaurant extends StatelessWidget {
                                   const SizedBox(
                                     width: 5,
                                   ),
-                                  Text(
+                                  TranslatedText(
                                     "${Constant.getDistance(
                                       lat1: vendorModel.latitude.toString(),
                                       lng1: vendorModel.longitude.toString(),
@@ -1291,7 +1376,7 @@ class AllRestaurant extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        TranslatedText(
                           vendorModel.title.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -1302,7 +1387,7 @@ class AllRestaurant extends StatelessWidget {
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                           ),
                         ),
-                        Text(
+                        TranslatedText(
                           vendorModel.location.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -1317,7 +1402,7 @@ class AllRestaurant extends StatelessWidget {
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  TranslatedText(
                                     Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -1437,7 +1522,7 @@ class NewArrival extends StatelessWidget {
                     const SizedBox(
                       height: 5,
                     ),
-                    Text(
+                    TranslatedText(
                       vendorModel.title.toString(),
                       textAlign: TextAlign.start,
                       maxLines: 1,
@@ -1462,8 +1547,8 @@ class NewArrival extends StatelessWidget {
                                 const SizedBox(
                                   width: 4,
                                 ),
-                                Text(
-                                  "Free Delivery".tr,
+                                TranslatedText(
+                                  "Free Delivery",
                                   textAlign: TextAlign.start,
                                   maxLines: 1,
                                   style: TextStyle(
@@ -1479,27 +1564,36 @@ class NewArrival extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              SvgPicture.asset(
-                                "assets/icons/ic_star.svg",
-                                colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
-                              ),
-                              const SizedBox(
-                                width: 4,
-                              ),
-                              Text(
-                                "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                textAlign: TextAlign.start,
-                                maxLines: 1,
-                                style: TextStyle(
-                                  overflow: TextOverflow.ellipsis,
-                                  fontFamily: AppThemeData.medium,
-                                  fontWeight: FontWeight.w500,
-                                  color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey400,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppThemeData.lightGreen,
+                              borderRadius: BorderRadius.circular(AppThemeData.radiusSm),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SvgPicture.asset(
+                                  "assets/icons/ic_star.svg",
+                                  width: 14,
+                                  colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(
+                                  width: 4,
+                                ),
+                                Text(
+                                  "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
+                                  textAlign: TextAlign.start,
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    overflow: TextOverflow.ellipsis,
+                                    fontFamily: AppThemeData.bold,
+                                    color: AppThemeData.darkGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(
                             width: 8,
@@ -1510,7 +1604,7 @@ class NewArrival extends StatelessWidget {
                               const SizedBox(
                                 width: 4,
                               ),
-                              Text(
+                              TranslatedText(
                                 "${Constant.getDistance(
                                   lat1: vendorModel.latitude.toString(),
                                   lng1: vendorModel.longitude.toString(),
@@ -1531,7 +1625,7 @@ class NewArrival extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Text(
+                    TranslatedText(
                       vendorModel.location.toString(),
                       textAlign: TextAlign.start,
                       maxLines: 1,
@@ -1553,7 +1647,7 @@ class NewArrival extends StatelessWidget {
                               // lineThickness: 1,
                               // ),
 
-                              Text(
+                              TranslatedText(
                                 Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1584,7 +1678,7 @@ class AdvertisementHomeCard extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return InkWell(
       onTap: () async {
-        ShowToastDialog.showLoader("Please wait".tr);
+        ShowToastDialog.showLoader("Please wait");
         VendorModel? vendorModel = await FireStoreUtils.getVendorById(model.vendorId!);
         ShowToastDialog.closeLoader();
         Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
@@ -1641,9 +1735,9 @@ class AdvertisementHomeCard extends StatelessWidget {
                             } else {
                               VendorModel vendorModel = snapshot.data!;
                               return Container(
-                                decoration: ShapeDecoration(
-                                  color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
+                                decoration: BoxDecoration(
+                                  color: AppThemeData.lightGreen,
+                                  borderRadius: BorderRadius.circular(120),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1652,7 +1746,8 @@ class AdvertisementHomeCard extends StatelessWidget {
                                       if (model.showRating == true)
                                         SvgPicture.asset(
                                           "assets/icons/ic_star.svg",
-                                          colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                          width: 14,
+                                          colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                         ),
                                       if (model.showRating == true)
                                         const SizedBox(
@@ -1660,10 +1755,10 @@ class AdvertisementHomeCard extends StatelessWidget {
                                         ),
                                       Text(
                                         "${model.showRating == true ? Constant.calculateReview(reviewCount: vendorModel.reviewsCount!.toStringAsFixed(0), reviewSum: vendorModel.reviewsSum.toString()) : ''} ${model.showReview == true ? '(${vendorModel.reviewsCount!.toStringAsFixed(0)})' : ''}",
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 14,
-                                          color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                          fontFamily: AppThemeData.semiBold,
+                                          color: AppThemeData.darkGreen,
+                                          fontFamily: AppThemeData.bold,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -1697,7 +1792,7 @@ class AdvertisementHomeCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        TranslatedText(
                           model.title ?? '',
                           style: TextStyle(
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -1706,7 +1801,7 @@ class AdvertisementHomeCard extends StatelessWidget {
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
+                        TranslatedText(
                           model.description ?? '',
                           style: TextStyle(fontSize: 12, fontFamily: AppThemeData.medium, color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey600),
                           overflow: TextOverflow.ellipsis,
@@ -1810,8 +1905,8 @@ class OfferView extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Upto".tr,
+                                  TranslatedText(
+                                    "Upto",
                                     textAlign: TextAlign.start,
                                     maxLines: 1,
                                     style: TextStyle(
@@ -1842,7 +1937,7 @@ class OfferView extends StatelessWidget {
                     const SizedBox(
                       height: 5,
                     ),
-                    Text(
+                    TranslatedText(
                       vendorModel.title.toString(),
                       textAlign: TextAlign.start,
                       maxLines: 1,
@@ -1869,8 +1964,8 @@ class OfferView extends StatelessWidget {
                                     const SizedBox(
                                       width: 5,
                                     ),
-                                    Text(
-                                      "Free Delivery".tr,
+                                    TranslatedText(
+                                      "Free Delivery",
                                       style: TextStyle(
                                         fontSize: 12,
                                         overflow: TextOverflow.ellipsis,
@@ -1887,28 +1982,36 @@ class OfferView extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              SvgPicture.asset(
-                                "assets/icons/ic_star.svg",
-                                colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                textAlign: TextAlign.start,
-                                maxLines: 1,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  overflow: TextOverflow.ellipsis,
-                                  fontFamily: AppThemeData.medium,
-                                  fontWeight: FontWeight.w500,
-                                  color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppThemeData.lightGreen,
+                              borderRadius: BorderRadius.circular(AppThemeData.radiusSm),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SvgPicture.asset(
+                                  "assets/icons/ic_star.svg",
+                                  width: 14,
+                                  colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(
+                                  width: 4,
+                                ),
+                                Text(
+                                  "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
+                                  textAlign: TextAlign.start,
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    overflow: TextOverflow.ellipsis,
+                                    fontFamily: AppThemeData.bold,
+                                    color: AppThemeData.darkGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -1951,7 +2054,7 @@ class BannerView extends StatelessWidget {
               return InkWell(
                 onTap: () async {
                   if (bannerModel.redirect_type == "store") {
-                    ShowToastDialog.showLoader("Please wait".tr);
+                    ShowToastDialog.showLoader("Please wait");
                     VendorModel? vendorModel = await FireStoreUtils.getVendorById(bannerModel.redirect_id.toString());
 
                     if (vendorModel!.zoneId == Constant.selectedZone!.id) {
@@ -1959,10 +2062,10 @@ class BannerView extends StatelessWidget {
                       Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                     } else {
                       ShowToastDialog.closeLoader();
-                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                     }
                   } else if (bannerModel.redirect_type == "product") {
-                    ShowToastDialog.showLoader("Please wait".tr);
+                    ShowToastDialog.showLoader("Please wait");
                     ProductModel? productModel = await FireStoreUtils.getProductById(bannerModel.redirect_id.toString());
                     VendorModel? vendorModel = await FireStoreUtils.getVendorById(productModel!.vendorID.toString());
 
@@ -1971,14 +2074,14 @@ class BannerView extends StatelessWidget {
                       Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                     } else {
                       ShowToastDialog.closeLoader();
-                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                     }
                   } else if (bannerModel.redirect_type == "external_link") {
                     final uri = Uri.parse(bannerModel.redirect_id.toString());
                     if (await canLaunchUrl(uri)) {
                       await launchUrl(uri);
                     } else {
-                      ShowToastDialog.showToast("Could not launch".tr);
+                      ShowToastDialog.showToast("Could not launch");
                     }
                   }
                 },
@@ -2052,7 +2155,7 @@ class BannerBottomView extends StatelessWidget {
               return InkWell(
                 onTap: () async {
                   if (bannerModel.redirect_type == "store") {
-                    ShowToastDialog.showLoader("Please wait".tr);
+                    ShowToastDialog.showLoader("Please wait");
                     VendorModel? vendorModel = await FireStoreUtils.getVendorById(bannerModel.redirect_id.toString());
 
                     if (vendorModel!.zoneId == Constant.selectedZone!.id) {
@@ -2060,10 +2163,10 @@ class BannerBottomView extends StatelessWidget {
                       Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                     } else {
                       ShowToastDialog.closeLoader();
-                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                     }
                   } else if (bannerModel.redirect_type == "product") {
-                    ShowToastDialog.showLoader("Please wait".tr);
+                    ShowToastDialog.showLoader("Please wait");
                     ProductModel? productModel = await FireStoreUtils.getProductById(bannerModel.redirect_id.toString());
                     VendorModel? vendorModel = await FireStoreUtils.getVendorById(productModel!.vendorID.toString());
 
@@ -2072,14 +2175,14 @@ class BannerBottomView extends StatelessWidget {
                       Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                     } else {
                       ShowToastDialog.closeLoader();
-                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                     }
                   } else if (bannerModel.redirect_type == "external_link") {
                     final uri = Uri.parse(bannerModel.redirect_id.toString());
                     if (await canLaunchUrl(uri)) {
                       await launchUrl(uri);
                     } else {
-                      ShowToastDialog.showToast("Could not launch".tr);
+                      ShowToastDialog.showToast("Could not launch");
                     }
                   }
                 },
@@ -2150,46 +2253,46 @@ class CategoryView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               child: SizedBox(
                 width: 78,
-                child: Container(
-                  decoration: ShapeDecoration(
-                    color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        width: 1,
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                        color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.primary50,
+                        shape: BoxShape.circle,
+                        boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                       ),
-                      borderRadius: BorderRadius.circular(100),
+                      child: ClipOval(
+                        child: SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: NetworkImageWidget(
+                              imageUrl: vendorCategoryModel.photo.toString(),
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: ClipOval(
-                          child: NetworkImageWidget(
-                            imageUrl: vendorCategoryModel.photo.toString(),
-                            fit: BoxFit.cover,
-                          ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: TranslatedText(
+                        '${vendorCategoryModel.title}',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                          fontFamily: AppThemeData.semiBold,
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: Text(
-                          '${vendorCategoryModel.title}',
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          style: TextStyle(
-                            color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                            fontFamily: AppThemeData.medium,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
+                    )
+                  ],
                 ),
               ),
             ),
@@ -2249,7 +2352,7 @@ class StoryView extends StatelessWidget {
                                 return Constant.loader();
                               } else {
                                 if (snapshot.hasError) {
-                                  return Center(child: Text('Error: ${snapshot.error}'));
+                                  return Center(child: TranslatedText('Error: ${snapshot.error}'));
                                 } else if (snapshot.data == null) {
                                   return const SizedBox();
                                 } else {
@@ -2274,7 +2377,7 @@ class StoryView extends StatelessWidget {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
+                                            TranslatedText(
                                               vendorModel.title.toString(),
                                               textAlign: TextAlign.center,
                                               maxLines: 1,
@@ -2331,6 +2434,7 @@ class MapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return GetX(
       init: MapViewController(),
       builder: (controller) {
@@ -2381,7 +2485,8 @@ class MapView extends StatelessWidget {
                 : Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 80),
+                      // Clear both the floating toggle pill (~150px) and the bottom nav.
+                      padding: const EdgeInsets.only(bottom: 160),
                       child: SizedBox(
                         height: Responsive.height(25, context),
                         child: Column(
@@ -2425,8 +2530,10 @@ class MapView extends StatelessWidget {
                                       padding: EdgeInsets.symmetric(vertical: 10, horizontal: index == 0 ? 0 : 10),
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                          borderRadius: const BorderRadius.all(Radius.circular(16)),
+                                          color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                                          borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                          boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                                          border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
                                         ),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2495,7 +2602,7 @@ class MapView extends StatelessWidget {
                                                   ),
                                                 ),
                                                 Transform.translate(
-                                                  offset: Offset(Responsive.width(-3, context), Responsive.height(11, context)),
+                                                  offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(11, context)),
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.end,
                                                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -2518,8 +2625,8 @@ class MapView extends StatelessWidget {
                                                                   const SizedBox(
                                                                     width: 5,
                                                                   ),
-                                                                  Text(
-                                                                    "Free Delivery".tr,
+                                                                  TranslatedText(
+                                                                    "Free Delivery",
                                                                     style: TextStyle(
                                                                       fontSize: 14,
                                                                       color: AppThemeData.darkGreen,
@@ -2537,9 +2644,9 @@ class MapView extends StatelessWidget {
                                                         ),
                                                       ),
                                                       Container(
-                                                        decoration: ShapeDecoration(
-                                                          color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
-                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
+                                                        decoration: BoxDecoration(
+                                                          color: AppThemeData.lightGreen,
+                                                          borderRadius: BorderRadius.circular(120),
                                                         ),
                                                         child: Padding(
                                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -2547,16 +2654,17 @@ class MapView extends StatelessWidget {
                                                             children: [
                                                               SvgPicture.asset(
                                                                 "assets/icons/ic_star.svg",
-                                                                colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                                                width: 14,
+                                                                colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                                               ),
                                                               const SizedBox(
                                                                 width: 5,
                                                               ),
                                                               Text(
                                                                 "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                                                style: TextStyle(
-                                                                    color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                                    fontFamily: AppThemeData.semiBold,
+                                                                style: const TextStyle(
+                                                                    color: AppThemeData.darkGreen,
+                                                                    fontFamily: AppThemeData.bold,
                                                                     fontWeight: FontWeight.w600),
                                                               ),
                                                             ],
@@ -2582,7 +2690,7 @@ class MapView extends StatelessWidget {
                                                               const SizedBox(
                                                                 width: 5,
                                                               ),
-                                                              Text(
+                                                              TranslatedText(
                                                                 "${Constant.getDistance(
                                                                   lat1: vendorModel.latitude.toString(),
                                                                   lng1: vendorModel.longitude.toString(),
@@ -2611,7 +2719,7 @@ class MapView extends StatelessWidget {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
+                                                  TranslatedText(
                                                     vendorModel.title.toString(),
                                                     textAlign: TextAlign.start,
                                                     maxLines: 1,
@@ -2622,7 +2730,7 @@ class MapView extends StatelessWidget {
                                                       color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                                     ),
                                                   ),
-                                                  Text(
+                                                  TranslatedText(
                                                     vendorModel.location.toString(),
                                                     textAlign: TextAlign.start,
                                                     maxLines: 1,
@@ -2637,7 +2745,7 @@ class MapView extends StatelessWidget {
                                                       ? Column(
                                                           crossAxisAlignment: CrossAxisAlignment.start,
                                                           children: [
-                                                            Text(
+                                                            TranslatedText(
                                                               Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                                               maxLines: 1,
                                                               overflow: TextOverflow.ellipsis,

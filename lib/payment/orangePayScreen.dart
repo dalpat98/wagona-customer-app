@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/models/payment_model/orange_money.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -46,7 +47,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
 
   Timer? timer;
 
-  callTransaction() {
+  void callTransaction() {
     timer = Timer.periodic(const Duration(seconds: 3), (Timer t) {
       if (mounted) {
         transactionstatus(accessToken: widget.accessToken, amount: widget.amount, orderId: widget.orderId, payToken: widget.payToken).then((value) {
@@ -66,7 +67,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
     });
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -137,11 +138,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
                 color: Colors.white,
               ),
             )),
-        body: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : WebViewWidget(controller: controller),
+        body: WebViewWidget(controller: controller),
       ),
     );
   }
@@ -152,14 +149,14 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
       barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Cancel Payment'.tr),
+          title: TranslatedText('Cancel Payment'),
           content: SingleChildScrollView(
-            child: Text("cancelPayment?".tr),
+            child: TranslatedText("Cancel Payment?"),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(
-                'Cancel'.tr,
+              child: TranslatedText(
+                'Cancel',
                 style: const TextStyle(color: Colors.red),
               ),
               onPressed: () {
@@ -168,8 +165,8 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
               },
             ),
             TextButton(
-              child: Text(
-                'Continue'.tr,
+              child: TranslatedText(
+                'Continue',
                 style: const TextStyle(color: Colors.green),
               ),
               onPressed: () {

@@ -5,9 +5,11 @@ import 'package:customer/controllers/change_language_controller.dart';
 import 'package:customer/services/localization_service.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -33,8 +35,8 @@ class ChangeLanguageScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Change Language".tr,
+                        TranslatedText(
+                          "Change Language",
                           style: TextStyle(
                             fontSize: 24,
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -42,8 +44,8 @@ class ChangeLanguageScreen extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Text(
-                          "Select your preferred language for a personalized app experience.".tr,
+                        TranslatedText(
+                          "Select your preferred language for a personalized app experience.",
                           style: TextStyle(
                             fontSize: 16,
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -64,7 +66,7 @@ class ChangeLanguageScreen extends StatelessWidget {
                                 .map(
                                   (data) => Obx(
                                     () => GestureDetector(
-                                      onTap: () {
+                                      onTap: () async {
                                         LocalizationService().changeLocale(data.slug.toString());
                                         Preferences.setString(Preferences.languageCodeKey, jsonEncode(data));
                                         controller.selectedLanguage.value = data;
@@ -81,7 +83,7 @@ class ChangeLanguageScreen extends StatelessWidget {
                                             const SizedBox(
                                               height: 5,
                                             ),
-                                            Text(
+                                            TranslatedText(
                                               "${data.title}",
                                               style: TextStyle(
                                                 fontSize: 16,

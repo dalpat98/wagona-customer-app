@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/controllers/dash_board_controller.dart';
 import 'package:customer/models/BannerModel.dart';
@@ -13,6 +14,7 @@ import 'package:customer/services/cart_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -56,7 +58,7 @@ class HomeController extends GetxController {
 
   Future<void> getData() async {
     isLoading.value = true;
-    selectedOrderTypeValue.value = Preferences.getString(Preferences.foodDeliveryType, defaultValue: "Delivery".tr);
+    selectedOrderTypeValue.value = Preferences.getString(Preferences.foodDeliveryType, defaultValue: "Delivery");
     await Future.wait([
       getTaxList(),
       getVendorCategory(),
@@ -105,14 +107,19 @@ class HomeController extends GetxController {
         return;
       }
 
-      // Sort by open status and rating
+      // Sort by open status and rating — precompute keys once per restaurant
+      // instead of recomputing inside every comparison (O(n log n) calls).
+      final Map<String?, bool> openStatus = {
+        for (final r in restaurants) r.id: Constant.statusCheckOpenORClose(vendorModel: r),
+      };
+      final Map<String?, String> ratingKey = {
+        for (final r in restaurants) r.id: Constant.calculateReview(reviewCount: r.reviewsCount.toString(), reviewSum: r.reviewsSum.toString()),
+      };
       restaurants.sort((a, b) {
-        final aOpen = Constant.statusCheckOpenORClose(vendorModel: a);
-        final bOpen = Constant.statusCheckOpenORClose(vendorModel: b);
+        final aOpen = openStatus[a.id] ?? false;
+        final bOpen = openStatus[b.id] ?? false;
         if (aOpen == bOpen) {
-          final ratingA = Constant.calculateReview(reviewCount: a.reviewsCount.toString(), reviewSum: a.reviewsSum.toString());
-          final ratingB = Constant.calculateReview(reviewCount: b.reviewsCount.toString(), reviewSum: b.reviewsSum.toString());
-          return ratingB.compareTo(ratingA);
+          return (ratingKey[b.id] ?? "0").compareTo(ratingKey[a.id] ?? "0");
         }
         return aOpen ? -1 : 1;
       });
@@ -129,8 +136,11 @@ class HomeController extends GetxController {
       final usedCategoryIds = restaurants.expand((v) => v.categoryID ?? []).toSet();
       vendorCategoryModel.retainWhere((cat) => usedCategoryIds.contains(cat.id));
 
-      await _loadAdditionalData(restaurants);
+      // Show the screen as soon as restaurants are ready — coupons, stories
+      // and ads are reactive (Rx) lists, so their sections appear on their own
+      // when the background fetch completes. No need to hold the loader.
       isLoading.value = false;
+      _loadAdditionalData(restaurants);
     });
   }
 
@@ -186,13 +196,20 @@ class HomeController extends GetxController {
     bannerModel.assignAll(results[1] as List<BannerModel>);
     bannerBottomModel.assignAll(results[2] as List<BannerModel>);
 
-    await getFavouriteRestaurant();
+    // Favourites only drive the heart icons — fetch in the background instead
+    // of blocking the initial load (favouriteList is reactive).
+    getFavouriteRestaurant();
   }
 
   Future<void> getFavouriteRestaurant() async {
-    if (Constant.userModel != null) {
+    // Guard on the LIVE Firebase session (getCurrentUid dereferences it) —
+    // a cached userModel can outlive the auth session and crash otherwise.
+    if (Constant.userModel == null || FirebaseAuth.instance.currentUser == null) return;
+    try {
       final favs = await FireStoreUtils.getFavouriteRestaurant();
       favouriteList.assignAll(favs);
+    } catch (e) {
+      // Non-fatal — favourites only drive heart icons.
     }
   }
 

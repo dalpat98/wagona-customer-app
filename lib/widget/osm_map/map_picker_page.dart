@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/widget/osm_map/map_controller.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
@@ -24,8 +26,8 @@ class MapPickerPage extends StatelessWidget {
         backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
         centerTitle: false,
         titleSpacing: 0,
-        title: Text(
-          "PickUp Location".tr,
+        title: TranslatedText(
+          "PickUp Location",
           textAlign: TextAlign.start,
           style: TextStyle(
             fontFamily: AppThemeData.medium,
@@ -108,7 +110,7 @@ class MapPickerPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final place = controller.searchResults[index];
                         return ListTile(
-                          title: Text(place['display_name']),
+                          title: TranslatedText(place['display_name']),
                           onTap: () {
                             controller.selectSearchResult(place);
                             final lat = double.parse(place['lat']);
@@ -135,8 +137,8 @@ class MapPickerPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                controller.pickedPlace.value != null ? "Picked Location:".tr : "No Location Picked".tr,
+              TranslatedText(
+                controller.pickedPlace.value != null ? "Picked Location:" : "No Location Picked",
                 style: TextStyle(
                   color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
                   fontFamily: AppThemeData.semiBold,
@@ -147,7 +149,7 @@ class MapPickerPage extends StatelessWidget {
               if (controller.pickedPlace.value != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Text(
+                  child: TranslatedText(
                     "${controller.pickedPlace.value!.address}\n(${controller.pickedPlace.value!.coordinates.latitude.toStringAsFixed(5)}, ${controller.pickedPlace.value!.coordinates.longitude.toStringAsFixed(5)})",
                     style: TextStyle(fontSize: 13, color: themeChange.getThem() ? AppThemeData.surface : AppThemeData.primary600),
                   ),
@@ -157,7 +159,7 @@ class MapPickerPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: RoundedButtonFill(
-                      title: "Confirm Location".tr,
+                      title: "Confirm Location",
                       color: AppThemeData.primary300,
                       textColor: AppThemeData.grey50,
                       height: 5,

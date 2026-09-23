@@ -6,7 +6,10 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -35,12 +38,13 @@ class SignupScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Create an Account 🚀".tr,
-                        style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 22, fontFamily: AppThemeData.semiBold),
+                      TranslatedText(
+                        "Create an Account",
+                        style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 24, fontFamily: AppThemeData.bold),
                       ),
-                      Text(
-                        "Sign up to start your food adventure with Wagona".tr,
+                      const SizedBox(height: AppThemeData.spaceXs),
+                      TranslatedText(
+                        "Sign up to start your food adventure with Wagona",
                         style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.regular),
                       ),
                       const SizedBox(
@@ -50,9 +54,9 @@ class SignupScreen extends StatelessWidget {
                         children: [
                           Expanded(
                             child: TextFieldWidget(
-                              title: 'First Name'.tr,
+                              title: 'First Name',
                               controller: controller.firstNameEditingController.value,
-                              hintText: 'Enter First Name'.tr,
+                              hintText: 'Enter First Name',
                               prefix: Padding(
                                 padding: const EdgeInsets.all(12),
                                 child: SvgPicture.asset(
@@ -70,9 +74,9 @@ class SignupScreen extends StatelessWidget {
                           ),
                           Expanded(
                             child: TextFieldWidget(
-                              title: 'Last Name'.tr,
+                              title: 'Last Name',
                               controller: controller.lastNameEditingController.value,
-                              hintText: 'Enter Last Name'.tr,
+                              hintText: 'Enter Last Name',
                               prefix: Padding(
                                 padding: const EdgeInsets.all(12),
                                 child: SvgPicture.asset(
@@ -88,11 +92,11 @@ class SignupScreen extends StatelessWidget {
                         ],
                       ),
                       TextFieldWidget(
-                        title: 'Email Address'.tr,
+                        title: 'Email Address',
                         textInputType: TextInputType.emailAddress,
                         controller: controller.emailEditingController.value,
                         enable: controller.type.value == "google" || controller.type.value == "apple" ? false : true,
-                        hintText: 'Enter Email Address'.tr,
+                        hintText: 'Enter Email Address',
                         prefix: Padding(
                           padding: const EdgeInsets.all(12),
                           child: SvgPicture.asset(
@@ -105,42 +109,47 @@ class SignupScreen extends StatelessWidget {
                         ),
                       ),
                       TextFieldWidget(
-                        title: 'Phone Number'.tr,
+                        title: 'Phone Number',
                         controller: controller.phoneNUmberEditingController.value,
-                        hintText: 'Enter Phone Number'.tr,
+                        hintText: 'Enter Phone Number',
                         enable: controller.type.value == "mobileNumber" ? false : true,
                         textInputType: const TextInputType.numberWithOptions(signed: true, decimal: true),
                         textInputAction: TextInputAction.done,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(RegExp('[0-9]')),
                         ],
-                        prefix: CountryCodePicker(
-                          onInit: (value) {
-                            controller.countryCodeEditingController.value.text = value?.dialCode ?? Constant.defaultCountryCode;
-                            controller.countryISOCodeEditingController.value.text = value?.code ?? Constant.defaultCountryCode;
-                          },
-                          enabled: controller.type.value == "mobileNumber" ? false : true,
-                          onChanged: (value) {
-                            controller.countryCodeEditingController.value.text = value.dialCode.toString();
-                            controller.countryISOCodeEditingController.value.text = value.code.toString();
-                          },
-                          dialogTextStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontWeight: FontWeight.w500, fontFamily: AppThemeData.medium),
-                          dialogBackgroundColor: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
-                          initialSelection: controller.countryISOCodeEditingController.value.text,
-                          comparator: (a, b) => b.name!.compareTo(a.name.toString()),
-                          textStyle: TextStyle(fontSize: 14, color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.medium),
-                          searchDecoration: InputDecoration(iconColor: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900),
-                          searchStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontWeight: FontWeight.w500, fontFamily: AppThemeData.medium),
-                        ),
+                        prefix: ValueListenableBuilder(
+                            valueListenable: TranslationNotifier.refresh,
+                            builder: (_, __, ___) {
+                              return CountryCodePicker(
+                                headerText: 'Select Country'.tr,
+                                onInit: (value) {
+                                  controller.countryCodeEditingController.value.text = value?.dialCode ?? Constant.defaultCountryCode;
+                                  controller.countryISOCodeEditingController.value.text = value?.code ?? Constant.defaultCountryCode;
+                                },
+                                enabled: controller.type.value == "mobileNumber" ? false : true,
+                                onChanged: (value) {
+                                  controller.countryCodeEditingController.value.text = value.dialCode.toString();
+                                  controller.countryISOCodeEditingController.value.text = value.code.toString();
+                                },
+                                dialogTextStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontWeight: FontWeight.w500, fontFamily: AppThemeData.medium),
+                                dialogBackgroundColor: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                                initialSelection: controller.countryISOCodeEditingController.value.text,
+                                comparator: (a, b) => b.name!.compareTo(a.name.toString()),
+                                textStyle: TextStyle(fontSize: 14, color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.medium),
+                                searchDecoration: InputDecoration(iconColor: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900),
+                                searchStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontWeight: FontWeight.w500, fontFamily: AppThemeData.medium),
+                              );
+                            }),
                       ),
                       controller.type.value == "google" || controller.type.value == "apple" || controller.type.value == "mobileNumber"
                           ? const SizedBox()
                           : Column(
                               children: [
                                 TextFieldWidget(
-                                  title: 'Password'.tr,
+                                  title: 'Password',
                                   controller: controller.passwordEditingController.value,
-                                  hintText: 'Enter Password'.tr,
+                                  hintText: 'Enter Password',
                                   obscureText: controller.passwordVisible.value,
                                   prefix: Padding(
                                     padding: const EdgeInsets.all(12),
@@ -176,9 +185,9 @@ class SignupScreen extends StatelessWidget {
                                   ),
                                 ),
                                 TextFieldWidget(
-                                  title: 'Confirm Password'.tr,
+                                  title: 'Confirm Password',
                                   controller: controller.conformPasswordEditingController.value,
-                                  hintText: 'Enter Confirm Password'.tr,
+                                  hintText: 'Enter Confirm Password',
                                   obscureText: controller.conformPasswordVisible.value,
                                   prefix: Padding(
                                     padding: const EdgeInsets.all(12),
@@ -216,44 +225,44 @@ class SignupScreen extends StatelessWidget {
                               ],
                             ),
                       TextFieldWidget(
-                        title: 'Referral Code(Optional)'.tr,
+                        title: 'Referral Code(Optional)',
                         controller: controller.referralCodeEditingController.value,
-                        hintText: 'Referral Code(Optional)'.tr,
+                        hintText: 'Referral Code(Optional)',
                       ),
                       RoundedButtonFill(
-                        title: "Signup".tr,
+                        title: "Signup",
                         color: AppThemeData.primary300,
                         textColor: AppThemeData.grey50,
                         onPress: () async {
                           if (controller.type.value == "google" || controller.type.value == "apple" || controller.type.value == "mobileNumber") {
                             if (controller.firstNameEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter first name".tr);
+                              ShowToastDialog.showToast("Please enter first name");
                             } else if (controller.lastNameEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter last name".tr);
+                              ShowToastDialog.showToast("Please enter last name");
                             } else if (controller.emailEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter valid email".tr);
+                              ShowToastDialog.showToast("Please enter valid email");
                             } else if (controller.phoneNUmberEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter Phone number".tr);
+                              ShowToastDialog.showToast("Please enter Phone number");
                             } else {
                               controller.signUpWithEmailAndPassword();
                             }
                           } else {
                             if (controller.firstNameEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter first name".tr);
+                              ShowToastDialog.showToast("Please enter first name");
                             } else if (controller.lastNameEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter last name".tr);
+                              ShowToastDialog.showToast("Please enter last name");
                             } else if (controller.emailEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter valid email".tr);
+                              ShowToastDialog.showToast("Please enter valid email");
                             } else if (controller.phoneNUmberEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter Phone number".tr);
+                              ShowToastDialog.showToast("Please enter Phone number");
                             } else if (controller.passwordEditingController.value.text.trim().length < 6) {
-                              ShowToastDialog.showToast("Please enter minimum 6 characters password".tr);
+                              ShowToastDialog.showToast("Please enter minimum 6 characters password");
                             } else if (controller.passwordEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter password".tr);
+                              ShowToastDialog.showToast("Please enter password");
                             } else if (controller.conformPasswordEditingController.value.text.trim().isEmpty) {
-                              ShowToastDialog.showToast("Please enter Confirm password".tr);
+                              ShowToastDialog.showToast("Please enter Confirm password");
                             } else if (controller.passwordEditingController.value.text.trim() != controller.conformPasswordEditingController.value.text.trim()) {
-                              ShowToastDialog.showToast("Password and Confirm password doesn't match".tr);
+                              ShowToastDialog.showToast("Password and Confirm password doesn't match");
                             } else {
                               controller.signUpWithEmailAndPassword();
                             }

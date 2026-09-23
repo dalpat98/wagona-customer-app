@@ -9,8 +9,10 @@ import 'package:customer/services/database_helper.dart';
 import 'package:customer/services/localization_service.dart';
 import 'package:customer/themes/styles.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/preferences.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -40,10 +42,33 @@ void main() async {
 
   DatabaseHelper.instance;
   await Preferences.initPref();
+  // _initLanguage();
   runApp(
     const MyApp(),
   );
 }
+
+// Future<void> _initLanguage() async {
+//   final storedLang = Preferences.getString(Preferences.languageCodeKey);
+
+//   if (storedLang.isEmpty) {
+//     final defaultLang = LanguageModel(
+//       slug: "en",
+//       isRtl: false,
+//       title: "english",
+//     );
+//     await Preferences.setString(
+//       Preferences.languageCodeKey,
+//       jsonEncode(defaultLang.toJson()),
+//     );
+//   }
+//   final language = Constant.getLanguage(); // from SharedPreferences
+//   DynamicTranslator.setLanguage(language.slug ?? 'en');
+
+//   /// ✅ Notify ML translator
+//   DynamicTranslator.clearCache();
+//   TranslationNotifier.notify();
+// }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -66,6 +91,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       } else {
         LanguageModel languageModel = LanguageModel(slug: "en", isRtl: false, title: "English");
         Preferences.setString(Preferences.languageCodeKey, jsonEncode(languageModel.toJson()));
+        LocalizationService().changeLocale(languageModel.slug.toString());
       }
     });
     super.initState();
@@ -89,7 +115,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: Consumer<DarkThemeProvider>(
         builder: (context, value, child) {
           return GetMaterialApp(
-            title: 'Wagona Customer'.tr,
+            title: 'Wagona Customer',
             debugShowCheckedModeBanner: false,
             theme: Styles.themeData(
                 themeChangeProvider.darkTheme == 0

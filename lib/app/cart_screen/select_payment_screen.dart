@@ -5,6 +5,7 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -23,8 +24,8 @@ class SelectPaymentScreen extends StatelessWidget {
             backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
             centerTitle: false,
             titleSpacing: 0,
-            title: Text(
-              "Payment Option".tr,
+            title: TranslatedText(
+              "Payment Option",
               textAlign: TextAlign.start,
               style: TextStyle(
                 fontFamily: AppThemeData.medium,
@@ -33,11 +34,11 @@ class SelectPaymentScreen extends StatelessWidget {
               ),
             ),
           ),
-          body: controller.walletSettingModel.value.isEnabled != true || controller.cashOnDeliverySettingModel.value.isEnabled != true
+          body: controller.isLoading.value == true
               ? Align(
                   alignment: Alignment.center,
-                  child: Text(
-                    "Loading, please wait...".tr,
+                  child: TranslatedText(
+                    "Loading, please wait...",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: AppThemeData.semiBold,
@@ -52,8 +53,8 @@ class SelectPaymentScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Preferred Payment".tr,
+                        TranslatedText(
+                          "Preferred Payment",
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontFamily: AppThemeData.semiBold,
@@ -100,8 +101,8 @@ class SelectPaymentScreen extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            Text(
-                              "Other Payment Options".tr,
+                            TranslatedText(
+                              "Other Payment Options",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontFamily: AppThemeData.semiBold,
@@ -177,6 +178,30 @@ class SelectPaymentScreen extends StatelessWidget {
                                   visible: controller.xenditModel.value.enable == true,
                                   child: cardDecoration(controller, PaymentGateway.xendit, themeChange, "assets/images/xendit.png"),
                                 ),
+                                Visibility(
+                                  visible: controller.mtnMomoModel.value.enable == true,
+                                  child: cardDecoration(controller, PaymentGateway.mtnMomo, themeChange, "assets/images/mtnmom.png"),
+                                ),
+                                Visibility(
+                                  visible: controller.phonePeModel.value.enable == true,
+                                  child: cardDecoration(controller, PaymentGateway.phonePe, themeChange, "assets/images/phonepe.png"),
+                                ),
+                                Visibility(
+                                  visible: controller.cashfreeModel.value.enable == true,
+                                  child: cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
+                                ),
+                                Visibility(
+                                  visible: controller.instamojoModel.value.enable == true,
+                                  child: cardDecoration(controller, PaymentGateway.instamojo, themeChange, "assets/images/instamojo.png"),
+                                ),
+                                Visibility(
+                                  visible: controller.foloosiModel.value.enable == true,
+                                  child: cardDecoration(controller, PaymentGateway.foloosi, themeChange, "assets/images/foloosi.png"),
+                                ),
+                                Visibility(
+                                  visible: controller.payMongoModel.value.enable == true,
+                                  child: cardDecoration(controller, PaymentGateway.payMongo, themeChange, "assets/images/payMongo.png"),
+                                ),
                               ],
                             ),
                           ),
@@ -192,7 +217,7 @@ class SelectPaymentScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20),
               child: RoundedButtonFill(
-                title: "${'Pay Now'.tr} | ${Constant.amountShow(amount: controller.totalAmount.value.toString())}".tr,
+                title: "${'Pay Now'} | ${Constant.amountShow(amount: controller.totalAmount.value.toString())}",
                 height: 5,
                 color: AppThemeData.primary300,
                 textColor: AppThemeData.grey50,
@@ -244,8 +269,8 @@ class SelectPaymentScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                value.name.capitalizeString(),
+                              TranslatedText(
+                                value.name.toString().capitalizeFirst ?? '',
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontFamily: AppThemeData.medium,
@@ -266,8 +291,8 @@ class SelectPaymentScreen extends StatelessWidget {
                           ),
                         )
                       : Expanded(
-                          child: Text(
-                            value.name.capitalizeString(),
+                          child: TranslatedText(
+                            value.name.toString().capitalizeFirst ?? '',
                             textAlign: TextAlign.start,
                             style: TextStyle(
                               fontFamily: AppThemeData.medium,

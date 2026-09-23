@@ -13,6 +13,7 @@ import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -187,7 +188,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
+                                            TranslatedText(
                                               controller.vendorModel.value.title.toString(),
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
@@ -201,7 +202,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                             ),
                                             SizedBox(
                                               width: Responsive.width(78, context),
-                                              child: Text(
+                                              child: TranslatedText(
                                                 controller.vendorModel.value.location.toString(),
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
@@ -252,8 +253,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                             onTap: () {
                                               Get.to(const ReviewListScreen(), arguments: {"vendorModel": controller.vendorModel.value});
                                             },
-                                            child: Text(
-                                              "${controller.vendorModel.value.reviewsCount} ${'Ratings'.tr}",
+                                            child: TranslatedText(
+                                              "${controller.vendorModel.value.reviewsCount} ${'Ratings'}",
                                               style: TextStyle(
                                                 decoration: TextDecoration.underline,
                                                 color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey700,
@@ -267,8 +268,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                   ),
                                   Row(
                                     children: [
-                                      Text(
-                                        controller.isOpen.value ? "Open".tr : "Close".tr,
+                                      TranslatedText(
+                                        controller.isOpen.value ? "Open" : "Close",
                                         textAlign: TextAlign.start,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -291,8 +292,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                         onTap: () {
                                           timeShowBottomSheet(context, controller);
                                         },
-                                        child: Text(
-                                          "View Timings".tr,
+                                        child: TranslatedText(
+                                          "View Timings",
                                           textAlign: TextAlign.start,
                                           maxLines: 1,
                                           style: TextStyle(
@@ -314,8 +315,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                           color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
                                         ),
                                       ),
-                                      Text(
-                                        "${Constant.amountShow(amount: controller.vendorModel.value.restaurantCost)} ${'for two'.tr}".tr,
+                                      TranslatedText(
+                                        "${Constant.amountShow(amount: controller.vendorModel.value.restaurantCost)} ${'for two'}",
                                         textAlign: TextAlign.start,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -334,8 +335,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                       const SizedBox(
                                         height: 20,
                                       ),
-                                      Text(
-                                        "Also applicable on food delivery".tr,
+                                      TranslatedText(
+                                        "Also applicable on food delivery",
                                         textAlign: TextAlign.start,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -352,7 +353,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                       InkWell(
                                         onTap: () {
                                           if (Constant.userModel == null) {
-                                            ShowToastDialog.showToast("Please log in to the application. You are not logged in.".tr);
+                                            ShowToastDialog.showToast("Please log in to the application. You are not logged in.");
                                           } else {
                                             Get.to(const BookTableScreen(), arguments: {"vendorModel": controller.vendorModel.value});
                                           }
@@ -384,8 +385,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(
-                                                        "Table Booking".tr,
+                                                      TranslatedText(
+                                                        "Table Booking",
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                           color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -393,8 +394,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                                           fontWeight: FontWeight.w600,
                                                         ),
                                                       ),
-                                                      Text(
-                                                        "Quick Conformations".tr,
+                                                      TranslatedText(
+                                                        "Quick Confirmation",
                                                         style: TextStyle(
                                                           fontSize: 12,
                                                           color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -448,8 +449,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(
-                                                        "Available food delivery".tr,
+                                                      TranslatedText(
+                                                        "Available food delivery",
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                           color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -457,8 +458,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                                           fontWeight: FontWeight.w600,
                                                         ),
                                                       ),
-                                                      Text(
-                                                        "in 30-45 mins.".tr,
+                                                      TranslatedText(
+                                                        "in 30-45 mins.",
                                                         style: TextStyle(
                                                           fontSize: 12,
                                                           color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -485,8 +486,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                             const SizedBox(
                                               height: 20,
                                             ),
-                                            Text(
-                                              "Menu".tr,
+                                            TranslatedText(
+                                              "Menu",
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
                                               style: TextStyle(
@@ -532,8 +533,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        "Location, Timing & Costs".tr,
+                                      TranslatedText(
+                                        "Location, Timing & Costs",
                                         textAlign: TextAlign.start,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -558,7 +559,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(
+                                                TranslatedText(
                                                   controller.vendorModel.value.location.toString(),
                                                   textAlign: TextAlign.start,
                                                   style: TextStyle(
@@ -573,8 +574,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                                     launchUrl(Constant.createCoordinatesUrl(
                                                         controller.vendorModel.value.latitude ?? 0.0, controller.vendorModel.value.longitude ?? 0.0, controller.vendorModel.value.title));
                                                   },
-                                                  child: Text(
-                                                    "View on Map".tr,
+                                                  child: TranslatedText(
+                                                    "View on Map",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
                                                       fontSize: 16,
@@ -605,8 +606,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "Timing".tr,
+                                              TranslatedText(
+                                                "Timing",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                   fontSize: 16,
@@ -617,8 +618,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                               ),
                                               InkWell(
                                                 onTap: () {},
-                                                child: Text(
-                                                  "${controller.vendorModel.value.openDineTime == '' ? "10:00 AM" : controller.vendorModel.value.openDineTime.toString()} ${"To".tr} ${controller.vendorModel.value.closeDineTime == '' ? "10:00 PM" : controller.vendorModel.value.closeDineTime.toString()}",
+                                                child: TranslatedText(
+                                                  "${controller.vendorModel.value.openDineTime == '' ? "10:00 AM" : controller.vendorModel.value.openDineTime.toString()} ${"To"} ${controller.vendorModel.value.closeDineTime == '' ? "10:00 PM" : controller.vendorModel.value.closeDineTime.toString()}",
                                                   textAlign: TextAlign.start,
                                                   style: TextStyle(
                                                     fontSize: 16,
@@ -654,8 +655,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "Cost for Two".tr,
+                                              TranslatedText(
+                                                "Cost for Two",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                   fontSize: 16,
@@ -664,8 +665,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                                   color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
                                                 ),
                                               ),
-                                              Text(
-                                                "${Constant.amountShow(amount: controller.vendorModel.value.restaurantCost ?? "0.0")} ${'(approx)'.tr}",
+                                              TranslatedText(
+                                                "${Constant.amountShow(amount: controller.vendorModel.value.restaurantCost ?? "0.0")} ${'(approx)'}",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                   fontSize: 16,
@@ -686,8 +687,8 @@ class DineInDetailsScreen extends StatelessWidget {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        "Cuisines".tr,
+                                      TranslatedText(
+                                        "Cuisines",
                                         textAlign: TextAlign.start,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -711,7 +712,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                                 side: BorderSide.none,
                                                 backgroundColor: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200,
                                                 labelStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800),
-                                                label: Text("$tag"),
+                                                label: TranslatedText("$tag"),
                                                 onSelected: (bool value) {},
                                               ))
                                         ],
@@ -779,7 +780,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    TranslatedText(
                                       "${workingHours.day}",
                                       textAlign: TextAlign.start,
                                       maxLines: 1,
@@ -810,7 +811,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                                     borderRadius: const BorderRadius.all(Radius.circular(12)),
                                                     border: Border.all(color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey200)),
                                                 child: Center(
-                                                  child: Text(
+                                                  child: TranslatedText(
                                                     timeSlotModel.from.toString(),
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.medium,
@@ -831,7 +832,7 @@ class DineInDetailsScreen extends StatelessWidget {
                                                     borderRadius: const BorderRadius.all(Radius.circular(12)),
                                                     border: Border.all(color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey200)),
                                                 child: Center(
-                                                  child: Text(
+                                                  child: TranslatedText(
                                                     timeSlotModel.from.toString(),
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.medium,

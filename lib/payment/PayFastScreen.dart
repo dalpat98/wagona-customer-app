@@ -1,9 +1,11 @@
 // ignore_for_file: file_names
 
 import 'dart:developer';
+import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/models/payment_model/pay_fast_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -26,7 +28,7 @@ class _PayFastScreenState extends State<PayFastScreen> {
     super.initState();
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -35,7 +37,9 @@ class _PayFastScreenState extends State<PayFastScreen> {
           onProgress: (int progress) {
             // Update loading bar.
           },
-          onPageStarted: (String url) {},
+          onPageStarted: (String url) {
+            ShowToastDialog.closeLoader();
+          },
           onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest navigation) async {
@@ -85,13 +89,13 @@ class _PayFastScreenState extends State<PayFastScreen> {
       barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Cancel Payment'),
+          title: const TranslatedText('Cancel Payment'),
           content: SingleChildScrollView(
-            child: Text("cancelPayment?".tr),
+            child: TranslatedText("Cancel Payment?"),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text(
+              child: const TranslatedText(
                 'Exit',
                 style: TextStyle(color: Colors.red),
               ),
@@ -101,7 +105,7 @@ class _PayFastScreenState extends State<PayFastScreen> {
               },
             ),
             TextButton(
-              child: const Text(
+              child: const TranslatedText(
                 'Continue Payment',
                 style: TextStyle(color: Colors.green),
               ),

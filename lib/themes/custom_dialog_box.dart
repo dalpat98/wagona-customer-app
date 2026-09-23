@@ -2,6 +2,7 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:provider/provider.dart';
 
 class CustomDialogBox extends StatelessWidget {
@@ -46,7 +47,7 @@ class CustomDialogBox extends StatelessWidget {
           ),
           Visibility(
             visible: title.isNotEmpty,
-            child: Text(
+            child: TranslatedText(
               title,
               style: TextStyle(fontSize: 20, fontFamily: AppThemeData.semiBold, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800),
             ),
@@ -56,7 +57,7 @@ class CustomDialogBox extends StatelessWidget {
           ),
           Visibility(
             visible: descriptions.isNotEmpty,
-            child: Text(
+            child: TranslatedText(
               descriptions,
               style: TextStyle(fontSize: 14, fontFamily: AppThemeData.regular, color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey700),
               textAlign: TextAlign.center,
@@ -85,7 +86,7 @@ class CustomDialogBox extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
+                        TranslatedText(
                           negativeString.toString(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -121,7 +122,7 @@ class CustomDialogBox extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
+                        TranslatedText(
                           positiveString.toString(),
                           textAlign: TextAlign.center,
                           style: const TextStyle(

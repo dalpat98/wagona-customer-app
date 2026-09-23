@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/models/order_model.dart';
@@ -12,6 +12,7 @@ import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -124,7 +125,7 @@ class RateProductController extends GetxController {
 
   Future<void> saveRating() async {
     if (ratings.value != 0.0) {
-      ShowToastDialog.showLoader("Please wait".tr);
+      ShowToastDialog.showLoader("Please wait");
       log("reviewsCount :11:: ${productReviewCount.value}+1.0 :: ${((productReviewCount.value) + 1.0)}");
       productModel.value.reviewsCount = ((productReviewCount.value) + 1.0);
       log("reviewsCount :22:: ${productReviewSum.value}+${ratings.value} :: ${(productReviewSum.value + ratings.value)}");
@@ -183,9 +184,9 @@ class RateProductController extends GetxController {
       await FireStoreUtils.setProduct(productModel.value);
       ShowToastDialog.closeLoader();
       Get.back();
-      ShowToastDialog.showToast("Review submitted successfully".tr);
+      ShowToastDialog.showToast("Review submitted successfully");
     } else {
-      ShowToastDialog.showToast("Please add rate for food item.".tr);
+      ShowToastDialog.showToast("Please add rate for food item.");
       ShowToastDialog.closeLoader();
     }
   }

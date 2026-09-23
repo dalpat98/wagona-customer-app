@@ -1,10 +1,10 @@
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class OtpController extends GetxController {
-  Rx<TextEditingController> otpController = TextEditingController().obs;
+  Rx<PinInputController> otpController = PinInputController().obs;
 
   RxString countryCode = "".obs;
   RxString countryISOCode = "".obs;
@@ -39,7 +39,7 @@ class OtpController extends GetxController {
       codeSent: (String verificationId0, int? resendToken0) async {
         verificationId.value = verificationId0;
         resendToken.value = resendToken0!;
-        ShowToastDialog.showToast("OTP sent".tr);
+        ShowToastDialog.showToast("OTP sent");
       },
       timeout: const Duration(seconds: 25),
       forceResendingToken: resendToken.value,

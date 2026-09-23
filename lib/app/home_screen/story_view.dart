@@ -10,6 +10,7 @@ import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/story_view/controller/story_controller.dart';
 import 'package:customer/widget/story_view/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../widget/story_view/widgets/story_view.dart';
@@ -109,7 +110,7 @@ class MoreStoriesState extends State<MoreStories> {
                       return SizedBox();
                     } else {
                       if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
+                        return Center(child: TranslatedText('Error: ${snapshot.error}'));
                       } else if (snapshot.data == null) {
                         return const SizedBox();
                       } else {
@@ -138,7 +139,7 @@ class MoreStoriesState extends State<MoreStories> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  TranslatedText(
                                     vendorModel.title.toString(),
                                     textAlign: TextAlign.center,
                                     maxLines: 1,

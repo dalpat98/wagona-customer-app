@@ -40,6 +40,7 @@ class OrderDetailsController extends GetxController {
   RxDouble packagingTaxAmount = 0.0.obs;
   RxDouble platformTaxAmount = 0.0.obs;
   RxDouble totalTaxAmount = 0.0.obs;
+  RxDouble taxAmount = 0.0.obs;
   RxDouble totalAmount = 0.0.obs;
 
   Future<void> calculatePrice() async {
@@ -70,6 +71,13 @@ class OrderDetailsController extends GetxController {
 
     if (orderModel.value.specialDiscount != null && orderModel.value.specialDiscount!['special_discount'] != null) {
       specialDiscountAmount.value = double.parse(orderModel.value.specialDiscount!['special_discount'].toString());
+    }
+
+    if (orderModel.value.taxSetting != null) {
+      for (var element in orderModel.value.taxSetting!) {
+        taxAmount.value =
+            taxAmount.value + Constant.calculateTax(amount: (subTotal.value - double.parse(orderModel.value.discount.toString()) - specialDiscountAmount.value).toString(), taxModel: element);
+      }
     }
 
     final double totalDiscount = couponAmount.value + specialDiscountAmount.value;

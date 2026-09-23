@@ -6,6 +6,7 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -23,8 +24,8 @@ class ViewAllCategoryScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Categories".tr,
+              title: TranslatedText(
+                "Categories",
                 style: TextStyle(
                   fontSize: 16,
                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -51,46 +52,46 @@ class ViewAllCategoryScreen extends StatelessWidget {
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                            child: Container(
-                              decoration: ShapeDecoration(
-                                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                    width: 1,
-                                    strokeAlign: BorderSide.strokeAlignOutside,
-                                    color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.primary50,
+                                    shape: BoxShape.circle,
+                                    boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                   ),
-                                  borderRadius: BorderRadius.circular(100),
+                                  child: ClipOval(
+                                    child: SizedBox(
+                                      width: 56,
+                                      height: 56,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: NetworkImageWidget(
+                                          imageUrl: vendorCategoryModel.photo.toString(),
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 60,
-                                    height: 60,
-                                    child: ClipOval(
-                                      child: NetworkImageWidget(
-                                        imageUrl: vendorCategoryModel.photo.toString(),
-                                        fit: BoxFit.cover,
-                                      ),
+                                const SizedBox(height: 6),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                                  child: TranslatedText(
+                                    '${vendorCategoryModel.title}',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                      color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                      fontFamily: AppThemeData.semiBold,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                    child: Text(
-                                      '${vendorCategoryModel.title}',
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      style: TextStyle(
-                                        color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                        fontFamily: AppThemeData.medium,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
+                                )
+                              ],
                             ),
                           ),
                         );

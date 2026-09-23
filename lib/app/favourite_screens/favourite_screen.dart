@@ -15,6 +15,7 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/restaurant_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,7 @@ class FavouriteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return GetX(
         init: FavouriteController(),
         builder: (controller) {
@@ -41,8 +43,8 @@ class FavouriteScreen extends StatelessWidget {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  "Your Favourites, All in One Place".tr,
+                                child: TranslatedText(
+                                  "Your Favourites, All in One Place",
                                   style: TextStyle(
                                     fontSize: 24,
                                     color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -73,15 +75,15 @@ class FavouriteScreen extends StatelessWidget {
                                       const SizedBox(
                                         height: 12,
                                       ),
-                                      Text(
-                                        "Please Log In to Continue".tr,
+                                      TranslatedText(
+                                        "Please Log In to Continue",
                                         style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontSize: 22, fontFamily: AppThemeData.semiBold),
                                       ),
                                       const SizedBox(
                                         height: 5,
                                       ),
-                                      Text(
-                                        "You’re not logged in. Please sign in to access your account and explore all features.".tr,
+                                      TranslatedText(
+                                        "You’re not logged in. Please sign in to access your account and explore all features.",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.bold),
                                       ),
@@ -89,7 +91,7 @@ class FavouriteScreen extends StatelessWidget {
                                         height: 20,
                                       ),
                                       RoundedButtonFill(
-                                        title: "Log in".tr,
+                                        title: "Log in",
                                         width: 55,
                                         height: 5.5,
                                         color: AppThemeData.primary300,
@@ -124,20 +126,23 @@ class FavouriteScreen extends StatelessWidget {
                                                   child: Container(
                                                     decoration: controller.favouriteRestaurant.value == false
                                                         ? null
-                                                        : ShapeDecoration(
-                                                            color: AppThemeData.grey900,
-                                                            shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(120),
-                                                            ),
+                                                        : BoxDecoration(
+                                                            gradient: AppThemeData.primaryGradient,
+                                                            borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                                                            boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
                                                           ),
                                                     child: Padding(
                                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                      child: Text(
-                                                        "Favourite Restaurants".tr,
+                                                      child: TranslatedText(
+                                                        "Favourite Restaurants",
                                                         textAlign: TextAlign.center,
                                                         style: TextStyle(
                                                           fontFamily: AppThemeData.semiBold,
-                                                          color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                                          color: controller.favouriteRestaurant.value == true
+                                                              ? AppThemeData.grey50
+                                                              : themeChange.getThem()
+                                                                  ? AppThemeData.grey400
+                                                                  : AppThemeData.grey500,
                                                         ),
                                                       ),
                                                     ),
@@ -152,16 +157,15 @@ class FavouriteScreen extends StatelessWidget {
                                                   child: Container(
                                                     decoration: controller.favouriteRestaurant.value == true
                                                         ? null
-                                                        : ShapeDecoration(
-                                                            color: AppThemeData.grey900,
-                                                            shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(120),
-                                                            ),
+                                                        : BoxDecoration(
+                                                            gradient: AppThemeData.primaryGradient,
+                                                            borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                                                            boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
                                                           ),
                                                     child: Padding(
                                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                      child: Text(
-                                                        "Favourite Foods".tr,
+                                                      child: TranslatedText(
+                                                        "Favourite Foods",
                                                         textAlign: TextAlign.center,
                                                         style: TextStyle(
                                                           fontFamily: AppThemeData.semiBold,
@@ -169,9 +173,7 @@ class FavouriteScreen extends StatelessWidget {
                                                               ? themeChange.getThem()
                                                                   ? AppThemeData.grey400
                                                                   : AppThemeData.grey500
-                                                              : themeChange.getThem()
-                                                                  ? AppThemeData.primary300
-                                                                  : AppThemeData.primary300,
+                                                              : AppThemeData.grey50,
                                                         ),
                                                       ),
                                                     ),
@@ -191,10 +193,10 @@ class FavouriteScreen extends StatelessWidget {
                                         padding: const EdgeInsets.symmetric(horizontal: 18),
                                         child: controller.favouriteRestaurant.value
                                             ? controller.favouriteVendorList.isEmpty
-                                                ? Constant.showEmptyView(message: "Favourite Restaurants not found.".tr)
+                                                ? Constant.showEmptyView(message: "Favourite Restaurants not found.")
                                                 : ListView.builder(
                                                     shrinkWrap: true,
-                                                    padding: EdgeInsets.zero,
+                                                    padding: const EdgeInsets.only(bottom: 100),
                                                     scrollDirection: Axis.vertical,
                                                     itemCount: controller.favouriteVendorList.length,
                                                     itemBuilder: (BuildContext context, int index) {
@@ -209,16 +211,22 @@ class FavouriteScreen extends StatelessWidget {
                                                             });
                                                           } else {
                                                             ShowToastDialog.closeLoader();
-                                                            ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                                                            ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                                                           }
                                                           // Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                                                         },
                                                         child: Padding(
                                                           padding: const EdgeInsets.only(bottom: 20),
                                                           child: Container(
-                                                            decoration: ShapeDecoration(
+                                                            padding: const EdgeInsets.all(8),
+                                                            decoration: BoxDecoration(
                                                               color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                                              borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                                              border: Border.all(
+                                                                width: 1,
+                                                                color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                                                              ),
+                                                              boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                                             ),
                                                             child: Column(
                                                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +234,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                 Stack(
                                                                   children: [
                                                                     ClipRRect(
-                                                                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+                                                                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
                                                                       child: Stack(
                                                                         children: [
                                                                           ColorFiltered(
@@ -315,7 +323,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                       ),
                                                                     ),
                                                                     Transform.translate(
-                                                                      offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                                                                      offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                                                                       child: Row(
                                                                         mainAxisAlignment: MainAxisAlignment.end,
                                                                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -338,8 +346,8 @@ class FavouriteScreen extends StatelessWidget {
                                                                                       const SizedBox(
                                                                                         width: 5,
                                                                                       ),
-                                                                                      Text(
-                                                                                        "Free Delivery".tr,
+                                                                                      TranslatedText(
+                                                                                        "Free Delivery",
                                                                                         style: TextStyle(
                                                                                           fontSize: 14,
                                                                                           color: AppThemeData.darkGreen,
@@ -358,23 +366,23 @@ class FavouriteScreen extends StatelessWidget {
                                                                           ),
                                                                           Container(
                                                                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                                                                            decoration: ShapeDecoration(
-                                                                              color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
-                                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
+                                                                            decoration: BoxDecoration(
+                                                                              color: AppThemeData.lightGreen,
+                                                                              borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
                                                                             ),
                                                                             child: Row(
                                                                               children: [
                                                                                 SvgPicture.asset(
                                                                                   "assets/icons/ic_star.svg",
-                                                                                  colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                                                                  colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                                                                 ),
                                                                                 const SizedBox(
                                                                                   width: 5,
                                                                                 ),
                                                                                 Text(
                                                                                   "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount!.toStringAsFixed(0), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                                                                  style: TextStyle(
-                                                                                    color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                                                                  style: const TextStyle(
+                                                                                    color: AppThemeData.darkGreen,
                                                                                     fontFamily: AppThemeData.semiBold,
                                                                                     fontWeight: FontWeight.w600,
                                                                                   ),
@@ -400,7 +408,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                                 const SizedBox(
                                                                                   width: 5,
                                                                                 ),
-                                                                                Text(
+                                                                                TranslatedText(
                                                                                   "${Constant.getDistance(
                                                                                     lat1: vendorModel.latitude.toString(),
                                                                                     lng1: vendorModel.longitude.toString(),
@@ -430,7 +438,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                   child: Column(
                                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                                     children: [
-                                                                      Text(
+                                                                      TranslatedText(
                                                                         vendorModel.title.toString(),
                                                                         textAlign: TextAlign.start,
                                                                         maxLines: 1,
@@ -441,7 +449,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                           color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                                                         ),
                                                                       ),
-                                                                      Text(
+                                                                      TranslatedText(
                                                                         vendorModel.location.toString(),
                                                                         textAlign: TextAlign.start,
                                                                         maxLines: 1,
@@ -456,7 +464,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                           ? Column(
                                                                               crossAxisAlignment: CrossAxisAlignment.start,
                                                                               children: [
-                                                                                Text(
+                                                                                TranslatedText(
                                                                                   Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                                                                   maxLines: 1,
                                                                                   overflow: TextOverflow.ellipsis,
@@ -479,11 +487,11 @@ class FavouriteScreen extends StatelessWidget {
                                                     },
                                                   )
                                             : controller.favouriteFoodList.isEmpty
-                                                ? Constant.showEmptyView(message: "Favourite Foods not found.".tr)
+                                                ? Constant.showEmptyView(message: "Favourite Foods not found.")
                                                 : ListView.builder(
                                                     itemCount: controller.favouriteFoodList.length,
                                                     shrinkWrap: true,
-                                                    padding: EdgeInsets.zero,
+                                                    padding: const EdgeInsets.only(bottom: 100),
                                                     itemBuilder: (context, index) {
                                                       ProductModel productModel = controller.favouriteFoodList[index];
                                                       return FutureBuilder(
@@ -493,7 +501,7 @@ class FavouriteScreen extends StatelessWidget {
                                                             return Constant.loader();
                                                           } else {
                                                             if (snapshot.hasError) {
-                                                              return Center(child: Text('Error: ${snapshot.error}'));
+                                                              return Center(child: TranslatedText('Error: ${snapshot.error}'));
                                                             } else if (snapshot.data == null) {
                                                               return const SizedBox();
                                                             } else {
@@ -512,7 +520,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                           });
                                                                         } else {
                                                                           ShowToastDialog.closeLoader();
-                                                                          ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                                                                          ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                                                                         }
 
                                                                         // Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": value});
@@ -523,9 +531,14 @@ class FavouriteScreen extends StatelessWidget {
                                                                 child: Padding(
                                                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                                                   child: Container(
-                                                                    decoration: ShapeDecoration(
+                                                                    decoration: BoxDecoration(
                                                                       color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                                                      borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                                                      border: Border.all(
+                                                                        width: 1,
+                                                                        color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                                                                      ),
+                                                                      boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                                                     ),
                                                                     child: Padding(
                                                                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -546,8 +559,8 @@ class FavouriteScreen extends StatelessWidget {
                                                                                     const SizedBox(
                                                                                       width: 5,
                                                                                     ),
-                                                                                    Text(
-                                                                                      productModel.nonveg == true ? "Non Veg.".tr : "Pure veg.".tr,
+                                                                                    TranslatedText(
+                                                                                      productModel.nonveg == true ? "Non Veg." : "Pure veg.",
                                                                                       style: TextStyle(
                                                                                         color: productModel.nonveg == true ? AppThemeData.danger300 : AppThemeData.success400,
                                                                                         fontFamily: AppThemeData.semiBold,
@@ -559,7 +572,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                                 const SizedBox(
                                                                                   height: 5,
                                                                                 ),
-                                                                                Text(
+                                                                                TranslatedText(
                                                                                   productModel.name.toString(),
                                                                                   style: TextStyle(
                                                                                     fontSize: 18,
@@ -624,7 +637,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                                     ),
                                                                                   ],
                                                                                 ),
-                                                                                Text(
+                                                                                TranslatedText(
                                                                                   "${productModel.description}",
                                                                                   maxLines: 2,
                                                                                   style: TextStyle(
@@ -641,7 +654,7 @@ class FavouriteScreen extends StatelessWidget {
                                                                             width: 6,
                                                                           ),
                                                                           ClipRRect(
-                                                                            borderRadius: const BorderRadius.all(Radius.circular(16)),
+                                                                            borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
                                                                             child: Stack(
                                                                               children: [
                                                                                 NetworkImageWidget(

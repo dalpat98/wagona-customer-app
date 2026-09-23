@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class AppThemeData {
   static const Color primary50 = Color(0xFFFFEBE5);
   static const Color primary100 = Color(0xFFFFC0AB);
@@ -75,4 +76,85 @@ class AppThemeData {
   static const String regular = 'Urbanist-Regular';
   static const String semiBold = 'Urbanist-SemiBold';
   static const String thin = 'Urbanist-Thin';
+
+  // ─────────────────────────────────────────────────────────────
+  //  Design tokens — vibrant redesign (2026)
+  //  Additive layer: gradients, shadows, radii & spacing so the UI
+  //  can feel modern & appetizing without touching the palette.
+  // ─────────────────────────────────────────────────────────────
+
+  /// Shifts a colour's HSL lightness — used to derive gradient shades from
+  /// the runtime brand colour so admin "dynamic colour" changes propagate.
+  static Color shiftLightness(Color color, double amount) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0)).toColor();
+  }
+
+  /// Brand gradient shades — DERIVED from [primary300], which is assigned at
+  /// runtime from the admin panel (`app_customer_color`). Getters, not
+  /// constants, so they always reflect the current dynamic colour.
+  static Color get primaryGradientStart => shiftLightness(primary300, 0.06);
+  static Color get primaryGradientEnd => shiftLightness(primary300, -0.05);
+
+  static LinearGradient get primaryGradient => LinearGradient(
+        colors: [primaryGradientStart, primaryGradientEnd],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+
+  /// Softer tint gradient for large surfaces (splash, headers, hero cards).
+  static LinearGradient get brandGradientSoft => LinearGradient(
+        colors: [shiftLightness(primary300, 0.09), shiftLightness(primary300, -0.02)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      );
+
+  /// Subtle scrim used on top of food imagery for legible text.
+  static const LinearGradient imageScrim = LinearGradient(
+    colors: [Colors.transparent, Color(0xCC000000)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  // Corner radii scale.
+  static const double radiusSm = 10;
+  static const double radiusMd = 16;
+  static const double radiusLg = 22;
+  static const double radiusXl = 28;
+  static const double radiusPill = 100;
+
+  // Spacing scale (4-pt based).
+  static const double spaceXs = 4;
+  static const double spaceSm = 8;
+  static const double spaceMd = 16;
+  static const double spaceLg = 24;
+  static const double spaceXl = 32;
+
+  /// Soft ambient shadow for cards on light surfaces.
+  static List<BoxShadow> cardShadow = [
+    BoxShadow(
+      color: grey900.withOpacity(0.06),
+      blurRadius: 18,
+      offset: const Offset(0, 8),
+    ),
+  ];
+
+  /// Coloured glow beneath primary CTAs. Getter so it follows the runtime
+  /// dynamic brand colour instead of caching the compile-time default.
+  static List<BoxShadow> get primaryGlow => [
+        BoxShadow(
+          color: primary300.withOpacity(0.35),
+          blurRadius: 16,
+          offset: const Offset(0, 8),
+        ),
+      ];
+
+  /// Elevated shadow for floating elements (bottom nav, FABs).
+  static List<BoxShadow> floatShadow = [
+    BoxShadow(
+      color: grey900.withOpacity(0.10),
+      blurRadius: 24,
+      offset: const Offset(0, 10),
+    ),
+  ];
 }

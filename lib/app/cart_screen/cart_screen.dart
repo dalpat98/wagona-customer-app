@@ -1,5 +1,5 @@
 import 'package:bottom_picker/bottom_picker.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/address_screens/address_list_screen.dart';
 import 'package:customer/app/cart_screen/coupon_list_screen.dart';
 import 'package:customer/app/cart_screen/select_payment_screen.dart';
@@ -8,6 +8,7 @@ import 'package:customer/app/wallet_screen/wallet_screen.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/cart_controller.dart';
+import 'package:customer/controllers/phonepay_controller.dart';
 import 'package:customer/models/cart_product_model.dart';
 import 'package:customer/models/product_model.dart';
 import 'package:customer/models/user_model.dart';
@@ -22,6 +23,7 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/my_separator.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -42,7 +44,7 @@ class CartScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
             ),
             body: cartItem.isEmpty
-                ? Constant.showEmptyView(message: "Item Not available".tr)
+                ? Constant.showEmptyView(message: "Item Not available")
                 : SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +89,7 @@ class CartScreen extends StatelessWidget {
                                                     width: 10,
                                                   ),
                                                   Expanded(
-                                                    child: Text(
+                                                    child: TranslatedText(
                                                       controller.selectedAddress.value.addressAs.toString(),
                                                       textAlign: TextAlign.start,
                                                       style: TextStyle(
@@ -103,7 +105,7 @@ class CartScreen extends StatelessWidget {
                                               const SizedBox(
                                                 height: 5,
                                               ),
-                                              Text(
+                                              TranslatedText(
                                                 controller.selectedAddress.value.getFullAddress(),
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
@@ -125,9 +127,11 @@ class CartScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Container(
-                            decoration: ShapeDecoration(
-                              color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            decoration: BoxDecoration(
+                              color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                              borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                              boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                              border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -176,7 +180,7 @@ class CartScreen extends StatelessWidget {
                                                 child: Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
+                                                    TranslatedText(
                                                       "${cartProductModel.name}",
                                                       textAlign: TextAlign.start,
                                                       style: TextStyle(
@@ -195,38 +199,41 @@ class CartScreen extends StatelessWidget {
                                                               fontWeight: FontWeight.w600,
                                                             ),
                                                           )
-                                                        : Row(
-                                                            children: [
-                                                              Text(
-                                                                Constant.amountShow(amount: cartProductModel.discountPrice.toString()),
-                                                                style: TextStyle(
-                                                                  fontSize: 16,
-                                                                  color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                                                  fontFamily: AppThemeData.semiBold,
-                                                                  fontWeight: FontWeight.w600,
+                                                        : SingleChildScrollView(
+                                                            scrollDirection: Axis.horizontal,
+                                                            child: Row(
+                                                              children: [
+                                                                Text(
+                                                                  Constant.amountShow(amount: cartProductModel.discountPrice.toString()),
+                                                                  style: TextStyle(
+                                                                    fontSize: 16,
+                                                                    color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                                    fontFamily: AppThemeData.semiBold,
+                                                                    fontWeight: FontWeight.w600,
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 5,
-                                                              ),
-                                                              Text(
-                                                                Constant.amountShow(amount: cartProductModel.price),
-                                                                style: TextStyle(
-                                                                  fontSize: 14,
-                                                                  decoration: TextDecoration.lineThrough,
-                                                                  decorationColor: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey400,
-                                                                  color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey400,
-                                                                  fontFamily: AppThemeData.semiBold,
-                                                                  fontWeight: FontWeight.w600,
+                                                                const SizedBox(
+                                                                  width: 5,
                                                                 ),
-                                                              ),
-                                                            ],
+                                                                Text(
+                                                                  Constant.amountShow(amount: cartProductModel.price),
+                                                                  style: TextStyle(
+                                                                    fontSize: 14,
+                                                                    decoration: TextDecoration.lineThrough,
+                                                                    decorationColor: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey400,
+                                                                    color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey400,
+                                                                    fontFamily: AppThemeData.semiBold,
+                                                                    fontWeight: FontWeight.w600,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
                                                           ),
                                                     if (Constant.taxScope == "product")
                                                       cartProductModel.taxSetting?.isEmpty == true
                                                           ? SizedBox()
-                                                          : Text(
-                                                              "${'Tax:'.tr} ${Constant.getTaxDisplayText(cartProductModel.taxSetting)}",
+                                                          : TranslatedText(
+                                                              "${'Tax:'} ${Constant.getTaxDisplayText(cartProductModel.taxSetting)}",
                                                               maxLines: 2,
                                                               overflow: TextOverflow.ellipsis,
                                                               style: TextStyle(
@@ -239,7 +246,7 @@ class CartScreen extends StatelessWidget {
                                                 ),
                                               ),
                                               Container(
-                                                width: Responsive.width(22, context),
+                                                width: Responsive.width(26, context),
                                                 decoration: ShapeDecoration(
                                                   color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
                                                   shape: RoundedRectangleBorder(
@@ -293,20 +300,20 @@ class CartScreen extends StatelessWidget {
                                                                         -1) {
                                                                   controller.addToCart(cartProductModel: cartProductModel, isIncrement: true, quantity: cartProductModel.quantity! + 1);
                                                                 } else {
-                                                                  ShowToastDialog.showToast("Out of stock".tr);
+                                                                  ShowToastDialog.showToast("Out of stock");
                                                                 }
                                                               } else {
                                                                 if ((productModel?.quantity ?? 0) > (cartProductModel.quantity ?? 0) || productModel!.quantity == -1) {
                                                                   controller.addToCart(cartProductModel: cartProductModel, isIncrement: true, quantity: cartProductModel.quantity! + 1);
                                                                 } else {
-                                                                  ShowToastDialog.showToast("Out of stock".tr);
+                                                                  ShowToastDialog.showToast("Out of stock");
                                                                 }
                                                               }
                                                             } else {
                                                               if ((productModel?.quantity ?? 0) > (cartProductModel.quantity ?? 0) || productModel!.quantity == -1) {
                                                                 controller.addToCart(cartProductModel: cartProductModel, isIncrement: true, quantity: cartProductModel.quantity! + 1);
                                                               } else {
-                                                                ShowToastDialog.showToast("Out of stock".tr);
+                                                                ShowToastDialog.showToast("Out of stock");
                                                               }
                                                             }
                                                           },
@@ -324,8 +331,8 @@ class CartScreen extends StatelessWidget {
                                                   child: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(
-                                                        "Variants".tr,
+                                                      TranslatedText(
+                                                        "Variants",
                                                         textAlign: TextAlign.start,
                                                         style: TextStyle(
                                                           fontFamily: AppThemeData.semiBold,
@@ -349,7 +356,7 @@ class CartScreen extends StatelessWidget {
                                                               ),
                                                               child: Padding(
                                                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                                                                child: Text(
+                                                                child: TranslatedText(
                                                                   "${cartProductModel.variantInfo!.variantOptions!.keys.elementAt(i)} : ${cartProductModel.variantInfo!.variantOptions![cartProductModel.variantInfo!.variantOptions!.keys.elementAt(i)]}",
                                                                   textAlign: TextAlign.start,
                                                                   style: TextStyle(
@@ -376,8 +383,8 @@ class CartScreen extends StatelessWidget {
                                                     Row(
                                                       children: [
                                                         Expanded(
-                                                          child: Text(
-                                                            "Addons".tr,
+                                                          child: TranslatedText(
+                                                            "Addons",
                                                             textAlign: TextAlign.start,
                                                             style: TextStyle(
                                                               fontFamily: AppThemeData.semiBold,
@@ -414,7 +421,7 @@ class CartScreen extends StatelessWidget {
                                                             ),
                                                             child: Padding(
                                                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                                                              child: Text(
+                                                              child: TranslatedText(
                                                                 cartProductModel.extras![i].toString(),
                                                                 textAlign: TextAlign.start,
                                                                 style: TextStyle(
@@ -452,8 +459,8 @@ class CartScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "${'Delivery Type'.tr} ${'(${controller.selectedFoodType.value})'.tr}".tr,
+                              TranslatedText(
+                                "${'Delivery Type'} ${'(${controller.selectedFoodType.value})'}",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontFamily: AppThemeData.semiBold,
@@ -480,8 +487,8 @@ class CartScreen extends StatelessWidget {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    "Instant Delivery".tr,
+                                                  TranslatedText(
+                                                    "Instant Delivery",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.medium,
@@ -492,8 +499,8 @@ class CartScreen extends StatelessWidget {
                                                   const SizedBox(
                                                     height: 5,
                                                   ),
-                                                  Text(
-                                                    "Standard".tr,
+                                                  TranslatedText(
+                                                    "Standard",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.medium,
@@ -529,12 +536,19 @@ class CartScreen extends StatelessWidget {
                                   onTap: () {
                                     controller.deliveryType.value = "schedule";
                                     BottomPicker.dateTime(
+                                      // bottom_picker 4.x: onSubmit passes Object?, and
+                                      // pickerTitle was replaced by headerBuilder.
                                       onSubmit: (index) {
-                                        controller.scheduleDateTime.value = index;
+                                        if (index is DateTime) {
+                                          controller.scheduleDateTime.value = index;
+                                        }
                                       },
                                       minDateTime: DateTime.now(),
                                       displaySubmitButton: true,
-                                      pickerTitle: Text('Schedule Time'.tr),
+                                      headerBuilder: (context) => Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        child: TranslatedText('Schedule Time'),
+                                      ),
                                       buttonSingleColor: AppThemeData.primary300,
                                     ).show(context);
                                   },
@@ -546,8 +560,8 @@ class CartScreen extends StatelessWidget {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "Schedule Time".tr,
+                                              TranslatedText(
+                                                "Schedule Time",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                   fontFamily: AppThemeData.medium,
@@ -558,8 +572,8 @@ class CartScreen extends StatelessWidget {
                                               const SizedBox(
                                                 height: 5,
                                               ),
-                                              Text(
-                                                "${'Your preferred time'.tr} ${controller.deliveryType.value == "schedule" ? Constant.timestampToDateTime(Timestamp.fromDate(controller.scheduleDateTime.value)) : ""}",
+                                              TranslatedText(
+                                                "${'Your preferred time'} ${controller.deliveryType.value == "schedule" ? Constant.timestampToDateTime(Timestamp.fromDate(controller.scheduleDateTime.value)) : ""}",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                   fontFamily: AppThemeData.medium,
@@ -579,11 +593,16 @@ class CartScreen extends StatelessWidget {
                                             BottomPicker.dateTime(
                                               initialDateTime: controller.scheduleDateTime.value,
                                               onSubmit: (index) {
-                                                controller.scheduleDateTime.value = index;
+                                                if (index is DateTime) {
+                                                  controller.scheduleDateTime.value = index;
+                                                }
                                               },
                                               minDateTime: controller.scheduleDateTime.value,
                                               displaySubmitButton: true,
-                                              pickerTitle: Text('Schedule Time'.tr),
+                                              headerBuilder: (context) => Padding(
+                                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                                child: TranslatedText('Schedule Time'),
+                                              ),
                                               buttonSingleColor: AppThemeData.primary300,
                                             ).show(context);
                                           },
@@ -604,8 +623,8 @@ class CartScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Offers & Benefits".tr,
+                              TranslatedText(
+                                "Offers & Benefits",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontFamily: AppThemeData.semiBold,
@@ -640,8 +659,8 @@ class CartScreen extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Expanded(
-                                          child: Text(
-                                            "Apply Coupons".tr,
+                                          child: TranslatedText(
+                                            "Apply Coupons",
                                             textAlign: TextAlign.start,
                                             style: TextStyle(
                                               fontFamily: AppThemeData.semiBold,
@@ -670,8 +689,8 @@ class CartScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Bill Details".tr,
+                              TranslatedText(
+                                "Bill Details",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontFamily: AppThemeData.semiBold,
@@ -744,8 +763,8 @@ class CartScreen extends StatelessWidget {
                                           isDark: themeChange.getThem(),
                                           trailing:
                                               ((controller.vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true) || controller.isEnableFreeDeliveryByAdmin.value == true)
-                                                  ? Text(
-                                                      'Free Delivery'.tr,
+                                                  ? TranslatedText(
+                                                      'Free Delivery',
                                                       style: TextStyle(
                                                         fontFamily: AppThemeData.regular,
                                                         color: AppThemeData.success400,
@@ -775,8 +794,8 @@ class CartScreen extends StatelessWidget {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    "Delivery Tips".tr,
+                                                  TranslatedText(
+                                                    "Delivery Tips",
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.regular,
                                                       color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
@@ -789,8 +808,8 @@ class CartScreen extends StatelessWidget {
                                                         controller.deliveryTips.value = 0;
                                                         controller.calculatePrice();
                                                       },
-                                                      child: Text(
-                                                        "Remove".tr,
+                                                      child: TranslatedText(
+                                                        "Remove",
                                                         style: TextStyle(
                                                           fontFamily: AppThemeData.medium,
                                                           color: AppThemeData.primary300,
@@ -865,8 +884,8 @@ class CartScreen extends StatelessWidget {
                                     const SizedBox(
                                       height: 20,
                                     ),
-                                    Text(
-                                      "Thanks with a tip!".tr,
+                                    TranslatedText(
+                                      "Thanks with a tip!",
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontFamily: AppThemeData.semiBold,
@@ -880,8 +899,8 @@ class CartScreen extends StatelessWidget {
                                     Container(
                                       width: Responsive.width(100, context),
                                       decoration: ShapeDecoration(
-                                        color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppThemeData.radiusLg)),
                                         shadows: const [
                                           BoxShadow(
                                             color: Color(0x14000000),
@@ -899,8 +918,8 @@ class CartScreen extends StatelessWidget {
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Expanded(
-                                                  child: Text(
-                                                    "Around the clock, our delivery partners bring you your favorite meals. Show your appreciation with a tip.".tr,
+                                                  child: TranslatedText(
+                                                    "Around the clock, our delivery partners bring you your favorite meals. Show your appreciation with a tip.",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.medium,
@@ -1056,8 +1075,8 @@ class CartScreen extends StatelessWidget {
                                                       child: Padding(
                                                         padding: const EdgeInsets.symmetric(vertical: 10),
                                                         child: Center(
-                                                          child: Text(
-                                                            'Other'.tr,
+                                                          child: TranslatedText(
+                                                            'Other',
                                                             style: TextStyle(
                                                               color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                                               fontSize: 14,
@@ -1087,9 +1106,9 @@ class CartScreen extends StatelessWidget {
                           child: Column(
                             children: [
                               TextFieldWidget(
-                                title: 'Remarks'.tr,
+                                title: 'Remarks',
                                 controller: controller.reMarkController.value,
-                                hintText: 'Write remarks for the restaurant'.tr,
+                                hintText: 'Write remarks for the restaurant',
                                 maxLine: 4,
                               ),
                             ],
@@ -1101,7 +1120,17 @@ class CartScreen extends StatelessWidget {
             bottomNavigationBar: cartItem.isEmpty
                 ? null
                 : Container(
-                    decoration: BoxDecoration(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50),
+                    decoration: BoxDecoration(
+                      color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(AppThemeData.radiusXl)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppThemeData.grey900.withOpacity(themeChange.getThem() ? 0.5 : 0.10),
+                          blurRadius: 24,
+                          offset: const Offset(0, -6),
+                        ),
+                      ],
+                    ),
                     height: controller.selectedPaymentMethod.value == ''
                         ? 100
                         : controller.isCashbackApply.value == true
@@ -1126,8 +1155,8 @@ class CartScreen extends StatelessWidget {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(top: 8),
-                                  child: Text(
-                                    "Cashback Offer".tr,
+                                  child: TranslatedText(
+                                    "Cashback Offer",
                                     style: TextStyle(
                                       color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                       fontFamily: AppThemeData.semiBold,
@@ -1135,16 +1164,16 @@ class CartScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                Text(
-                                  "${"Cashback Name :".tr} ${controller.bestCashback.value.title ?? ''}",
+                                TranslatedText(
+                                  "${"Cashback Name :"} ${controller.bestCashback.value.title ?? ''}",
                                   style: TextStyle(
                                     color: AppThemeData.darkGreen,
                                     fontFamily: AppThemeData.semiBold,
                                     fontSize: 13,
                                   ),
                                 ),
-                                Text(
-                                  "${"You will get".tr} ${Constant.amountShow(amount: controller.bestCashback.value.cashbackValue?.toStringAsFixed(2))} ${"cashback after completing the order.".tr}",
+                                TranslatedText(
+                                  "${"You will get"} ${Constant.amountShow(amount: controller.bestCashback.value.cashbackValue?.toStringAsFixed(2))} ${"cashback after completing the order."}",
                                   style: TextStyle(
                                     color: AppThemeData.darkGreen,
                                     fontFamily: AppThemeData.semiBold,
@@ -1171,14 +1200,14 @@ class CartScreen extends StatelessWidget {
                                       height: 25,
                                       decoration: const BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/offer_gif.gif"), fit: BoxFit.fill)),
                                       child: Center(
-                                          child: Text(
+                                          child: TranslatedText(
                                         "%",
                                         style: TextStyle(
                                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50, fontFamily: AppThemeData.semiBold, fontWeight: FontWeight.w600, fontSize: 12),
                                       )),
                                     ),
-                                    Text(
-                                      "${'Buy'.tr} ${Constant.amountShow(amount: "${double.parse("${controller.freeDeliveryByAdminModel.value.freeDeliveryOver ?? 0.0}") - controller.subTotal.value}")} ${"more for free delivery".tr}",
+                                    TranslatedText(
+                                      "${'Buy'} ${Constant.amountShow(amount: "${double.parse("${controller.freeDeliveryByAdminModel.value.freeDeliveryOver ?? 0.0}") - controller.subTotal.value}")} ${"more for free delivery"}",
                                       style: TextStyle(
                                         color: AppThemeData.primary300,
                                         fontFamily: AppThemeData.semiBold,
@@ -1232,53 +1261,73 @@ class CartScreen extends StatelessWidget {
                                                                                   : controller.selectedPaymentMethod.value == PaymentGateway.orangeMoney.name
                                                                                       ? cardDecoration(controller, PaymentGateway.orangeMoney, themeChange, "assets/images/orange_money.png")
                                                                                       : controller.selectedPaymentMethod.value == PaymentGateway.xendit.name
-                                                                                          ? cardDecoration(controller, PaymentGateway.xendit, themeChange, "assets/images/xendit.png")
-                                                                                          : cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/razorpay.png"),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Pay Via".tr,
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(
-                                              fontFamily: AppThemeData.semiBold,
-                                              color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
-                                              fontSize: 12,
+                                                                                          ? cardDecoration(controller, PaymentGateway.mtnMomo, themeChange, "assets/images/xendit.png")
+                                                                                          : controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name
+                                                                                              ? cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/razorpay.png")
+                                                                                              : controller.selectedPaymentMethod.value == PaymentGateway.mtnMomo.name
+                                                                                                  ? cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/mtnmom.png")
+                                                                                                  : controller.selectedPaymentMethod.value == PaymentGateway.phonePe.name
+                                                                                                      ? cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/phonepe.png")
+                                                                                                      : controller.selectedPaymentMethod.value == PaymentGateway.cashfree.name
+                                                                                                          ? cardDecoration(
+                                                                                                              controller, PaymentGateway.razorpay, themeChange, "assets/images/cashfree.png")
+                                                                                                          : controller.selectedPaymentMethod.value == PaymentGateway.instamojo.name
+                                                                                                              ? cardDecoration(
+                                                                                                                  controller, PaymentGateway.razorpay, themeChange, "assets/images/instamojo.png")
+                                                                                                              : controller.selectedPaymentMethod.value == PaymentGateway.foloosi.name
+                                                                                                                  ? cardDecoration(
+                                                                                                                      controller, PaymentGateway.razorpay, themeChange, "assets/images/foloosi.png")
+                                                                                                                  : controller.selectedPaymentMethod.value == PaymentGateway.payMongo.name
+                                                                                                                      ? cardDecoration(controller, PaymentGateway.razorpay, themeChange,
+                                                                                                                          "assets/images/payMongo.png")
+                                                                                                                      : const SizedBox(
+                                                                                                                          width: 10,
+                                                                                                                        ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 8, right: 8),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            TranslatedText(
+                                              "Pay Via",
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontFamily: AppThemeData.semiBold,
+                                                color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
+                                                fontSize: 12,
+                                              ),
                                             ),
-                                          ),
-                                          controller.selectedPaymentMethod.value == ''
-                                              ? Padding(
-                                                  padding: const EdgeInsets.only(top: 4),
-                                                  child: Container(width: 60, height: 12, color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
-                                                )
-                                              : Row(
-                                                  children: [
-                                                    Text(
-                                                      controller.selectedPaymentMethod.value,
-                                                      textAlign: TextAlign.start,
-                                                      style: TextStyle(
-                                                        fontFamily: AppThemeData.semiBold,
-                                                        color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                                        fontSize: 16,
+                                            controller.selectedPaymentMethod.value == ''
+                                                ? Padding(
+                                                    padding: const EdgeInsets.only(top: 4),
+                                                    child: Container(width: 60, height: 12, color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
+                                                  )
+                                                : Row(
+                                                    children: [
+                                                      TranslatedText(
+                                                        controller.selectedPaymentMethod.value,
+                                                        textAlign: TextAlign.start,
+                                                        style: TextStyle(
+                                                          fontFamily: AppThemeData.semiBold,
+                                                          color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                          fontSize: 16,
+                                                        ),
                                                       ),
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Text(
-                                                      "(Change)".tr,
-                                                      textAlign: TextAlign.start,
-                                                      style: TextStyle(
-                                                        fontFamily: AppThemeData.semiBold,
-                                                        color: AppThemeData.primary300,
-                                                        fontSize: 16,
+                                                      SizedBox(width: 5),
+                                                      TranslatedText(
+                                                        "(Change)",
+                                                        textAlign: TextAlign.start,
+                                                        style: TextStyle(
+                                                          fontFamily: AppThemeData.semiBold,
+                                                          color: AppThemeData.primary300,
+                                                          fontSize: 16,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                        ],
+                                                    ],
+                                                  ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -1292,7 +1341,7 @@ class CartScreen extends StatelessWidget {
                                           ? AppThemeData.grey800
                                           : AppThemeData.grey100,
                                   isEnabled: controller.selectedPaymentMethod.value != '',
-                                  title: "Pay Now".tr,
+                                  title: "Pay Now",
                                   height: 5,
                                   color: controller.selectedPaymentMethod.value != ''
                                       ? AppThemeData.primary300
@@ -1301,20 +1350,27 @@ class CartScreen extends StatelessWidget {
                                           : AppThemeData.grey100,
                                   fontSizes: 16,
                                   onPress: () async {
+                                    if (controller.deliveryType.value == "schedule") {
+                                      bool isOpen = controller.isSelectedDateRestaurantOpen(selectedDateTime: controller.scheduleDateTime.value);
+                                      if (isOpen == false) {
+                                        ShowToastDialog.showToast("The restaurant will be closed at the selected scheduled time. Please choose a different date and time.");
+                                        return;
+                                      }
+                                    }
                                     if ((controller.couponAmount.value >= 1) && (controller.couponAmount.value > controller.totalAmount.value)) {
-                                      ShowToastDialog.showToast("The total price must be greater than or equal to the coupon discount value for the code to apply. Please review your cart total.".tr);
+                                      ShowToastDialog.showToast("The total price must be greater than or equal to the coupon discount value for the code to apply. Please review your cart total.");
                                       return;
                                     }
                                     if ((controller.specialDiscountAmount.value >= 1) && (controller.specialDiscountAmount.value > controller.totalAmount.value)) {
-                                      ShowToastDialog.showToast("The total price must be greater than or equal to the special discount value for the code to apply. Please review your cart total.".tr);
+                                      ShowToastDialog.showToast("The total price must be greater than or equal to the special discount value for the code to apply. Please review your cart total.");
                                       return;
                                     }
                                     if (Constant.statusCheckOpenORClose(vendorModel: controller.vendorModel.value) != true) {
-                                      ShowToastDialog.showToast("The restaurant is closed at the moment. Please try placing your order later.".tr);
+                                      ShowToastDialog.showToast("The restaurant is closed at the moment. Please try placing your order later.");
                                       return;
                                     }
                                     if (controller.isOrderPlaced.value == false) {
-                                      ShowToastDialog.showLoader("Please wait".tr);
+                                      ShowToastDialog.showLoader("Please wait");
                                       bool? isZoneAvailable = await FireStoreUtils.getNearbyVendor(
                                           latitude: controller.selectedAddress.value.location!.latitude!,
                                           longitude: controller.selectedAddress.value.location!.longitude!,
@@ -1322,7 +1378,7 @@ class CartScreen extends StatelessWidget {
 
                                       if (isZoneAvailable == false) {
                                         ShowToastDialog.closeLoader();
-                                        ShowToastDialog.showToast("The selected product is not available at your delivery address.".tr);
+                                        ShowToastDialog.showToast("The selected product is not available at your delivery address.");
                                         return;
                                       }
                                       controller.isOrderPlaced.value = true;
@@ -1352,20 +1408,36 @@ class CartScreen extends StatelessWidget {
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.xendit.name) {
                                         controller.xenditPayment(context, controller.totalAmount.value.toString());
                                       } else if (controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name) {
-                                        ShowToastDialog.showLoader("Please wait".tr);
+                                        ShowToastDialog.showLoader("Please wait");
                                         RazorPayController()
                                             .createOrderRazorPay(amount: double.parse(controller.totalAmount.value.toString()), razorpayModel: controller.razorPayModel.value)
                                             .then((value) {
                                           if (value == null) {
-                                            ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
+                                            ShowToastDialog.showToast("Something went wrong, please contact admin.");
                                           } else {
                                             CreateRazorPayOrderModel result = value;
                                             controller.openCheckout(amount: controller.totalAmount.value.toString(), orderId: result.id);
                                           }
                                         });
+                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.mtnMomoModel.value.name?.toLowerCase()) {
+                                        await controller.mtnMomoMakePayment(amount: controller.totalAmount.value.toString());
+                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.phonePeModel.value.name?.toLowerCase()) {
+                                        PhonePePaymentService.phonePe = controller.phonePeModel.value;
+                                        await PhonePePaymentService.payNow(amountInPaise: (controller.totalAmount.value * 100).round());
+                                        if (PhonePePaymentService.isSucess) {
+                                          controller.placeOrder();
+                                        }
+                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.cashfreeModel.value.name?.toLowerCase()) {
+                                        controller.cashFreeMakePayment(context: context, amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
+                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.instamojoModel.value.name?.toLowerCase()) {
+                                        controller.makeInstamojoPayment(amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
+                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.foloosiModel.value.name?.toLowerCase()) {
+                                        controller.makeFoloosiPayment(amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
+                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.payMongoModel.value.name?.toLowerCase()) {
+                                        controller.makePayMongoPayment(amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
                                       } else {
                                         controller.isOrderPlaced.value = false;
-                                        ShowToastDialog.showToast("Please select payment method".tr);
+                                        ShowToastDialog.showToast("Please select payment method");
                                         ShowToastDialog.closeLoader();
                                       }
                                       controller.isOrderPlaced.value = false;
@@ -1399,8 +1471,8 @@ class CartScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(height: 10),
-                  Text(
-                    "Tax Details".tr,
+                  TranslatedText(
+                    "Tax Details",
                     style: TextStyle(
                       fontFamily: AppThemeData.medium,
                       fontSize: 18,
@@ -1412,14 +1484,14 @@ class CartScreen extends StatelessWidget {
                   const SizedBox(height: 5),
                   Constant.taxScope == 'product'
                       ? amountRow(
-                          title: "Tax on item total".tr,
+                          title: "Tax on item total",
                           amount: Constant.amountShow(
                             amount: controller.productTaxAmount.value.toString(),
                           ),
                           isDark: isDark,
                         )
                       : amountRow(
-                          title: "Tax on Order Total".tr,
+                          title: "Tax on Order Total",
                           amount: Constant.amountShow(
                             amount: controller.orderTaxAmount.value.toString(),
                           ),
@@ -1433,7 +1505,7 @@ class CartScreen extends StatelessWidget {
                       itemCount: Constant.driverDeliveryTaxList!.length,
                       itemBuilder: (context, index) {
                         return amountRow(
-                          title: "${Constant.driverDeliveryTaxList?[index].title} ${'Tax on Delivery Fee'.tr}",
+                          title: "${Constant.driverDeliveryTaxList?[index].title} ${'Tax on Delivery Fee'}",
                           amount: Constant.amountShow(
                               amount: Constant.calculateTax(
                             taxModel: Constant.driverDeliveryTaxList![index],
@@ -1450,7 +1522,7 @@ class CartScreen extends StatelessWidget {
                     itemCount: Constant.packagingTaxList!.length,
                     itemBuilder: (context, index) {
                       return amountRow(
-                        title: "${Constant.packagingTaxList![index].title} ${'Tax on Packaging Fee'.tr}",
+                        title: "${Constant.packagingTaxList![index].title} ${'Tax on Packaging Fee'}",
                         amount: controller.packagingCharge.value == 0.0
                             ? Constant.amountShow(amount: '0')
                             : Constant.amountShow(
@@ -1469,7 +1541,7 @@ class CartScreen extends StatelessWidget {
                     itemCount: Constant.platformTaxList!.length,
                     itemBuilder: (context, index) {
                       return amountRow(
-                        title: "${Constant.platformTaxList![index].title} ${'Tax on Platform Fee'.tr}",
+                        title: "${Constant.platformTaxList![index].title} ${'Tax on Platform Fee'}",
                         amount: controller.platformFee.value == 0.0
                             ? Constant.amountShow(amount: '0')
                             : Constant.amountShow(
@@ -1483,7 +1555,7 @@ class CartScreen extends StatelessWidget {
                   ),
                   if (Constant.platformTaxList!.isNotEmpty) sectionDivider(isDark),
                   amountRow(
-                    title: "Total Tax Amount".tr,
+                    title: "Total Tax Amount",
                     amount: Constant.amountShow(amount: controller.totalTaxAmount.value.toString()),
                     amountColor: AppThemeData.primary300,
                     isDark: isDark,
@@ -1493,7 +1565,7 @@ class CartScreen extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Close".tr),
+                      child: TranslatedText("Close"),
                     ),
                   ),
                 ],
@@ -1518,8 +1590,8 @@ class CartScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text(
-            title.tr,
+          child: TranslatedText(
+            title,
             style: TextStyle(
                 fontFamily: AppThemeData.regular,
                 color: textColour ?? (isDark ? AppThemeData.grey300 : AppThemeData.grey600),
@@ -1589,7 +1661,7 @@ class CartScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFieldWidget(
-                title: 'Tips Amount'.tr,
+                title: 'Tips Amount',
                 controller: controller.tipsController.value,
                 textInputType: const TextInputType.numberWithOptions(signed: true, decimal: true),
                 textInputAction: TextInputAction.done,
@@ -1599,17 +1671,17 @@ class CartScreen extends StatelessWidget {
                 prefix: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   child: Text(
-                    "${Constant.currencyModel!.symbol}".tr,
+                    "${Constant.currencyModel!.symbol}",
                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.semiBold, fontSize: 18),
                   ),
                 ),
-                hintText: 'Enter Tips Amount'.tr,
+                hintText: 'Enter Tips Amount',
               ),
               Row(
                 children: [
                   Expanded(
                     child: RoundedButtonFill(
-                      title: "Cancel".tr,
+                      title: "Cancel",
                       color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200,
                       textColor: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                       onPress: () async {
@@ -1622,12 +1694,12 @@ class CartScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: RoundedButtonFill(
-                      title: "Add".tr,
+                      title: "Add",
                       color: AppThemeData.primary300,
                       textColor: AppThemeData.grey50,
                       onPress: () async {
                         if (controller.tipsController.value.text.isEmpty) {
-                          ShowToastDialog.showToast("Please enter tips Amount".tr);
+                          ShowToastDialog.showToast("Please enter tips Amount");
                         } else {
                           controller.deliveryTips.value = double.parse(controller.tipsController.value.text);
                           controller.calculatePrice();

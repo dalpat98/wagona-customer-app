@@ -3,6 +3,7 @@ import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 class PhoneNumberController extends GetxController {
@@ -11,7 +12,7 @@ class PhoneNumberController extends GetxController {
   Rx<TextEditingController> countryISOCodeEditingController = TextEditingController(text: Constant.defaultCountryCode).obs;
 
   Future<void> sendCode() async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     await FirebaseAuth.instance
         .verifyPhoneNumber(
             phoneNumber: countryCodeEditingController.value.text + phoneNUmberEditingController.value.text,
@@ -20,7 +21,7 @@ class PhoneNumberController extends GetxController {
               debugPrint("FirebaseAuthException--->${e.message}");
               ShowToastDialog.closeLoader();
               if (e.code == 'invalid-phone-number') {
-                ShowToastDialog.showToast("invalid_phone_number".tr);
+                ShowToastDialog.showToast("invalid_phone_number");
               } else {
                 ShowToastDialog.showToast(e.message);
               }
@@ -38,7 +39,7 @@ class PhoneNumberController extends GetxController {
         .catchError((error) {
       debugPrint("catchError--->$error");
       ShowToastDialog.closeLoader();
-      ShowToastDialog.showToast("multiple_time_request".tr);
+      ShowToastDialog.showToast("multiple_time_request");
     });
   }
 }

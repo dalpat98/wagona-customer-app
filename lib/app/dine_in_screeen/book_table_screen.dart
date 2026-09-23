@@ -7,6 +7,7 @@ import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -25,8 +26,8 @@ class BookTableScreen extends StatelessWidget {
               centerTitle: false,
               titleSpacing: 0,
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
-              title: Text(
-                "Book Table".tr,
+              title: TranslatedText(
+                "Book Table",
                 style: TextStyle(
                   fontSize: 16,
                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -51,8 +52,8 @@ class BookTableScreen extends StatelessWidget {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                "Numbers of Guests".tr,
+                              child: TranslatedText(
+                                "Numbers of Guests",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -65,8 +66,7 @@ class BookTableScreen extends StatelessWidget {
                               height: Responsive.height(4, context),
                               decoration: ShapeDecoration(
                                 color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(200), side: BorderSide(color: themeChange.getThem() ? AppThemeData.grey600 : AppThemeData.grey300)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(200), side: BorderSide(color: themeChange.getThem() ? AppThemeData.grey600 : AppThemeData.grey300)),
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -126,8 +126,8 @@ class BookTableScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "When are you visiting?".tr,
+                            TranslatedText(
+                              "When are you visiting?",
                               style: TextStyle(
                                 fontSize: 16,
                                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -174,7 +174,7 @@ class BookTableScreen extends StatelessWidget {
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     crossAxisAlignment: CrossAxisAlignment.center,
                                                     children: [
-                                                      Text(
+                                                      TranslatedText(
                                                         Constant.calculateDifference(controller.dateList[index].date.toDate()) == 0
                                                             ? "Today".tr
                                                             : Constant.calculateDifference(controller.dateList[index].date.toDate()) == 1
@@ -187,7 +187,7 @@ class BookTableScreen extends StatelessWidget {
                                                           fontWeight: FontWeight.w500,
                                                         ),
                                                       ),
-                                                      Text(
+                                                      TranslatedText(
                                                         DateFormat('d MMM').format(controller.dateList[index].date.toDate()).toString(),
                                                         style: TextStyle(
                                                           fontSize: 16,
@@ -209,7 +209,7 @@ class BookTableScreen extends StatelessWidget {
                                           right: 0,
                                           child: Center(
                                             child: RoundedButtonFill(
-                                              title: "${controller.dateList[index].discountPer}%".tr,
+                                              title: "${controller.dateList[index].discountPer}%",
                                               color: AppThemeData.primary300,
                                               textColor: AppThemeData.grey50,
                                               width: 12,
@@ -225,8 +225,8 @@ class BookTableScreen extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            Text(
-                              "Select time slot and scroll to see offers".tr,
+                            TranslatedText(
+                              "Select time slot and scroll to see offers",
                               style: TextStyle(
                                 fontSize: 16,
                                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -257,7 +257,7 @@ class BookTableScreen extends StatelessWidget {
                                           backgroundColor: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
                                           selectedColor: AppThemeData.primary300,
                                           labelStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800),
-                                          label: Text(
+                                          label: TranslatedText(
                                             DateFormat('hh:mm a').format(timeSlotList.time!),
                                             style: TextStyle(
                                               color: controller.selectedTimeSlot.value == DateFormat('hh:mm a').format(timeSlotList.time!)
@@ -291,8 +291,8 @@ class BookTableScreen extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            "Special Occasion".tr,
+                          child: TranslatedText(
+                            "Special Occasion",
                             style: TextStyle(
                               fontSize: 16,
                               color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -305,8 +305,8 @@ class BookTableScreen extends StatelessWidget {
                           onTap: () {
                             controller.selectedOccasion.value = "";
                           },
-                          child: Text(
-                            "Clear".tr,
+                          child: TranslatedText(
+                            "Clear",
                             style: TextStyle(
                               color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
                               fontFamily: AppThemeData.semiBold,
@@ -334,8 +334,8 @@ class BookTableScreen extends StatelessWidget {
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
                                 visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                                 dense: true,
-                                title: Text(
-                                  '${controller.occasionList[i]}'.tr,
+                                title: TranslatedText(
+                                  '${controller.occasionList[i]}',
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -357,8 +357,8 @@ class BookTableScreen extends StatelessWidget {
                               contentPadding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
                               visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                               dense: true,
-                              title: Text(
-                                'Is this your first visit?'.tr,
+                              title: TranslatedText(
+                                'Is this your first visit?',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -382,8 +382,8 @@ class BookTableScreen extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    Text(
-                      "Personal Details".tr,
+                    TranslatedText(
+                      "Personal Details",
                       style: TextStyle(
                         fontSize: 16,
                         color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -421,7 +421,7 @@ class BookTableScreen extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                TranslatedText(
                                   "${Constant.userModel!.fullName()}",
                                   style: TextStyle(
                                     fontSize: 16,
@@ -430,7 +430,7 @@ class BookTableScreen extends StatelessWidget {
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                Text(
+                                TranslatedText(
                                   "${Constant.userModel!.email}",
                                   style: TextStyle(
                                     fontSize: 12,
@@ -448,8 +448,8 @@ class BookTableScreen extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    Text(
-                      "Additional Requests".tr,
+                    TranslatedText(
+                      "Additional Requests",
                       style: TextStyle(
                         fontSize: 16,
                         color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -462,7 +462,7 @@ class BookTableScreen extends StatelessWidget {
                     ),
                     TextFieldWidget(
                       controller: controller.additionRequestController.value,
-                      hintText: 'Add message here....'.tr,
+                      hintText: 'Add message here....',
                       maxLine: 5,
                     ),
                     const SizedBox(
@@ -478,7 +478,7 @@ class BookTableScreen extends StatelessWidget {
               child: Padding(
                   padding: const EdgeInsets.only(bottom: 20),
                   child: RoundedButtonFill(
-                    title: "Book Now".tr,
+                    title: "Book Now",
                     height: 5.5,
                     color: AppThemeData.primary300,
                     textColor: AppThemeData.grey50,

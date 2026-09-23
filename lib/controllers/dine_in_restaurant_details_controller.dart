@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/dine_in_booking/dine_in_booking_screen.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/send_notification.dart';
@@ -9,6 +9,7 @@ import 'package:customer/models/favourite_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -47,7 +48,7 @@ class DineInRestaurantDetailsController extends GetxController {
   }
 
   Future<void> orderBook() async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
 
     DateTime dt = selectedDate.value.toDate();
     String hour = DateFormat("kk:mm").format(DateFormat('hh:mm a').parse((Intl.getCurrentLocale() == "en_US") ? selectedTimeSlot.value : selectedTimeSlot.value.toLowerCase()));
@@ -55,7 +56,7 @@ class DineInRestaurantDetailsController extends GetxController {
     Timestamp selectedDateTime = Timestamp.fromDate(dt);
     if (selectedDateTime.toDate().isBefore(DateTime.now())) {
       ShowToastDialog.closeLoader();
-      ShowToastDialog.showToast('Please select a future time for your Dine-In request.'.tr);
+      ShowToastDialog.showToast('Please select a future time for your Dine-In request.');
       return;
     } else {
       DineInBookingModel dineInBookingModel = DineInBookingModel(
@@ -82,44 +83,44 @@ class DineInRestaurantDetailsController extends GetxController {
       ShowToastDialog.closeLoader();
       Get.back();
       selectedDate.value = Timestamp.now();
-      Get.to(const DineInBookingScreen());
-      ShowToastDialog.showToast('Dine-In Request submitted successfully.'.tr);
+      ShowToastDialog.showToast('Dine-In Request submitted successfully.');
+      Get.to(() => const DineInBookingScreen());
     }
   }
 
-  getRecord() {
-    for (int i = 0; i < 7; i++) {
-      final now = DateTime.now().add(Duration(days: i));
-      var day = DateFormat('EEEE').format(now);
-      if (vendorModel.value.specialDiscount?.isNotEmpty == true && vendorModel.value.specialDiscountEnable == true) {
-        for (var element in vendorModel.value.specialDiscount!) {
-          if (day == element.day.toString()) {
-            if (element.timeslot!.isNotEmpty) {
-              SpecialDiscountTimeslot employeeWithMaxSalary =
-                  element.timeslot!.reduce((item1, item2) => double.parse(item1.discount.toString()) > double.parse(item2.discount.toString()) ? item1 : item2);
-              if (employeeWithMaxSalary.discountType == "dinein") {
-                DateModel model = DateModel(date: Timestamp.fromDate(now), discountPer: employeeWithMaxSalary.discount.toString());
-                dateList.add(model);
-              } else {
-                DateModel model = DateModel(date: Timestamp.fromDate(now), discountPer: "0");
-                dateList.add(model);
+  void getRecord() {
+    try {
+      // Build one bookable date per day for the next week. Every day is always
+      // added (with its best dine-in discount, else "0") — previously days
+      // without a matching special-discount entry were skipped, which could
+      // leave the list empty and crash the screen on `dateList.first`.
+      for (int i = 0; i < 7; i++) {
+        final now = DateTime.now().add(Duration(days: i));
+        final day = DateFormat('EEEE').format(now);
+        String discountPer = "0";
+
+        if (vendorModel.value.specialDiscountEnable == true && vendorModel.value.specialDiscount?.isNotEmpty == true) {
+          for (var element in vendorModel.value.specialDiscount!) {
+            if (day == element.day.toString() && element.timeslot != null && element.timeslot!.isNotEmpty) {
+              final best = element.timeslot!.reduce((a, b) => double.parse(a.discount.toString()) > double.parse(b.discount.toString()) ? a : b);
+              if (best.discountType == "dinein") {
+                discountPer = best.discount.toString();
               }
-            } else {
-              DateModel model = DateModel(date: Timestamp.fromDate(now), discountPer: "0");
-              dateList.add(model);
             }
           }
         }
-      } else {
-        DateModel model = DateModel(date: Timestamp.fromDate(now), discountPer: "0");
-        dateList.add(model);
+        dateList.add(DateModel(date: Timestamp.fromDate(now), discountPer: discountPer));
       }
-    }
-    selectedDate.value = dateList.first.date;
 
-    timeSet(selectedDate.value);
-    if (timeSlotList.isNotEmpty) {
-      selectedTimeSlot.value = DateFormat('hh:mm a').format(timeSlotList[0].time!);
+      if (dateList.isNotEmpty) {
+        selectedDate.value = dateList.first.date;
+        timeSet(selectedDate.value);
+        if (timeSlotList.isNotEmpty) {
+          selectedTimeSlot.value = DateFormat('hh:mm a').format(timeSlotList[0].time!);
+        }
+      }
+    } catch (e) {
+      // Never let dine-in date setup blank the screen.
     }
   }
 
@@ -235,22 +236,27 @@ class DineInRestaurantDetailsController extends GetxController {
 
   RxBool isOpen = false.obs;
 
-  statusCheck() {
-    final now = DateTime.now();
-    var day = DateFormat('EEEE', 'en_US').format(now);
-    var date = DateFormat('dd-MM-yyyy').format(now);
-    for (var element in vendorModel.value.workingHours!) {
-      if (day == element.day.toString()) {
-        if (element.timeslot!.isNotEmpty) {
-          for (var element in element.timeslot!) {
-            var start = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${element.from}");
-            var end = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${element.to}");
-            if (isCurrentDateInRange(start, end)) {
-              isOpen.value = true;
+  void statusCheck() {
+    try {
+      final now = DateTime.now();
+      var day = DateFormat('EEEE', 'en_US').format(now);
+      var date = DateFormat('dd-MM-yyyy').format(now);
+      // workingHours can be null when the restaurant hasn't configured hours.
+      for (var element in (vendorModel.value.workingHours ?? [])) {
+        if (day == element.day.toString()) {
+          if (element.timeslot != null && element.timeslot!.isNotEmpty) {
+            for (var slot in element.timeslot!) {
+              var start = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${slot.from}");
+              var end = DateFormat("dd-MM-yyyy HH:mm").parse("$date ${slot.to}");
+              if (isCurrentDateInRange(start, end)) {
+                isOpen.value = true;
+              }
             }
           }
         }
       }
+    } catch (e) {
+      // Malformed / missing hours shouldn't blank the screen.
     }
   }
 

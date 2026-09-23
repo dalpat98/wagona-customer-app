@@ -1,4 +1,5 @@
 import 'package:badges/badges.dart' as badges;
+import 'package:customer/app/auth_screen/login_screen.dart';
 import 'package:customer/app/cart_screen/cart_screen.dart';
 import 'package:customer/app/dine_in_screeen/dine_in_details_screen.dart';
 import 'package:customer/app/review_list_screen/review_list_screen.dart';
@@ -17,9 +18,11 @@ import 'package:customer/themes/responsive.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -51,16 +54,16 @@ class RestaurantDetailsScreen extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            '${cartItem.length} ${'items'.tr}',
+                          TranslatedText(
+                            '${cartItem.length} ${'items'}',
                             style: TextStyle(
                               fontFamily: AppThemeData.medium,
                               color: AppThemeData.grey50,
                               fontSize: 16,
                             ),
                           ),
-                          Text(
-                            'View Cart'.tr,
+                          TranslatedText(
+                            'View Cart',
                             style: TextStyle(
                               fontFamily: AppThemeData.semiBold,
                               color: AppThemeData.grey50,
@@ -87,9 +90,18 @@ class RestaurantDetailsScreen extends StatelessWidget {
                           onTap: () {
                             Get.back();
                           },
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50,
+                          borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.28),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              size: 20,
+                              color: AppThemeData.grey50,
+                            ),
                           ),
                         ),
                         const Expanded(child: SizedBox()),
@@ -111,8 +123,8 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                     const SizedBox(
                                       width: 5,
                                     ),
-                                    Text(
-                                      "Free Delivery".tr,
+                                    TranslatedText(
+                                      "Free Delivery",
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: AppThemeData.darkGreen,
@@ -237,7 +249,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                             gradient: LinearGradient(
                                               begin: const Alignment(0.00, -1.00),
                                               end: const Alignment(0, 1),
-                                              colors: [Colors.black.withOpacity(0), Colors.black],
+                                              colors: [Colors.black.withOpacity(0), Colors.black.withOpacity(0.55)],
                                             ),
                                           ),
                                         ),
@@ -256,14 +268,16 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                 controller.vendorModel.value.photos!.length,
                                 (index) {
                                   return Obx(
-                                    () => Container(
+                                    () => AnimatedContainer(
+                                      duration: const Duration(milliseconds: 250),
+                                      curve: Curves.easeOut,
                                       margin: const EdgeInsets.only(right: 5),
                                       alignment: Alignment.centerLeft,
-                                      height: 9,
-                                      width: 9,
+                                      height: 8,
+                                      width: controller.currentPage.value == index ? 22 : 8,
                                       decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: controller.currentPage.value == index ? AppThemeData.primary300 : AppThemeData.grey300,
+                                        borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                                        color: controller.currentPage.value == index ? AppThemeData.primary300 : AppThemeData.grey50.withOpacity(0.7),
                                       ),
                                     ),
                                   );
@@ -289,7 +303,16 @@ class RestaurantDetailsScreen extends StatelessWidget {
                           children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Column(
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                                  borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                  boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                                  border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
+                                ),
+                                child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -302,21 +325,20 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
+                                            TranslatedText(
                                               controller.vendorModel.value.title.toString(),
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
                                               style: TextStyle(
-                                                fontSize: 22,
+                                                fontSize: 24,
                                                 overflow: TextOverflow.ellipsis,
-                                                fontFamily: AppThemeData.semiBold,
-                                                fontWeight: FontWeight.w600,
+                                                fontFamily: AppThemeData.extraBold,
                                                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                               ),
                                             ),
                                             SizedBox(
                                               width: Responsive.width(78, context),
-                                              child: Text(
+                                              child: TranslatedText(
                                                 controller.vendorModel.value.location.toString(),
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
@@ -333,16 +355,17 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                         children: [
                                           Container(
                                             decoration: ShapeDecoration(
-                                              color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
+                                              color: AppThemeData.lightGreen,
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
                                             ),
                                             child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                                               child: Row(
                                                 children: [
                                                   SvgPicture.asset(
                                                     "assets/icons/ic_star.svg",
-                                                    colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                                    width: 16,
+                                                    colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                                   ),
                                                   const SizedBox(
                                                     width: 5,
@@ -350,10 +373,9 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                   Text(
                                                     Constant.calculateReview(
                                                         reviewCount: controller.vendorModel.value.reviewsCount!.toStringAsFixed(0), reviewSum: controller.vendorModel.value.reviewsSum.toString()),
-                                                    style: TextStyle(
-                                                      color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                      fontFamily: AppThemeData.semiBold,
-                                                      fontWeight: FontWeight.w600,
+                                                    style: const TextStyle(
+                                                      color: AppThemeData.darkGreen,
+                                                      fontFamily: AppThemeData.bold,
                                                     ),
                                                   ),
                                                 ],
@@ -364,8 +386,8 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                             onTap: () {
                                               Get.to(const ReviewListScreen(), arguments: {"vendorModel": controller.vendorModel.value});
                                             },
-                                            child: Text(
-                                              "${controller.vendorModel.value.reviewsCount} ${'Ratings'.tr}",
+                                            child: TranslatedText(
+                                              "${controller.vendorModel.value.reviewsCount} ${'Ratings'}",
                                               style: TextStyle(
                                                 decoration: TextDecoration.underline,
                                                 color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey700,
@@ -379,16 +401,33 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                   ),
                                   Row(
                                     children: [
-                                      Text(
-                                        controller.isOpen.value ? "Open".tr : "Close".tr,
-                                        textAlign: TextAlign.start,
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          overflow: TextOverflow.ellipsis,
-                                          fontFamily: AppThemeData.semiBold,
-                                          fontWeight: FontWeight.w600,
-                                          color: controller.isOpen.value ? AppThemeData.success400 : AppThemeData.danger300,
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: controller.isOpen.value ? AppThemeData.lightGreen : AppThemeData.danger50,
+                                          borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.circle,
+                                              size: 8,
+                                              color: controller.isOpen.value ? AppThemeData.darkGreen : AppThemeData.danger300,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            TranslatedText(
+                                              controller.isOpen.value ? "Open" : "Close",
+                                              textAlign: TextAlign.start,
+                                              maxLines: 1,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                overflow: TextOverflow.ellipsis,
+                                                fontFamily: AppThemeData.bold,
+                                                color: controller.isOpen.value ? AppThemeData.darkGreen : AppThemeData.danger300,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                       Padding(
@@ -402,13 +441,13 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                       InkWell(
                                         onTap: () {
                                           if (controller.vendorModel.value.workingHours!.isEmpty) {
-                                            ShowToastDialog.showToast("Timing is not added by restaurant".tr);
+                                            ShowToastDialog.showToast("Timing is not added by restaurant");
                                           } else {
                                             timeShowBottomSheet(context, controller);
                                           }
                                         },
-                                        child: Text(
-                                          "View Timings".tr,
+                                        child: TranslatedText(
+                                          "View Timings",
                                           textAlign: TextAlign.start,
                                           maxLines: 1,
                                           style: TextStyle(
@@ -424,15 +463,18 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                                  controller.vendorModel.value.dineInActive == true || (controller.vendorModel.value.openDineTime != null && controller.vendorModel.value.openDineTime!.isNotEmpty)
+                                  (Constant.isDineInEnable == true &&
+                                          controller.vendorModel.value.enabledDiveInFuture == true &&
+                                          controller.vendorModel.value.openDineTime != null &&
+                                          controller.vendorModel.value.openDineTime?.isNotEmpty == true)
                                       ? Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             const SizedBox(
                                               height: 20,
                                             ),
-                                            Text(
-                                              "Also applicable on table booking".tr,
+                                            TranslatedText(
+                                              "Also applicable on table booking",
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
                                               style: TextStyle(
@@ -454,10 +496,10 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                 height: 80,
                                                 clipBehavior: Clip.antiAlias,
                                                 decoration: ShapeDecoration(
-                                                  color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                                                  color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.primary50,
                                                   shape: RoundedRectangleBorder(
-                                                    side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50),
-                                                    borderRadius: BorderRadius.circular(16),
+                                                    side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.primary100),
+                                                    borderRadius: BorderRadius.circular(AppThemeData.radiusMd),
                                                   ),
                                                 ),
                                                 child: Padding(
@@ -472,8 +514,8 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                           mainAxisAlignment: MainAxisAlignment.center,
                                                           crossAxisAlignment: CrossAxisAlignment.start,
                                                           children: [
-                                                            Text(
-                                                              "Table Booking".tr,
+                                                            TranslatedText(
+                                                              "Table Booking",
                                                               style: TextStyle(
                                                                 fontSize: 16,
                                                                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -481,8 +523,8 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                                 fontWeight: FontWeight.w600,
                                                               ),
                                                             ),
-                                                            Text(
-                                                              "Quick Conformations".tr,
+                                                            TranslatedText(
+                                                              "Quick Confirmation",
                                                               style: TextStyle(
                                                                 fontSize: 12,
                                                                 color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -509,8 +551,8 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                             const SizedBox(
                                               height: 20,
                                             ),
-                                            Text(
-                                              "Additional Offers".tr,
+                                            TranslatedText(
+                                              "Additional Offers",
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
                                               style: TextStyle(
@@ -532,15 +574,14 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                   const SizedBox(
                                     height: 20,
                                   ),
-                                  Text(
-                                    "Menu".tr,
+                                  TranslatedText(
+                                    "Menu",
                                     textAlign: TextAlign.start,
                                     maxLines: 1,
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 20,
                                       overflow: TextOverflow.ellipsis,
-                                      fontFamily: AppThemeData.semiBold,
-                                      fontWeight: FontWeight.w600,
+                                      fontFamily: AppThemeData.bold,
                                       color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                     ),
                                   ),
@@ -549,7 +590,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                   ),
                                   TextFieldWidget(
                                     controller: controller.searchEditingController.value,
-                                    hintText: 'Search the dish, food, meals and more...'.tr,
+                                    hintText: 'Search the dish, food, meals and more...',
                                     onchange: (value) {
                                       controller.searchProduct(value);
                                     },
@@ -573,14 +614,14 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                           decoration: controller.isVag.value
                                               ? ShapeDecoration(
-                                                  color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
+                                                  color: AppThemeData.lightGreen,
                                                   shape: RoundedRectangleBorder(
-                                                    side: BorderSide(width: 1, color: AppThemeData.primary300),
+                                                    side: const BorderSide(width: 1.5, color: AppThemeData.darkGreen),
                                                     borderRadius: BorderRadius.circular(120),
                                                   ),
                                                 )
                                               : ShapeDecoration(
-                                                  color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                                                  color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
                                                   shape: RoundedRectangleBorder(
                                                     side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
                                                     borderRadius: BorderRadius.circular(120),
@@ -597,8 +638,8 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                 width: 20,
                                               ),
                                               const SizedBox(width: 8),
-                                              Text(
-                                                'Veg'.tr,
+                                              TranslatedText(
+                                                'Veg',
                                                 style: TextStyle(
                                                   color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
                                                   fontFamily: AppThemeData.semiBold,
@@ -625,14 +666,14 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                           decoration: controller.isNonVag.value
                                               ? ShapeDecoration(
-                                                  color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
+                                                  color: AppThemeData.danger50,
                                                   shape: RoundedRectangleBorder(
-                                                    side: BorderSide(width: 1, color: AppThemeData.primary300),
+                                                    side: const BorderSide(width: 1.5, color: AppThemeData.danger300),
                                                     borderRadius: BorderRadius.circular(120),
                                                   ),
                                                 )
                                               : ShapeDecoration(
-                                                  color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                                                  color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
                                                   shape: RoundedRectangleBorder(
                                                     side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
                                                     borderRadius: BorderRadius.circular(120),
@@ -649,8 +690,8 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                 width: 20,
                                               ),
                                               const SizedBox(width: 8),
-                                              Text(
-                                                'Non Veg'.tr,
+                                              TranslatedText(
+                                                'Non Veg',
                                                 style: TextStyle(
                                                   color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
                                                   fontFamily: AppThemeData.semiBold,
@@ -664,6 +705,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                     ],
                                   ),
                                 ],
+                                ),
                               ),
                             ),
                             const SizedBox(
@@ -696,7 +738,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
             //         onTap: () {},
             //         child: SizedBox(
             //           width: 230,
-            //           child: Text(
+            //           child: TranslatedText(
             //             vendorCategoryModel.title.toString(),
             //             textAlign: TextAlign.start,
             //             maxLines: 1,
@@ -733,7 +775,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
             //             crossAxisAlignment: CrossAxisAlignment.center,
             //             children: [
             //               SvgPicture.asset("assets/icons/ic_book.svg"),
-            //               Text(
+            //               TranslatedText(
             //                 "Menu",
             //                 textAlign: TextAlign.start,
             //                 maxLines: 1,
@@ -802,7 +844,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    TranslatedText(
                                       "${workingHours.day}",
                                       textAlign: TextAlign.start,
                                       maxLines: 1,
@@ -837,7 +879,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                             borderRadius: const BorderRadius.all(Radius.circular(12)),
                                                             border: Border.all(color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey200)),
                                                         child: Center(
-                                                          child: Text(
+                                                          child: TranslatedText(
                                                             timeSlotModel.from.toString(),
                                                             style: TextStyle(
                                                               fontFamily: AppThemeData.medium,
@@ -858,7 +900,7 @@ class RestaurantDetailsScreen extends StatelessWidget {
                                                             borderRadius: const BorderRadius.all(Radius.circular(12)),
                                                             border: Border.all(color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey200)),
                                                         child: Center(
-                                                          child: Text(
+                                                          child: TranslatedText(
                                                             timeSlotModel.to.toString(),
                                                             style: TextStyle(
                                                               fontFamily: AppThemeData.medium,
@@ -926,7 +968,7 @@ class CouponListView extends StatelessWidget {
                         width: 60,
                         decoration: const BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/offer_gif.gif"), fit: BoxFit.fill)),
                         child: Center(
-                            child: Text(
+                            child: TranslatedText(
                           offerModel.discountType == "Fix Price" ? Constant.amountShow(amount: offerModel.discount) : "${offerModel.discount}%",
                           style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50, fontFamily: AppThemeData.semiBold, fontWeight: FontWeight.w600, fontSize: 12),
                         )),
@@ -936,7 +978,7 @@ class CouponListView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          TranslatedText(
                             offerModel.description.toString(),
                             style: TextStyle(
                               fontSize: 16,
@@ -949,13 +991,13 @@ class CouponListView extends StatelessWidget {
                             onTap: () {
                               Clipboard.setData(ClipboardData(text: offerModel.code.toString())).then(
                                 (value) {
-                                  ShowToastDialog.showToast("Copied".tr);
+                                  ShowToastDialog.showToast("Copied");
                                 },
                               );
                             },
                             child: Row(
                               children: [
-                                Text(
+                                TranslatedText(
                                   offerModel.code.toString(),
                                   style: TextStyle(
                                     fontSize: 12,
@@ -972,7 +1014,7 @@ class CouponListView extends StatelessWidget {
                                 const SizedBox(
                                   width: 5,
                                 ),
-                                Text(
+                                TranslatedText(
                                   Constant.timestampToDateTime(offerModel.expiresAt!),
                                   style: TextStyle(
                                     fontSize: 12,
@@ -1007,7 +1049,6 @@ class ProductListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return Container(
-      color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ListView.builder(
         shrinkWrap: true,
@@ -1021,12 +1062,13 @@ class ProductListView extends StatelessWidget {
             tilePadding: EdgeInsets.zero,
             shape: const Border(),
             initiallyExpanded: true,
+            iconColor: AppThemeData.primary300,
+            collapsedIconColor: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
             title: Text(
-              "${vendorCategoryModel.title.toString()} (${controller.productList.where((p0) => p0.categoryID == vendorCategoryModel.id).toList().length})",
+              "${vendorCategoryModel.title.toString().tr} (${controller.productList.where((p0) => p0.categoryID == vendorCategoryModel.id).toList().length})",
               style: TextStyle(
-                fontSize: 18,
-                fontFamily: AppThemeData.semiBold,
-                fontWeight: FontWeight.w600,
+                fontSize: 19,
+                fontFamily: AppThemeData.bold,
                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
               ),
             ),
@@ -1064,8 +1106,15 @@ class ProductListView extends StatelessWidget {
                       price = Constant.productCommissionPrice(controller.vendorModel.value, productModel.price.toString());
                       disPrice = double.parse(productModel.disPrice.toString()) <= 0 ? "0" : Constant.productCommissionPrice(controller.vendorModel.value, productModel.disPrice.toString());
                     }
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                        borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                        boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                        border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1081,8 +1130,8 @@ class ProductListView extends StatelessWidget {
                                     const SizedBox(
                                       width: 5,
                                     ),
-                                    Text(
-                                      productModel.nonveg == true ? "Non Veg.".tr : "Pure veg.".tr,
+                                    TranslatedText(
+                                      productModel.nonveg == true ? "Non Veg." : "Pure veg.",
                                       style: TextStyle(
                                         color: productModel.nonveg == true ? AppThemeData.danger300 : AppThemeData.success400,
                                         fontFamily: AppThemeData.semiBold,
@@ -1094,7 +1143,7 @@ class ProductListView extends StatelessWidget {
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                Text(
+                                TranslatedText(
                                   productModel.name.toString(),
                                   style: TextStyle(
                                     fontSize: 18,
@@ -1107,10 +1156,9 @@ class ProductListView extends StatelessWidget {
                                     ? Text(
                                         Constant.amountShow(amount: price),
                                         style: TextStyle(
-                                          fontSize: 16,
-                                          color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                          fontFamily: AppThemeData.semiBold,
-                                          fontWeight: FontWeight.w600,
+                                          fontSize: 17,
+                                          color: AppThemeData.primary300,
+                                          fontFamily: AppThemeData.bold,
                                         ),
                                       )
                                     : Row(
@@ -1118,10 +1166,9 @@ class ProductListView extends StatelessWidget {
                                           Text(
                                             Constant.amountShow(amount: disPrice),
                                             style: TextStyle(
-                                              fontSize: 16,
-                                              color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                              fontFamily: AppThemeData.semiBold,
-                                              fontWeight: FontWeight.w600,
+                                              fontSize: 17,
+                                              color: AppThemeData.primary300,
+                                              fontFamily: AppThemeData.bold,
                                             ),
                                           ),
                                           const SizedBox(
@@ -1159,7 +1206,7 @@ class ProductListView extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                Text(
+                                TranslatedText(
                                   "${productModel.description}",
                                   maxLines: 2,
                                   style: TextStyle(
@@ -1191,8 +1238,8 @@ class ProductListView extends StatelessWidget {
                                       const SizedBox(
                                         width: 8,
                                       ),
-                                      Text(
-                                        "Info".tr,
+                                      TranslatedText(
+                                        "Info",
                                         maxLines: 2,
                                         style: TextStyle(
                                           overflow: TextOverflow.ellipsis,
@@ -1225,7 +1272,7 @@ class ProductListView extends StatelessWidget {
                                     gradient: LinearGradient(
                                       begin: const Alignment(-0.00, -1.00),
                                       end: const Alignment(0, 1),
-                                      colors: [Colors.black.withOpacity(0), const Color(0xFF111827)],
+                                      colors: [Colors.black.withOpacity(0), Colors.black.withOpacity(0.45)],
                                     ),
                                   ),
                                 ),
@@ -1258,7 +1305,7 @@ class ProductListView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                controller.isOpen.value == false || Constant.userModel == null
+                                controller.isOpen.value == false
                                     ? const SizedBox()
                                     : Positioned(
                                         bottom: 10,
@@ -1266,58 +1313,63 @@ class ProductListView extends StatelessWidget {
                                         right: 20,
                                         child: selectedVariants.isNotEmpty || (productModel.addOnsTitle != null && productModel.addOnsTitle!.isNotEmpty)
                                             ? RoundedButtonFill(
-                                                title: "Add".tr,
+                                                title: "Add",
                                                 width: 10,
                                                 height: 4,
-                                                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                                textColor: AppThemeData.primary300,
+                                                gradient: AppThemeData.primaryGradient,
+                                                textColor: AppThemeData.grey50,
                                                 onPress: () async {
-                                                  controller.selectedVariants.clear();
-                                                  controller.selectedIndexVariants.clear();
-                                                  controller.selectedIndexArray.clear();
-                                                  controller.selectedAddOns.clear();
-                                                  controller.quantity.value = 1;
-                                                  if (productModel.itemAttribute != null) {
-                                                    if (productModel.itemAttribute!.attributes!.isNotEmpty) {
-                                                      for (var element in productModel.itemAttribute!.attributes!) {
-                                                        if (element.attributeOptions!.isNotEmpty) {
-                                                          controller.selectedVariants
-                                                              .add(productModel.itemAttribute!.attributes![productModel.itemAttribute!.attributes!.indexOf(element)].attributeOptions![0].toString());
-                                                          controller.selectedIndexVariants.add(
-                                                              '${productModel.itemAttribute!.attributes!.indexOf(element)} _${productModel.itemAttribute!.attributes![0].attributeOptions![0].toString()}');
-                                                          controller.selectedIndexArray.add('${productModel.itemAttribute!.attributes!.indexOf(element)}_0');
+                                                  if (Constant.userModel?.id == null) {
+                                                    ShowToastDialog.showToast("Please login first to add items to your cart.");
+                                                    Get.offAll(LoginScreen());
+                                                  } else {
+                                                    controller.selectedVariants.clear();
+                                                    controller.selectedIndexVariants.clear();
+                                                    controller.selectedIndexArray.clear();
+                                                    controller.selectedAddOns.clear();
+                                                    controller.quantity.value = 1;
+                                                    if (productModel.itemAttribute != null) {
+                                                      if (productModel.itemAttribute!.attributes!.isNotEmpty) {
+                                                        for (var element in productModel.itemAttribute!.attributes!) {
+                                                          if (element.attributeOptions!.isNotEmpty) {
+                                                            controller.selectedVariants
+                                                                .add(productModel.itemAttribute!.attributes![productModel.itemAttribute!.attributes!.indexOf(element)].attributeOptions![0].toString());
+                                                            controller.selectedIndexVariants.add(
+                                                                '${productModel.itemAttribute!.attributes!.indexOf(element)} _${productModel.itemAttribute!.attributes![0].attributeOptions![0].toString()}');
+                                                            controller.selectedIndexArray.add('${productModel.itemAttribute!.attributes!.indexOf(element)}_0');
+                                                          }
                                                         }
                                                       }
-                                                    }
-                                                    final bool productIsInList = cartItem.any((product) =>
-                                                        product.id ==
-                                                        "${productModel.id}~${productModel.itemAttribute!.variants!.where((element) => element.variantSku == controller.selectedVariants.join('-')).isNotEmpty ? productModel.itemAttribute!.variants!.where((element) => element.variantSku == controller.selectedVariants.join('-')).first.variantId.toString() : ""}");
-
-                                                    if (productIsInList) {
-                                                      CartProductModel element = cartItem.firstWhere((product) =>
+                                                      final bool productIsInList = cartItem.any((product) =>
                                                           product.id ==
                                                           "${productModel.id}~${productModel.itemAttribute!.variants!.where((element) => element.variantSku == controller.selectedVariants.join('-')).isNotEmpty ? productModel.itemAttribute!.variants!.where((element) => element.variantSku == controller.selectedVariants.join('-')).first.variantId.toString() : ""}");
-                                                      controller.quantity.value = element.quantity!;
-                                                      if (element.extras != null) {
-                                                        for (var element in element.extras!) {
-                                                          controller.selectedAddOns.add(element);
+
+                                                      if (productIsInList) {
+                                                        CartProductModel element = cartItem.firstWhere((product) =>
+                                                            product.id ==
+                                                            "${productModel.id}~${productModel.itemAttribute!.variants!.where((element) => element.variantSku == controller.selectedVariants.join('-')).isNotEmpty ? productModel.itemAttribute!.variants!.where((element) => element.variantSku == controller.selectedVariants.join('-')).first.variantId.toString() : ""}");
+                                                        controller.quantity.value = element.quantity!;
+                                                        if (element.extras != null) {
+                                                          for (var element in element.extras!) {
+                                                            controller.selectedAddOns.add(element);
+                                                          }
+                                                        }
+                                                      }
+                                                    } else {
+                                                      if (cartItem.where((product) => product.id == "${productModel.id}").isNotEmpty) {
+                                                        CartProductModel element = cartItem.firstWhere((product) => product.id == "${productModel.id}");
+                                                        controller.quantity.value = element.quantity!;
+                                                        if (element.extras != null) {
+                                                          for (var element in element.extras!) {
+                                                            controller.selectedAddOns.add(element);
+                                                          }
                                                         }
                                                       }
                                                     }
-                                                  } else {
-                                                    if (cartItem.where((product) => product.id == "${productModel.id}").isNotEmpty) {
-                                                      CartProductModel element = cartItem.firstWhere((product) => product.id == "${productModel.id}");
-                                                      controller.quantity.value = element.quantity!;
-                                                      if (element.extras != null) {
-                                                        for (var element in element.extras!) {
-                                                          controller.selectedAddOns.add(element);
-                                                        }
-                                                      }
-                                                    }
+                                                    controller.update();
+                                                    controller.calculatePrice(productModel);
+                                                    productDetailsBottomSheet(context, productModel);
                                                   }
-                                                  controller.update();
-                                                  controller.calculatePrice(productModel);
-                                                  productDetailsBottomSheet(context, productModel);
                                                 },
                                               )
                                             : Obx(
@@ -1346,7 +1398,7 @@ class ProductListView extends StatelessWidget {
                                                                 },
                                                                 child: const Icon(Icons.remove)),
                                                             Padding(
-                                                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                                                              padding: const EdgeInsets.symmetric(horizontal: 10),
                                                               child: Text(
                                                                 cartItem.where((p0) => p0.id == productModel.id).first.quantity.toString(),
                                                                 textAlign: TextAlign.start,
@@ -1371,7 +1423,7 @@ class ProductListView extends StatelessWidget {
                                                                         isIncrement: true,
                                                                         quantity: cartItem.where((p0) => p0.id == productModel.id).first.quantity! + 1);
                                                                   } else {
-                                                                    ShowToastDialog.showToast("Out of stock".tr);
+                                                                    ShowToastDialog.showToast("Out of stock");
                                                                   }
                                                                 },
                                                                 child: const Icon(Icons.add)),
@@ -1379,16 +1431,21 @@ class ProductListView extends StatelessWidget {
                                                         ),
                                                       )
                                                     : RoundedButtonFill(
-                                                        title: "Add".tr,
+                                                        title: "Add",
                                                         width: 10,
                                                         height: 4,
                                                         color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
                                                         textColor: AppThemeData.primary300,
                                                         onPress: () async {
-                                                          if (1 <= (productModel.quantity ?? 0) || (productModel.quantity ?? 0) == -1) {
-                                                            controller.addToCart(productModel: productModel, price: price, discountPrice: disPrice, isIncrement: true, quantity: 1);
+                                                          if (Constant.userModel?.id == null) {
+                                                            ShowToastDialog.showToast("Please login first to add items to your cart.");
+                                                            Get.offAll(LoginScreen());
                                                           } else {
-                                                            ShowToastDialog.showToast("Out of stock".tr);
+                                                            if (1 <= (productModel.quantity ?? 0) || (productModel.quantity ?? 0) == -1) {
+                                                              controller.addToCart(productModel: productModel, price: price, discountPrice: disPrice, isIncrement: true, quantity: 1);
+                                                            } else {
+                                                              ShowToastDialog.showToast("Out of stock");
+                                                            }
                                                           }
                                                         },
                                                       ),
@@ -1448,8 +1505,8 @@ class ProductListView extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    "Food Information's".tr,
+                  child: TranslatedText(
+                    "Food Information's",
                     textAlign: TextAlign.start,
                     style: TextStyle(
                       fontFamily: AppThemeData.semiBold,
@@ -1461,7 +1518,7 @@ class ProductListView extends StatelessWidget {
                 const SizedBox(
                   height: 5,
                 ),
-                Text(
+                TranslatedText(
                   productModel.description.toString(),
                   textAlign: TextAlign.start,
                   style: TextStyle(
@@ -1477,8 +1534,8 @@ class ProductListView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        "Gram".tr,
+                      child: TranslatedText(
+                        "Gram",
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           fontFamily: AppThemeData.regular,
@@ -1487,7 +1544,7 @@ class ProductListView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
+                    TranslatedText(
                       productModel.grams.toString(),
                       textAlign: TextAlign.start,
                       style: TextStyle(
@@ -1505,8 +1562,8 @@ class ProductListView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        "Calories".tr,
+                      child: TranslatedText(
+                        "Calories",
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           fontFamily: AppThemeData.regular,
@@ -1515,7 +1572,7 @@ class ProductListView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
+                    TranslatedText(
                       productModel.calories.toString(),
                       textAlign: TextAlign.start,
                       style: TextStyle(
@@ -1533,8 +1590,8 @@ class ProductListView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        "Proteins".tr,
+                      child: TranslatedText(
+                        "Proteins",
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           fontFamily: AppThemeData.regular,
@@ -1543,7 +1600,7 @@ class ProductListView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
+                    TranslatedText(
                       productModel.proteins.toString(),
                       textAlign: TextAlign.start,
                       style: TextStyle(
@@ -1561,8 +1618,8 @@ class ProductListView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        "Fats".tr,
+                      child: TranslatedText(
+                        "Fats",
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           fontFamily: AppThemeData.regular,
@@ -1571,7 +1628,7 @@ class ProductListView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
+                    TranslatedText(
                       productModel.fats.toString(),
                       textAlign: TextAlign.start,
                       style: TextStyle(
@@ -1591,8 +1648,8 @@ class ProductListView extends StatelessWidget {
                         children: [
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              "Specification".tr,
+                            child: TranslatedText(
+                              "Specification",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontFamily: AppThemeData.semiBold,
@@ -1612,7 +1669,7 @@ class ProductListView extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    TranslatedText(
                                       productModel.productSpecification!.keys.elementAt(index),
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
@@ -1621,7 +1678,7 @@ class ProductListView extends StatelessWidget {
                                         fontSize: 16,
                                       ),
                                     ),
-                                    Text(
+                                    TranslatedText(
                                       productModel.productSpecification!.values.elementAt(index),
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
@@ -1642,7 +1699,7 @@ class ProductListView extends StatelessWidget {
                   height: 20,
                 ),
                 RoundedButtonFill(
-                  title: "Back".tr,
+                  title: "Back",
                   color: AppThemeData.primary300,
                   textColor: AppThemeData.grey50,
                   onPress: () async {
@@ -1721,7 +1778,7 @@ class ProductDetailsView extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
-                                      child: Text(
+                                      child: TranslatedText(
                                         productModel.name.toString(),
                                         textAlign: TextAlign.start,
                                         maxLines: 1,
@@ -1762,7 +1819,7 @@ class ProductDetailsView extends StatelessWidget {
                                     )
                                   ],
                                 ),
-                                Text(
+                                TranslatedText(
                                   productModel.description.toString(),
                                   textAlign: TextAlign.start,
                                   style: TextStyle(
@@ -1817,7 +1874,7 @@ class ProductDetailsView extends StatelessWidget {
                                               children: [
                                                 Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                  child: Text(
+                                                  child: TranslatedText(
                                                     title,
                                                     style: TextStyle(
                                                       fontSize: 16,
@@ -1830,8 +1887,8 @@ class ProductDetailsView extends StatelessWidget {
                                                 ),
                                                 Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                  child: Text(
-                                                    "Required • Select any 1 option".tr,
+                                                  child: TranslatedText(
+                                                    "Required • Select any 1 option",
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       overflow: TextOverflow.ellipsis,
@@ -1892,7 +1949,7 @@ class ProductDetailsView extends StatelessWidget {
                                                   label: Row(
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
-                                                      Text(
+                                                      TranslatedText(
                                                         productModel.itemAttribute!.attributes![index].attributeOptions![i].toString(),
                                                         style: TextStyle(
                                                           overflow: TextOverflow.ellipsis,
@@ -1945,8 +2002,8 @@ class ProductDetailsView extends StatelessWidget {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    child: Text(
-                                      "Addons".tr,
+                                    child: TranslatedText(
+                                      "Addons",
                                       style: TextStyle(
                                         fontSize: 16,
                                         overflow: TextOverflow.ellipsis,
@@ -1973,7 +2030,7 @@ class ProductDetailsView extends StatelessWidget {
                                           child: Row(
                                             children: [
                                               Expanded(
-                                                child: Text(
+                                                child: TranslatedText(
                                                   title,
                                                   textAlign: TextAlign.start,
                                                   maxLines: 1,
@@ -2085,7 +2142,7 @@ class ProductDetailsView extends StatelessWidget {
                                       controller.quantity.value += 1;
                                       controller.update();
                                     } else {
-                                      ShowToastDialog.showToast("Out of stock".tr);
+                                      ShowToastDialog.showToast("Out of stock");
                                     }
                                   } else {
                                     int totalQuantity = int.parse(
@@ -2094,7 +2151,7 @@ class ProductDetailsView extends StatelessWidget {
                                       controller.quantity.value += 1;
                                       controller.update();
                                     } else {
-                                      ShowToastDialog.showToast("Out of stock".tr);
+                                      ShowToastDialog.showToast("Out of stock");
                                     }
                                   }
                                 },
@@ -2109,7 +2166,7 @@ class ProductDetailsView extends StatelessWidget {
                     Expanded(
                       flex: 2,
                       child: RoundedButtonFill(
-                        title: "${'Add item'.tr} ${Constant.amountShow(amount: controller.calculatePrice(productModel))}".tr,
+                        title: "${'Add item'} ${Constant.amountShow(amount: controller.calculatePrice(productModel))}",
                         height: 5.5,
                         color: AppThemeData.primary300,
                         textColor: AppThemeData.grey50,

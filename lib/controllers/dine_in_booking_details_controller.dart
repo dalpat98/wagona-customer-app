@@ -13,7 +13,7 @@ class DineInBookingDetailsController extends GetxController {
 
   Rx<DineInBookingModel> bookingModel = DineInBookingModel().obs;
 
-  getArgument() async {
+  Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       bookingModel.value = argumentData['bookingModel'];

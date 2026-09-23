@@ -6,6 +6,7 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -23,8 +24,8 @@ class ViewAllCategoryDineInScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Categories".tr,
+              title: TranslatedText(
+                "Categories",
                 style: TextStyle(
                   fontSize: 16,
                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -71,15 +72,18 @@ class ViewAllCategoryDineInScreen extends StatelessWidget {
                                     width: 60,
                                     height: 60,
                                     child: ClipOval(
-                                      child: NetworkImageWidget(
-                                        imageUrl: vendorCategoryModel.photo.toString(),
-                                        fit: BoxFit.cover,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: NetworkImageWidget(
+                                          imageUrl: vendorCategoryModel.photo.toString(),
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                    child: Text(
+                                    child: TranslatedText(
                                       '${vendorCategoryModel.title}',
                                       textAlign: TextAlign.center,
                                       maxLines: 2,

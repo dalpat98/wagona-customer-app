@@ -12,8 +12,8 @@ class MyProfileController extends GetxController {
   @override
   void onInit() {
     // TODO: implement onInit
-    getThem();
     super.onInit();
+    getThem();
   }
 
   RxString isDarkMode = "Light".obs;

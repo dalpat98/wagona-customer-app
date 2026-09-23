@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/chat_screens/ChatVideoContainer.dart';
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/constant.dart';
@@ -30,15 +29,21 @@ import 'package:customer/models/mail_setting.dart';
 import 'package:customer/models/notification_model.dart';
 import 'package:customer/models/on_boarding_model.dart';
 import 'package:customer/models/order_model.dart';
+import 'package:customer/models/payment_model/cashfree_model.dart';
 import 'package:customer/models/payment_model/cod_setting_model.dart';
 import 'package:customer/models/payment_model/flutter_wave_model.dart';
+import 'package:customer/models/payment_model/foloosi_model.dart';
+import 'package:customer/models/payment_model/instamojo_model.dart';
 import 'package:customer/models/payment_model/mercado_pago_model.dart';
-import 'package:customer/models/payment_model/mid_trans.dart';
+import 'package:customer/models/payment_model/midtrans_model.dart';
+import 'package:customer/models/payment_model/mtnmomo_model.dart';
 import 'package:customer/models/payment_model/orange_money.dart';
 import 'package:customer/models/payment_model/pay_fast_model.dart';
 import 'package:customer/models/payment_model/pay_stack_model.dart';
+import 'package:customer/models/payment_model/paymongo_model.dart';
 import 'package:customer/models/payment_model/paypal_model.dart';
 import 'package:customer/models/payment_model/paytm_model.dart';
+import 'package:customer/models/payment_model/phonepe_model.dart';
 import 'package:customer/models/payment_model/razorpay_model.dart';
 import 'package:customer/models/payment_model/stripe_model.dart';
 import 'package:customer/models/payment_model/wallet_setting_model.dart';
@@ -63,8 +68,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+
 import 'package:geocoding/geocoding.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -179,17 +184,21 @@ class FireStoreUtils {
   }
 
   static Future<bool?> updateUserWallet({required String amount, required String userId}) async {
-    bool isAdded = false;
-    await getUserProfile(userId).then((value) async {
-      if (value != null) {
-        UserModel userModel = value;
-        userModel.walletAmount = (double.parse(userModel.walletAmount.toString()) + double.parse(amount));
-        await FireStoreUtils.updateUser(userModel).then((value) {
-          isAdded = value;
-        });
+    // Atomic increment instead of read-modify-write: no extra profile read, and
+    // concurrent credits can't lose updates by clobbering each other's total.
+    try {
+      final double delta = double.parse(amount);
+      await fireStore.collection(CollectionName.users).doc(userId).update({
+        'wallet_amount': FieldValue.increment(delta),
+      });
+      if (Constant.userModel?.id == userId) {
+        Constant.userModel?.walletAmount = (double.tryParse(Constant.userModel?.walletAmount?.toString() ?? '0') ?? 0) + delta;
       }
-    });
-    return isAdded;
+      return true;
+    } catch (error) {
+      log("Failed to update user wallet: $error");
+      return false;
+    }
   }
 
   static Future<bool> updateUser(UserModel userModel) async {
@@ -244,6 +253,12 @@ class FireStoreUtils {
 
   static Future<void> getSettings() async {
     try {
+      fireStore.collection(CollectionName.settings).doc("localisationSettings").snapshots().listen((event) async {
+        if (event.exists) {
+          Constant.apiKeyOfDeepl = event.data()?["apiKeyOfDeepl"] ?? '';
+          Constant.localisationType = event.data()?["localisationType"] ?? '';
+        }
+      });
       await FireStoreUtils.fireStore.collection(CollectionName.currencies).where("isActive", isEqualTo: true).get().then((value) async {
         if (value.docs.isNotEmpty) {
           Constant.currencyModel = CurrencyModel.fromJson(value.docs.first.data());
@@ -271,6 +286,12 @@ class FireStoreUtils {
         Constant.isSelfDeliveryFeature = value.data()!['isSelfDelivery'] ?? false;
         AppThemeData.primary300 = Color(int.parse(value.data()!['app_customer_color'].replaceFirst("#", "0xff")));
         Constant.taxScope = value.data()?['taxScope'] ?? "";
+      });
+
+      fireStore.collection(CollectionName.settings).doc("DineinForRestaurant").get().then((dineinresult) {
+        if (dineinresult.exists) {
+          Constant.isDineInEnable = dineinresult.data()!["isEnabled"];
+        }
       });
 
       fireStore.collection(CollectionName.settings).doc("googleMapKey").snapshots().listen((event) {
@@ -528,6 +549,42 @@ class FireStoreUtils {
         await Preferences.setString(Preferences.xenditSettings, jsonEncode(xendit.toJson()));
       }
     });
+    await fireStore.collection(CollectionName.settings).doc("mtnMomo_settings").get().then((value) async {
+      if (value.exists) {
+        MtnMomo mtnMomo = MtnMomo.fromJson(value.data()!);
+        await Preferences.setString(Preferences.mtnMomoSettings, jsonEncode(mtnMomo.toJson()));
+      }
+    });
+    await fireStore.collection(CollectionName.settings).doc("phonepay_settings").get().then((value) async {
+      if (value.exists) {
+        PhonePe phonePe = PhonePe.fromJson(value.data()!);
+        await Preferences.setString(Preferences.phonePaySettings, jsonEncode(phonePe.toJson()));
+      }
+    });
+    await fireStore.collection(CollectionName.settings).doc("foloosi_settings").get().then((value) async {
+      if (value.exists) {
+        Foloosi foloosi = Foloosi.fromJson(value.data()!);
+        await Preferences.setString(Preferences.foloosiSettings, jsonEncode(foloosi.toJson()));
+      }
+    });
+    await fireStore.collection(CollectionName.settings).doc("cashfree_settings").get().then((value) async {
+      if (value.exists) {
+        Cashfree cashfree = Cashfree.fromJson(value.data()!);
+        await Preferences.setString(Preferences.cashFreeSettings, jsonEncode(cashfree.toJson()));
+      }
+    });
+    await fireStore.collection(CollectionName.settings).doc("paymongo_settings").get().then((value) async {
+      if (value.exists) {
+        PayMongo payMongo = PayMongo.fromJson(value.data()!);
+        await Preferences.setString(Preferences.payMongoSettings, jsonEncode(payMongo.toJson()));
+      }
+    });
+    await fireStore.collection(CollectionName.settings).doc("instamojo_settings").get().then((value) async {
+      if (value.exists) {
+        Instamojo instamojo = Instamojo.fromJson(value.data()!);
+        await Preferences.setString(Preferences.instamojoSettings, jsonEncode(instamojo.toJson()));
+      }
+    });
   }
 
   static Future<VendorModel?> getVendorById(String vendorId) async {
@@ -772,7 +829,7 @@ class FireStoreUtils {
   }
 
   static Future<List<ProductModel>> getProductByVendorId(String vendorId) async {
-    String selectedFoodType = Preferences.getString(Preferences.foodDeliveryType, defaultValue: "Delivery".tr);
+    String selectedFoodType = Preferences.getString(Preferences.foodDeliveryType, defaultValue: "Delivery");
     List<ProductModel> list = [];
     if (selectedFoodType == "TakeAway") {
       await fireStore.collection(CollectionName.vendorProducts).where("vendorID", isEqualTo: vendorId).where('publish', isEqualTo: true).orderBy("createdAt", descending: false).get().then((value) {
@@ -899,9 +956,30 @@ class FireStoreUtils {
 
   static Future<List<TaxModel>?> getTaxList() async {
     List<TaxModel> taxList = [];
-    List<Placemark> placeMarks = await placemarkFromCoordinates(Constant.selectedLocation.location!.latitude!, Constant.selectedLocation.location!.longitude!);
-    log("placeMarks.first.country :: ${placeMarks.first.country}");
-    await fireStore.collection(CollectionName.tax).where('country', isEqualTo: placeMarks.first.country).where('enable', isEqualTo: true).get().then((value) {
+
+    // Reverse-geocode the selected location to a country so taxes can be
+    // filtered by it. iOS geocoding can throw a network error
+    // (kCLErrorDomain Code=2) — never let that crash the home load.
+    String? country;
+    try {
+      final lat = Constant.selectedLocation.location?.latitude;
+      final lng = Constant.selectedLocation.location?.longitude;
+      if (lat != null && lng != null) {
+        final placeMarks = await Geocoding().placemarkFromCoordinates(lat, lng);
+        if (placeMarks.isNotEmpty) {
+          country = placeMarks.first.country;
+        }
+      }
+    } catch (e) {
+      log("getTaxList geocoding failed: $e");
+    }
+
+    if (country == null || country.isEmpty) {
+      // No country resolved — skip tax loading rather than mis-filtering.
+      return taxList;
+    }
+
+    await fireStore.collection(CollectionName.tax).where('country', isEqualTo: country).where('enable', isEqualTo: true).get().then((value) {
       for (var element in value.docs) {
         TaxModel taxModel = TaxModel.fromJson(element.data());
         taxList.add(taxModel);
@@ -1002,10 +1080,13 @@ class FireStoreUtils {
     List<OrderModel> list = [];
 
     await fireStore.collection(CollectionName.restaurantOrders).where("authorID", isEqualTo: FireStoreUtils.getCurrentUid()).orderBy("createdAt", descending: true).get().then((value) {
+      log("FireStoreUtils.getCurrentUid() :: ${FireStoreUtils.getCurrentUid()}");
       for (var element in value.docs) {
         OrderModel taxModel = OrderModel.fromJson(element.data());
         list.add(taxModel);
       }
+    }).catchError((e) {
+      log("FireStoreUtils.getCurrentUid() :: getAllOrder :: $e");
     });
     return list;
   }
@@ -1234,7 +1315,7 @@ class FireStoreUtils {
   }
 
   static Future<Url> uploadChatImageToFireStorage(File image, BuildContext context) async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     var uniqueID = const Uuid().v4();
     Reference upload = FirebaseStorage.instance.ref().child('images/$uniqueID.png');
     UploadTask uploadTask = upload.putFile(image);

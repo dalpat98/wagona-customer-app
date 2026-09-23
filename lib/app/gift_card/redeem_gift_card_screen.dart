@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/dash_board_screens/dash_board_screen.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
@@ -12,6 +12,7 @@ import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -40,8 +41,8 @@ class RedeemGiftCardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Redeem Gift Card".tr,
+                    TranslatedText(
+                      "Redeem Gift Card",
                       style: TextStyle(
                         fontSize: 24,
                         color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -49,8 +50,8 @@ class RedeemGiftCardScreen extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Text(
-                      "Enter your gift card code to enjoy discounts and special offers on your orders.".tr,
+                    TranslatedText(
+                      "Enter your gift card code to enjoy discounts and special offers on your orders.",
                       style: TextStyle(
                         fontSize: 16,
                         color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -62,9 +63,9 @@ class RedeemGiftCardScreen extends StatelessWidget {
                       height: 20,
                     ),
                     TextFieldWidget(
-                      title: 'Gift Code'.tr,
+                      title: 'Gift Code',
                       controller: controller.giftCodeController.value,
-                      hintText: 'Enter gift code'.tr,
+                      hintText: 'Enter gift code',
                       textInputType: TextInputType.number,
                       prefix: Padding(
                         padding: const EdgeInsets.all(10),
@@ -72,9 +73,9 @@ class RedeemGiftCardScreen extends StatelessWidget {
                       ),
                     ),
                     TextFieldWidget(
-                      title: 'Gift Pin'.tr,
+                      title: 'Gift Pin',
                       controller: controller.giftPinController.value,
-                      hintText: 'Enter gift pin'.tr,
+                      hintText: 'Enter gift pin',
                       textInputType: TextInputType.number,
                       prefix: Padding(
                         padding: const EdgeInsets.all(10),
@@ -91,30 +92,30 @@ class RedeemGiftCardScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 20),
                 child: RoundedButtonFill(
-                  title: "Redeem".tr,
+                  title: "Redeem",
                   height: 5.5,
                   color: AppThemeData.primary300,
                   textColor: AppThemeData.grey50,
                   fontSizes: 16,
                   onPress: () async {
                     if (controller.giftCodeController.value.text.isEmpty) {
-                      ShowToastDialog.showToast("Please Enter Gift Code".tr);
+                      ShowToastDialog.showToast("Please Enter Gift Code");
                     } else if (controller.giftPinController.value.text.isEmpty) {
-                      ShowToastDialog.showToast("Please Enter Gift Pin".tr);
+                      ShowToastDialog.showToast("Please Enter Gift Pin");
                     } else {
-                      ShowToastDialog.showLoader("Please wait".tr);
+                      ShowToastDialog.showLoader("Please wait");
                       await FireStoreUtils.checkRedeemCode(controller.giftCodeController.value.text.replaceAll(" ", "")).then((value) async {
                         if (value != null) {
                           GiftCardsOrderModel giftCodeModel = value;
                           if (giftCodeModel.redeem == true) {
                             ShowToastDialog.closeLoader();
-                            ShowToastDialog.showToast("Gift voucher already redeemed".tr);
+                            ShowToastDialog.showToast("Gift voucher already redeemed");
                           } else if (giftCodeModel.giftPin != controller.giftPinController.value.text) {
                             ShowToastDialog.closeLoader();
-                            ShowToastDialog.showToast("Gift Pin Invalid".tr);
+                            ShowToastDialog.showToast("Gift Pin Invalid");
                           } else if (giftCodeModel.expireDate!.toDate().isBefore(DateTime.now())) {
                             ShowToastDialog.closeLoader();
-                            ShowToastDialog.showToast("Gift Voucher expire".tr);
+                            ShowToastDialog.showToast("Gift Voucher expire");
                           } else {
                             giftCodeModel.redeem = true;
 
@@ -132,8 +133,7 @@ class RedeemGiftCardScreen extends StatelessWidget {
                             await FireStoreUtils.setWalletTransaction(transactionModel).then((value) async {
                               if (value == true) {
                                 await FireStoreUtils.updateUserWallet(amount: giftCodeModel.price.toString(), userId: FireStoreUtils.getCurrentUid()).then((value) async {
-                                  await FireStoreUtils.sendTopUpMail(
-                                      paymentMethod: "Gift Voucher", amount: giftCodeModel.price.toString(), tractionId: transactionModel.id.toString());
+                                  await FireStoreUtils.sendTopUpMail(paymentMethod: "Gift Voucher", amount: giftCodeModel.price.toString(), tractionId: transactionModel.id.toString());
                                   await FireStoreUtils.placeGiftCardOrder(giftCodeModel).then((value) {
                                     ShowToastDialog.closeLoader();
                                     if (Constant.walletSetting == true) {
@@ -141,7 +141,7 @@ class RedeemGiftCardScreen extends StatelessWidget {
                                       DashBoardController controller = Get.put(DashBoardController());
                                       controller.selectedIndex.value = 2;
                                     }
-                                    ShowToastDialog.showToast("Voucher redeem successfully".tr);
+                                    ShowToastDialog.showToast("Voucher redeem successfully");
                                   });
                                 });
                               }
@@ -149,7 +149,7 @@ class RedeemGiftCardScreen extends StatelessWidget {
                           }
                         } else {
                           ShowToastDialog.closeLoader();
-                          ShowToastDialog.showToast("Invalid Gift Code".tr);
+                          ShowToastDialog.showToast("Invalid Gift Code");
                         }
                       });
                     }

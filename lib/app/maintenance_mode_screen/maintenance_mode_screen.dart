@@ -1,7 +1,7 @@
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:provider/provider.dart';
 
 class MaintenanceModeScreen extends StatelessWidget {
@@ -18,12 +18,12 @@ class MaintenanceModeScreen extends StatelessWidget {
         children: [
           Center(child: Image.asset('assets/images/maintenance.png', height: 200, width: 200)),
           const SizedBox(height: 20),
-          Text("We'll be back soon!".tr, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800)),
+          TranslatedText("We'll be back soon!", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800)),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Text(
-              "Sorry for the inconvenience but we're performing some maintenance at the moment. We'll be back online shortly!".tr,
+            child: TranslatedText(
+              "Sorry for the inconvenience but we're performing some maintenance at the moment. We'll be back online shortly!",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800),
             ),

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/chat_screens/chat_screen.dart';
 import 'package:customer/app/order_list_screen/live_tracking_screen.dart';
 import 'package:customer/app/rate_us_screen/rate_product_screen.dart';
@@ -19,6 +19,7 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/my_separator.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -40,8 +41,8 @@ class OrderDetailsScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Order Details".tr,
+              title: TranslatedText(
+                "Order Details",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,
@@ -65,8 +66,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      "${'Order'.tr} ${Constant.orderId(orderId: controller.orderModel.value.id.toString())}".tr,
+                                    TranslatedText(
+                                      "${'Order'} ${Constant.orderId(orderId: controller.orderModel.value.id.toString())}",
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontFamily: AppThemeData.semiBold,
@@ -78,7 +79,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                 ),
                               ),
                               RoundedButtonFill(
-                                title: controller.orderModel.value.status.toString().tr,
+                                title: controller.orderModel.value.status.toString(),
                                 color: Constant.statusColor(status: controller.orderModel.value.status.toString()),
                                 width: 32,
                                 height: 4.5,
@@ -93,11 +94,11 @@ class OrderDetailsScreen extends StatelessWidget {
                           ),
                           controller.orderModel.value.isPosOrder == true
                               ? Container(
-                                  decoration: ShapeDecoration(
+                                  decoration: BoxDecoration(
                                     color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                                    borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                    border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                    boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                   ),
                                   child: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -108,7 +109,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
+                                              TranslatedText(
                                                 "${controller.orderModel.value.vendor!.title}",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
@@ -117,7 +118,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                   color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
                                                 ),
                                               ),
-                                              Text(
+                                              TranslatedText(
                                                 "${controller.orderModel.value.vendor!.location}",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
@@ -132,11 +133,11 @@ class OrderDetailsScreen extends StatelessWidget {
                                       ])))
                               : controller.orderModel.value.takeAway == true
                                   ? Container(
-                                      decoration: ShapeDecoration(
+                                      decoration: BoxDecoration(
                                         color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
+                                        borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                        border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                        boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -146,7 +147,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
+                                                  TranslatedText(
                                                     "${controller.orderModel.value.vendor!.title}",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
@@ -155,7 +156,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                       color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
                                                     ),
                                                   ),
-                                                  Text(
+                                                  TranslatedText(
                                                     "${controller.orderModel.value.vendor!.location}",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
@@ -199,7 +200,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                 ? const SizedBox()
                                                 : InkWell(
                                                     onTap: () async {
-                                                      ShowToastDialog.showLoader("Please wait".tr);
+                                                      ShowToastDialog.showLoader("Please wait");
 
                                                       UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
                                                       UserModel? restaurantUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor!.author.toString());
@@ -238,11 +239,11 @@ class OrderDetailsScreen extends StatelessWidget {
                                       ),
                                     )
                                   : Container(
-                                      decoration: ShapeDecoration(
+                                      decoration: BoxDecoration(
                                         color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
+                                        borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                        border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                        boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -277,7 +278,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                 child: Column(
                                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                                   children: [
-                                                                    Text(
+                                                                    TranslatedText(
                                                                       "${controller.orderModel.value.vendor!.title}",
                                                                       textAlign: TextAlign.start,
                                                                       style: TextStyle(
@@ -286,7 +287,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                         color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
                                                                       ),
                                                                     ),
-                                                                    Text(
+                                                                    TranslatedText(
                                                                       "${controller.orderModel.value.vendor!.location}",
                                                                       textAlign: TextAlign.start,
                                                                       style: TextStyle(
@@ -330,7 +331,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                   ? const SizedBox()
                                                                   : InkWell(
                                                                       onTap: () async {
-                                                                        ShowToastDialog.showLoader("Please wait".tr);
+                                                                        ShowToastDialog.showLoader("Please wait");
 
                                                                         UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
                                                                         UserModel? restaurantUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor!.author.toString());
@@ -369,7 +370,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                         : Column(
                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
-                                                              Text(
+                                                              TranslatedText(
                                                                 controller.orderModel.value.address?.addressAs ?? '',
                                                                 textAlign: TextAlign.start,
                                                                 style: TextStyle(
@@ -378,7 +379,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                   color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
                                                                 ),
                                                               ),
-                                                              Text(
+                                                              TranslatedText(
                                                                 controller.orderModel.value.address?.getFullAddress() ?? '',
                                                                 textAlign: TextAlign.start,
                                                                 style: TextStyle(
@@ -409,7 +410,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                 const SizedBox(
                                                                   width: 5,
                                                                 ),
-                                                                Text(
+                                                                TranslatedText(
                                                                   controller.orderModel.value.driver!.fullName(),
                                                                   textAlign: TextAlign.right,
                                                                   style: TextStyle(
@@ -422,8 +423,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                 const SizedBox(
                                                                   width: 5,
                                                                 ),
-                                                                Text(
-                                                                  "Order Delivered.".tr,
+                                                                TranslatedText(
+                                                                  "Order Delivered.",
                                                                   textAlign: TextAlign.right,
                                                                   style: TextStyle(
                                                                     color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
@@ -443,9 +444,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                       width: 5,
                                                                     ),
                                                                     Expanded(
-                                                                      child: Text(
-                                                                        "${'Your Order has been Preparing and assign to the driver'.tr}\n${'Preparation Time'.tr} ${controller.orderModel.value.estimatedTimeToPrepare}"
-                                                                            .tr,
+                                                                      child: TranslatedText(
+                                                                        "${'Your Order has been Preparing and assign to the driver'}\n${'Preparation Time'} ${controller.orderModel.value.estimatedTimeToPrepare}",
                                                                         textAlign: TextAlign.start,
                                                                         style: TextStyle(
                                                                           color: themeChange.getThem() ? AppThemeData.warning400 : AppThemeData.warning400,
@@ -462,7 +462,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                       children: [
                                                                         ClipOval(
                                                                           child: NetworkImageWidget(
-                                                                            imageUrl: controller.orderModel.value.author!.profilePictureURL.toString(),
+                                                                            imageUrl: controller.orderModel.value.driver!.profilePictureURL.toString(),
                                                                             fit: BoxFit.cover,
                                                                             height: Responsive.height(5, context),
                                                                             width: Responsive.width(10, context),
@@ -475,7 +475,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                           child: Column(
                                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                                             children: [
-                                                                              Text(
+                                                                              TranslatedText(
                                                                                 controller.orderModel.value.driver!.fullName().toString(),
                                                                                 textAlign: TextAlign.start,
                                                                                 style: TextStyle(
@@ -485,7 +485,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                   fontSize: 16,
                                                                                 ),
                                                                               ),
-                                                                              Text(
+                                                                              TranslatedText(
                                                                                 controller.orderModel.value.driver!.email.toString(),
                                                                                 textAlign: TextAlign.start,
                                                                                 style: TextStyle(
@@ -522,7 +522,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                         ),
                                                                         InkWell(
                                                                           onTap: () async {
-                                                                            ShowToastDialog.showLoader("Please wait".tr);
+                                                                            ShowToastDialog.showLoader("Please wait");
 
                                                                             UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
                                                                             UserModel? driverUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.driverID.toString());
@@ -571,8 +571,8 @@ class OrderDetailsScreen extends StatelessWidget {
                           const SizedBox(
                             height: 14,
                           ),
-                          Text(
-                            "Your Order".tr,
+                          TranslatedText(
+                            "Your Order",
                             textAlign: TextAlign.start,
                             style: TextStyle(
                               fontFamily: AppThemeData.semiBold,
@@ -584,11 +584,11 @@ class OrderDetailsScreen extends StatelessWidget {
                             height: 10,
                           ),
                           Container(
-                            decoration: ShapeDecoration(
+                            decoration: BoxDecoration(
                               color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                              border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                              boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -643,7 +643,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Expanded(
-                                                      child: Text(
+                                                      child: TranslatedText(
                                                         "${cartProductModel.name}",
                                                         textAlign: TextAlign.start,
                                                         style: TextStyle(
@@ -653,7 +653,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                         ),
                                                       ),
                                                     ),
-                                                    Text(
+                                                    TranslatedText(
                                                       "x ${cartProductModel.quantity}",
                                                       textAlign: TextAlign.start,
                                                       style: TextStyle(
@@ -707,8 +707,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                                 if (Constant.taxScope == "product")
                                                   cartProductModel.taxSetting?.isEmpty == true
                                                       ? SizedBox()
-                                                      : Text(
-                                                          "${'Tax:'.tr} ${Constant.getTaxDisplayText(cartProductModel.taxSetting)}",
+                                                      : TranslatedText(
+                                                          "${'Tax:'} ${Constant.getTaxDisplayText(cartProductModel.taxSetting)}",
                                                           maxLines: 2,
                                                           overflow: TextOverflow.ellipsis,
                                                           style: TextStyle(
@@ -729,8 +729,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    "Variants".tr,
+                                                  TranslatedText(
+                                                    "Variants",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.semiBold,
@@ -754,7 +754,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                           ),
                                                           child: Padding(
                                                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                                                            child: Text(
+                                                            child: TranslatedText(
                                                               "${cartProductModel.variantInfo!.variantOptions!.keys.elementAt(i)} : ${cartProductModel.variantInfo!.variantOptions![cartProductModel.variantInfo!.variantOptions!.keys.elementAt(i)]}",
                                                               textAlign: TextAlign.start,
                                                               style: TextStyle(
@@ -778,8 +778,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                                 Row(
                                                   children: [
                                                     Expanded(
-                                                      child: Text(
-                                                        "Addons".tr,
+                                                      child: TranslatedText(
+                                                        "Addons",
                                                         textAlign: TextAlign.start,
                                                         style: TextStyle(
                                                           fontFamily: AppThemeData.semiBold,
@@ -813,7 +813,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                         ),
                                                         child: Padding(
                                                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                                                          child: Text(
+                                                          child: TranslatedText(
                                                             cartProductModel.extras![i].toString(),
                                                             textAlign: TextAlign.start,
                                                             style: TextStyle(
@@ -831,7 +831,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                       Align(
                                         alignment: Alignment.centerRight,
                                         child: RoundedButtonFill(
-                                          title: "Rate us".tr,
+                                          title: "Rate us",
                                           height: 3.8,
                                           width: 20,
                                           color: themeChange.getThem() ? AppThemeData.warning300 : AppThemeData.warning300,
@@ -862,8 +862,8 @@ class OrderDetailsScreen extends StatelessWidget {
                           //   Column(
                           //     crossAxisAlignment: CrossAxisAlignment.start,
                           //     children: [
-                          //       Text(
-                          //         "Delivery Man".tr,
+                          //       TranslatedText(
+                          //         "Delivery Man",
                           //         textAlign: TextAlign.start,
                           //         style: TextStyle(
                           //           fontFamily: AppThemeData.semiBold,
@@ -881,8 +881,8 @@ class OrderDetailsScreen extends StatelessWidget {
                           //       ),
                           //     ],
                           //   ),
-                          Text(
-                            "Bill Details".tr,
+                          TranslatedText(
+                            "Bill Details",
                             textAlign: TextAlign.start,
                             style: TextStyle(
                               fontFamily: AppThemeData.semiBold,
@@ -895,15 +895,11 @@ class OrderDetailsScreen extends StatelessWidget {
                           ),
                           Container(
                             width: Responsive.width(100, context),
-                            decoration: ShapeDecoration(
+                            decoration: BoxDecoration(
                               color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              shadows: const [
-                                BoxShadow(
-                                  color: Color(0x14000000),
-                                  blurRadius: 52,
-                                )
-                              ],
+                              borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                              border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                              boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
@@ -955,8 +951,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                       title: "Delivery Fee",
                                       isDark: themeChange.getThem(),
                                       trailing: (controller.orderModel.value.vendor!.isSelfDelivery == true || controller.orderModel.value.isFreeDelivery == true)
-                                          ? Text(
-                                              'Free Delivery'.tr,
+                                          ? TranslatedText(
+                                              'Free Delivery',
                                               style: TextStyle(
                                                 fontFamily: AppThemeData.regular,
                                                 color: AppThemeData.success400,
@@ -986,8 +982,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "Delivery Tips".tr,
+                                              TranslatedText(
+                                                "Delivery Tips",
                                                 style: TextStyle(
                                                   fontFamily: AppThemeData.regular,
                                                   color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
@@ -1000,8 +996,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                               //       controller.deliveryTips.value = 0;
                                               //       controller.calculatePrice();
                                               //     },
-                                              //     child: Text(
-                                              //       "Remove".tr,
+                                              //     child: TranslatedText(
+                                              //       "Remove",
                                               //       style: TextStyle(
                                               //         fontFamily: AppThemeData.medium,
                                               //         color: AppThemeData.primary300,
@@ -1065,8 +1061,8 @@ class OrderDetailsScreen extends StatelessWidget {
                           const SizedBox(
                             height: 14,
                           ),
-                          Text(
-                            "Order Details".tr,
+                          TranslatedText(
+                            "Order Details",
                             textAlign: TextAlign.start,
                             style: TextStyle(
                               fontFamily: AppThemeData.semiBold,
@@ -1079,9 +1075,11 @@ class OrderDetailsScreen extends StatelessWidget {
                           ),
                           Container(
                             width: Responsive.width(100, context),
-                            decoration: ShapeDecoration(
+                            decoration: BoxDecoration(
                               color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                              border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                              boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
@@ -1091,8 +1089,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          "Delivery type".tr,
+                                        child: TranslatedText(
+                                          "Delivery type",
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
                                             fontFamily: AppThemeData.regular,
@@ -1101,12 +1099,12 @@ class OrderDetailsScreen extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                      Text(
+                                      TranslatedText(
                                         controller.orderModel.value.takeAway == true
                                             ? "TakeAway".tr
                                             : controller.orderModel.value.scheduleTime == null
                                                 ? "Standard".tr
-                                                : "Schedule".tr,
+                                                : "Schedule",
                                         textAlign: TextAlign.start,
                                         style: TextStyle(
                                           fontFamily: AppThemeData.medium,
@@ -1127,8 +1125,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          "Payment Method".tr,
+                                        child: TranslatedText(
+                                          "Payment Method",
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
                                             fontFamily: AppThemeData.regular,
@@ -1137,7 +1135,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                      Text(
+                                      TranslatedText(
                                         controller.orderModel.value.paymentMethod.toString(),
                                         textAlign: TextAlign.start,
                                         style: TextStyle(
@@ -1155,8 +1153,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          "Date and Time".tr,
+                                        child: TranslatedText(
+                                          "Date and Time",
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
                                             fontFamily: AppThemeData.regular,
@@ -1165,7 +1163,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                      Text(
+                                      TranslatedText(
                                         Constant.timestampToDateTime(controller.orderModel.value.createdAt!),
                                         textAlign: TextAlign.start,
                                         style: TextStyle(
@@ -1186,8 +1184,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              "Phone Number".tr,
+                                            TranslatedText(
+                                              "Phone Number",
                                               textAlign: TextAlign.start,
                                               style: TextStyle(
                                                 fontFamily: AppThemeData.regular,
@@ -1198,7 +1196,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                           ],
                                         ),
                                       ),
-                                      Text(
+                                      TranslatedText(
                                         controller.orderModel.value.author!.phoneNumber.toString(),
                                         textAlign: TextAlign.start,
                                         style: TextStyle(
@@ -1224,8 +1222,8 @@ class OrderDetailsScreen extends StatelessWidget {
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      "Remarks".tr,
+                                    TranslatedText(
+                                      "Remarks",
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontFamily: AppThemeData.semiBold,
@@ -1238,13 +1236,15 @@ class OrderDetailsScreen extends StatelessWidget {
                                     ),
                                     Container(
                                       width: Responsive.width(100, context),
-                                      decoration: ShapeDecoration(
+                                      decoration: BoxDecoration(
                                         color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                        border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                        boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-                                        child: Text(
+                                        child: TranslatedText(
                                           controller.orderModel.value.notes.toString(),
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
@@ -1263,20 +1263,28 @@ class OrderDetailsScreen extends StatelessWidget {
                   ),
             bottomNavigationBar: controller.orderModel.value.status == Constant.orderPlaced
                 ? Container(
-                    color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                    decoration: BoxDecoration(
+                      color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(AppThemeData.radiusLg),
+                        topRight: Radius.circular(AppThemeData.radiusLg),
+                      ),
+                      boxShadow: themeChange.getThem() ? null : AppThemeData.floatShadow,
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 20),
                       child: RoundedButtonFill(
-                        title: "Cancel Order".tr,
+                        title: "Cancel Order",
                         color: AppThemeData.danger300,
                         textColor: AppThemeData.grey50,
                         height: 5,
                         onPress: () async {
-                          ShowToastDialog.showLoader('Please wait...'.tr);
+                          ShowToastDialog.showLoader('Please wait...');
                           controller.orderModel.value.status = Constant.orderCancelled;
                           await FireStoreUtils.setOrder(controller.orderModel.value);
-                          SendNotification.sendFcmMessage(Constant.customerCancelled, controller.orderModel.value.vendor!.fcmToken.toString(), {});
+                          UserModel? vendorUserModel = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor?.author ?? '');
+                          SendNotification.sendFcmMessage(Constant.customerCancelled, vendorUserModel?.fcmToken ?? '', {});
                           if (controller.orderModel.value.paymentMethod!.toLowerCase() != 'cod') {
                             WalletTransactionModel historyModel = WalletTransactionModel(
                                 amount: controller.totalAmount.value,
@@ -1294,7 +1302,7 @@ class OrderDetailsScreen extends StatelessWidget {
                             await FireStoreUtils.updateUserWallet(amount: controller.totalAmount.value.toString(), userId: controller.orderModel.value.author!.id.toString());
                           }
                           ShowToastDialog.closeLoader();
-                          ShowToastDialog.showToast("You have successfully canceled your order.".tr);
+                          ShowToastDialog.showToast("You have successfully canceled your order.");
                           Get.back(result: true);
                         },
                       ),
@@ -1303,13 +1311,20 @@ class OrderDetailsScreen extends StatelessWidget {
                         controller.orderModel.value.status == Constant.orderInTransit ||
                         controller.orderModel.value.status == Constant.orderCompleted
                     ? Container(
-                        color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                        decoration: BoxDecoration(
+                          color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(AppThemeData.radiusLg),
+                            topRight: Radius.circular(AppThemeData.radiusLg),
+                          ),
+                          boxShadow: themeChange.getThem() ? null : AppThemeData.floatShadow,
+                        ),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: controller.orderModel.value.status == Constant.orderShipped || controller.orderModel.value.status == Constant.orderInTransit
                               ? RoundedButtonFill(
-                                  title: "Track Order".tr,
+                                  title: "Track Order",
                                   height: 5.5,
                                   color: AppThemeData.warning300,
                                   textColor: AppThemeData.grey900,
@@ -1346,14 +1361,14 @@ class OrderDetailsScreen extends StatelessWidget {
                                                     if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && vendorModel.subscriptionPlan != null) {
                                                       if (vendorModel.subscriptionTotalOrders == "-1") {
                                                         return RoundedButtonFill(
-                                                          title: "Reorder".tr,
+                                                          title: "Reorder",
                                                           height: 5.5,
                                                           color: AppThemeData.warning300,
                                                           textColor: AppThemeData.grey900,
                                                           onPress: () async {
                                                             for (var element in controller.orderModel.value.products!) {
                                                               controller.addToCart(cartProductModel: element);
-                                                              ShowToastDialog.showToast("Item Added In a cart".tr);
+                                                              ShowToastDialog.showToast("Item Added In a cart");
                                                             }
                                                           },
                                                         );
@@ -1362,14 +1377,14 @@ class OrderDetailsScreen extends StatelessWidget {
                                                             vendorModel.subscriptionPlan?.expiryDay == '-1') {
                                                           if (vendorModel.subscriptionTotalOrders != '0') {
                                                             return RoundedButtonFill(
-                                                              title: "Reorder".tr,
+                                                              title: "Reorder",
                                                               height: 5.5,
                                                               color: AppThemeData.warning300,
                                                               textColor: AppThemeData.grey900,
                                                               onPress: () async {
                                                                 for (var element in controller.orderModel.value.products!) {
                                                                   controller.addToCart(cartProductModel: element);
-                                                                  ShowToastDialog.showToast("Item Added In a cart".tr);
+                                                                  ShowToastDialog.showToast("Item Added In a cart");
                                                                 }
                                                               },
                                                             );
@@ -1382,14 +1397,14 @@ class OrderDetailsScreen extends StatelessWidget {
                                                       }
                                                     } else {
                                                       return RoundedButtonFill(
-                                                        title: "Reorder".tr,
+                                                        title: "Reorder",
                                                         height: 5.5,
                                                         color: AppThemeData.warning300,
                                                         textColor: AppThemeData.grey900,
                                                         onPress: () async {
                                                           for (var element in controller.orderModel.value.products!) {
                                                             controller.addToCart(cartProductModel: element);
-                                                            ShowToastDialog.showToast("Item Added In a cart".tr);
+                                                            ShowToastDialog.showToast("Item Added In a cart");
                                                           }
                                                         },
                                                       );
@@ -1424,8 +1439,8 @@ class OrderDetailsScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 10),
-                  Text(
-                    "Tax Details".tr,
+                  TranslatedText(
+                    "Tax Details",
                     style: TextStyle(
                       fontFamily: AppThemeData.medium,
                       fontSize: 18,
@@ -1436,14 +1451,14 @@ class OrderDetailsScreen extends StatelessWidget {
                   sectionDivider(isDark),
                   controller.orderModel.value.taxScope == 'product'
                       ? amountRow(
-                          title: "Tax on item total".tr,
+                          title: "Tax on item total",
                           amount: Constant.amountShow(
                             amount: controller.productTaxAmount.value.toString(),
                           ),
                           isDark: isDark,
                         )
                       : amountRow(
-                          title: "Tax on Order Total".tr,
+                          title: "Tax on Order Total",
                           amount: Constant.amountShow(
                             amount: controller.orderTaxAmount.value.toString(),
                           ),
@@ -1457,7 +1472,7 @@ class OrderDetailsScreen extends StatelessWidget {
                       itemCount: controller.orderModel.value.driverDeliveryTax?.length,
                       itemBuilder: (context, index) {
                         return amountRow(
-                          title: "${controller.orderModel.value.driverDeliveryTax![index].title} ${'Tax on Delivery Fee'.tr}",
+                          title: "${controller.orderModel.value.driverDeliveryTax![index].title} ${'Tax on Delivery Fee'}",
                           amount: Constant.amountShow(
                               amount: Constant.calculateTax(
                             taxModel: controller.orderModel.value.driverDeliveryTax![index],
@@ -1467,14 +1482,14 @@ class OrderDetailsScreen extends StatelessWidget {
                         );
                       },
                     ),
-                  if (controller.orderModel.value.takeAway != true && controller.orderModel.value.isFreeDelivery != true) sectionDivider(isDark),
+                  if (controller.orderModel.value.packagingTax?.isNotEmpty == true) sectionDivider(isDark),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: controller.orderModel.value.packagingTax!.length,
                     itemBuilder: (context, index) {
                       return amountRow(
-                        title: "${controller.orderModel.value.packagingTax![index].title} ${'Tax on Packaging Fee'.tr}",
+                        title: "${controller.orderModel.value.packagingTax![index].title} ${'Tax on Packaging Fee'}",
                         amount: controller.packagingCharge.value == 0.0
                             ? Constant.amountShow(amount: controller.packagingCharge.value.toString())
                             : Constant.amountShow(
@@ -1486,14 +1501,14 @@ class OrderDetailsScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  sectionDivider(isDark),
+                  if (controller.orderModel.value.platformTax?.isNotEmpty == true) sectionDivider(isDark),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: controller.orderModel.value.platformTax!.length,
                     itemBuilder: (context, index) {
                       return amountRow(
-                        title: "${controller.orderModel.value.platformTax?[index].title} ${'Tax on Platform Fee'.tr}",
+                        title: "${controller.orderModel.value.platformTax?[index].title} ${'Tax on Platform Fee'}",
                         amount: Constant.amountShow(
                             amount: controller.platformFee.value == 0.0
                                 ? Constant.calculateTax(amount: controller.platformFee.value.toString()).toString()
@@ -1507,7 +1522,7 @@ class OrderDetailsScreen extends StatelessWidget {
                   ),
                   sectionDivider(isDark),
                   amountRow(
-                    title: "Total Tax Amount".tr,
+                    title: "Total Tax Amount",
                     amount: Constant.amountShow(amount: controller.totalTaxAmount.value.toString()),
                     amountColor: AppThemeData.primary300,
                     isDark: isDark,
@@ -1517,7 +1532,7 @@ class OrderDetailsScreen extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Close".tr),
+                      child: TranslatedText("Close"),
                     ),
                   ),
                 ],
@@ -1542,8 +1557,8 @@ class OrderDetailsScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text(
-            title.tr,
+          child: TranslatedText(
+            title,
             style: TextStyle(
                 fontFamily: AppThemeData.regular,
                 color: textColour ?? (isDark ? AppThemeData.grey300 : AppThemeData.grey600),

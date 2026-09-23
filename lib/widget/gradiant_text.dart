@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 
 class GradientText extends StatelessWidget {
   const GradientText(
@@ -19,7 +20,7 @@ class GradientText extends StatelessWidget {
       shaderCallback: (bounds) => gradient.createShader(
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
-      child: Text(text, style: style),
+      child: TranslatedText(text, style: style),
     );
   }
 }

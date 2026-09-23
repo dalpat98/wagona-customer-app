@@ -5,6 +5,7 @@ import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/widget/place_picker/location_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_google_places_hoc081098/flutter_google_places_hoc081098.dart';
 import 'package:flutter_google_places_hoc081098/google_maps_webservice_places.dart';
 import 'package:get/get.dart';
@@ -117,7 +118,7 @@ class LocationPickerScreen extends StatelessWidget {
                             children: [
                               Icon(Icons.search),
                               SizedBox(width: 8),
-                              Text("Search place..."),
+                              TranslatedText("Search place..."),
                             ],
                           ),
                         ),
@@ -141,14 +142,14 @@ class LocationPickerScreen extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Obx(() => Text(
+                        Obx(() => TranslatedText(
                               controller.address.value,
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                             )),
                         const SizedBox(height: 10),
                         RoundedButtonFill(
-                          title: "Confirm Location".tr,
+                          title: "Confirm Location",
                           height: 5.5,
                           color: AppThemeData.primary300,
                           textColor: AppThemeData.grey50,

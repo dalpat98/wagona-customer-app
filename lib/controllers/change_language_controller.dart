@@ -19,13 +19,15 @@ class ChangeLanguageController extends GetxController {
     super.onInit();
   }
 
-  getLanguage() async {
+  Future<void> getLanguage() async {
     await FireStoreUtils.fireStore.collection(CollectionName.settings).doc("languages").get().then((event) {
       if (event.exists) {
         List languageListTemp = event.data()!["list"];
         for (var element in languageListTemp) {
           LanguageModel languageModel = LanguageModel.fromJson(element);
-          languageList.add(languageModel);
+          if (languageModel.isActive == true) {
+            languageList.add(languageModel);
+          }
         }
 
         if (Preferences.getString(Preferences.languageCodeKey).toString().isNotEmpty) {

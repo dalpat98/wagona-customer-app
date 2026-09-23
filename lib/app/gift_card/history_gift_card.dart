@@ -5,6 +5,7 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/widget/my_separator.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +29,7 @@ class HistoryGiftCard extends StatelessWidget {
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: controller.giftCardsOrderList.isEmpty
-                        ? Constant.showEmptyView(message: "Purchased Gift card not found".tr)
+                        ? Constant.showEmptyView(message: "Purchased Gift card not found")
                         : ListView.builder(
                             itemCount: controller.giftCardsOrderList.length,
                             shrinkWrap: true,
@@ -48,7 +49,7 @@ class HistoryGiftCard extends StatelessWidget {
                                       Row(
                                         children: [
                                           Expanded(
-                                            child: Text(
+                                            child: TranslatedText(
                                               giftCardOrderModel.giftTitle.toString(),
                                               style: TextStyle(
                                                 fontSize: 16,
@@ -79,8 +80,8 @@ class HistoryGiftCard extends StatelessWidget {
                                       Row(
                                         children: [
                                           Expanded(
-                                            child: Text(
-                                              "Gift Code".tr,
+                                            child: TranslatedText(
+                                              "Gift Code",
                                               style: TextStyle(
                                                 color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
                                                 fontFamily: AppThemeData.semiBold,
@@ -88,7 +89,7 @@ class HistoryGiftCard extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          Text(
+                                          TranslatedText(
                                             giftCardOrderModel.giftCode.toString().replaceAllMapped(RegExp(r".{4}"), (match) => "${match.group(0)} "),
                                             style: TextStyle(
                                               fontSize: 16,
@@ -105,8 +106,8 @@ class HistoryGiftCard extends StatelessWidget {
                                       Row(
                                         children: [
                                           Expanded(
-                                            child: Text(
-                                              "Gift Pin".tr,
+                                            child: TranslatedText(
+                                              "Gift Pin",
                                               style: TextStyle(
                                                 color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
                                                 fontFamily: AppThemeData.semiBold,
@@ -174,8 +175,8 @@ class HistoryGiftCard extends StatelessWidget {
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Text(
-                                                    'Share'.tr,
+                                                  TranslatedText(
+                                                    'Share',
                                                     style: TextStyle(
                                                       color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
                                                       fontSize: 14,
@@ -191,8 +192,8 @@ class HistoryGiftCard extends StatelessWidget {
                                             ),
                                           ),
                                           const Expanded(child: SizedBox()),
-                                          Text(
-                                            giftCardOrderModel.redeem == true ? "Redeemed".tr : "Not Redeem".tr,
+                                          TranslatedText(
+                                            giftCardOrderModel.redeem == true ? "Redeemed" : "Not Redeem",
                                             style: TextStyle(
                                               fontSize: 16,
                                               color: giftCardOrderModel.redeem == true ? AppThemeData.success400 : AppThemeData.danger300,

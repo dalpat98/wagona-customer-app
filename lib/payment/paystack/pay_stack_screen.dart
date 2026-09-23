@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/payment/paystack/paystack_url_genrater.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -34,7 +36,9 @@ class _PayStackScreenState extends State<PayStackScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {},
-          onPageStarted: (String url) {},
+          onPageStarted: (String url) {
+            ShowToastDialog.closeLoader();
+          },
           onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest navigation) async {
@@ -65,7 +69,7 @@ class _PayStackScreenState extends State<PayStackScreen> {
       child: Scaffold(
         appBar: AppBar(
             backgroundColor: AppThemeData.grey50,
-            title: Text("Payment".tr),
+            title: TranslatedText("Payment"),
             centerTitle: false,
             leading: GestureDetector(
               onTap: () {
@@ -86,13 +90,13 @@ class _PayStackScreenState extends State<PayStackScreen> {
       barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Cancel Payment'),
+          title: const TranslatedText('Cancel Payment'),
           content: const SingleChildScrollView(
-            child: Text("cancelPayment?"),
+            child: TranslatedText("Cancel Payment?"),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text(
+              child: const TranslatedText(
                 'Cancel',
                 style: TextStyle(color: Colors.red),
               ),
@@ -102,7 +106,7 @@ class _PayStackScreenState extends State<PayStackScreen> {
               },
             ),
             TextButton(
-              child: const Text(
+              child: const TranslatedText(
                 'Continue',
                 style: TextStyle(color: Colors.green),
               ),

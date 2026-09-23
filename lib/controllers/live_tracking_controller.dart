@@ -9,6 +9,7 @@ import 'package:customer/models/order_model.dart';
 import 'package:customer/models/user_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_map/flutter_map.dart' as flutterMap;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
@@ -29,7 +30,9 @@ class LiveTrackingController extends GetxController {
 
   @override
   void onClose() {
-    // Clean up controllers and cancel any running animations.
+    // Clean up controllers, listeners and cancel any running animations.
+    _orderSub?.cancel();
+    _driverSub?.cancel();
     mapController = null;
     _cancelGoogleAnim();
     _cancelOsmAnim();
@@ -64,89 +67,133 @@ class LiveTrackingController extends GetxController {
   // Movement threshold (meters) below which we snap instead of animate
   final double snapThresholdMeters = 0.5;
 
+  // ---------- Firestore listeners & route-fetch throttle ----------
+  StreamSubscription? _orderSub;
+  StreamSubscription? _driverSub;
+
+  // The route (polyline) is only re-fetched when the delivery leg changes
+  // (order status) or the throttle window elapses — NOT on every GPS ping.
+  // This is what removes the per-ping Google Directions API billing.
+  String? _lastRouteStatus;
+  DateTime _lastRouteFetch = DateTime.fromMillisecondsSinceEpoch(0);
+  final Duration _routeMinInterval = const Duration(seconds: 60);
+
   // ---------- initialization from arguments & Firestore listeners ----------
   Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       orderModel.value = argumentData['orderModel'];
-      // listen to order doc
-      FireStoreUtils.fireStore.collection(CollectionName.restaurantOrders).doc(orderModel.value.id).snapshots().listen((event) {
-        if (event.data() != null) {
-          OrderModel orderModelStream = OrderModel.fromJson(event.data()!);
-          orderModel.value = orderModelStream;
-
-          // listen to driver doc inside order listener
-          if (orderModel.value.driverID != null && orderModel.value.driverID!.isNotEmpty) {
-            FireStoreUtils.fireStore.collection(CollectionName.users).doc(orderModel.value.driverID).snapshots().listen((event) {
-              if (event.data() != null) {
-                driverUserModel.value = UserModel.fromJson(event.data()!);
-
-                // animate / fetch based on map type & order status
-                if (Constant.selectedMapType != 'osm') {
-                  if (orderModel.value.status == Constant.orderShipped) {
-                    getPolyline(
-                        sourceLatitude: driverUserModel.value.location!.latitude,
-                        sourceLongitude: driverUserModel.value.location!.longitude,
-                        destinationLatitude: orderModel.value.vendor!.latitude,
-                        destinationLongitude: orderModel.value.vendor!.longitude);
-                  } else if (orderModel.value.status == Constant.orderInTransit) {
-                    getPolyline(
-                        sourceLatitude: driverUserModel.value.location!.latitude,
-                        sourceLongitude: driverUserModel.value.location!.longitude,
-                        destinationLatitude: orderModel.value.address!.location!.latitude,
-                        destinationLongitude: orderModel.value.address!.location!.longitude);
-                  } else {
-                    getPolyline(
-                        sourceLatitude: orderModel.value.address!.location!.latitude,
-                        sourceLongitude: orderModel.value.address!.location!.longitude,
-                        destinationLatitude: orderModel.value.vendor!.latitude,
-                        destinationLongitude: orderModel.value.vendor!.longitude);
-                  }
-
-                  // call animation for Google (non-blocking)
-                } else {
-                  // OSM flow
-                  current.value = location.LatLng(driverUserModel.value.location!.latitude ?? 0.0, driverUserModel.value.location!.longitude ?? 0.0);
-
-                  // set source/destination logically depending on status
-                  if (orderModel.value.status == Constant.orderShipped) {
-                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                    awaitFetchRouteAndAnimateOSM(current.value, source.value);
-                  } else if (orderModel.value.status == Constant.orderInTransit) {
-                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                    awaitFetchRouteAndAnimateOSM(current.value, destination.value);
-                  } else {
-                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                    awaitFetchRouteAndAnimateOSM(current.value, source.value);
-                  }
-                }
-                onDriverLocationUpdate(
-                  lat: driverUserModel.value.location!.latitude,
-                  lng: driverUserModel.value.location!.longitude,
-                  rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
-                );
-              }
-            });
-          }
-
-          if (orderModel.value.status == Constant.orderCompleted) {
-            // ensure we cancel animations before popping
-            _cancelGoogleAnim();
-            _cancelOsmAnim();
-            if (Get.isOverlaysOpen) {
-              // just a gentle guard; your app may not need this
-            }
-            Get.back();
-          }
-        }
+      // Single order-doc listener; stored so it can be cancelled in onClose().
+      _orderSub = FireStoreUtils.fireStore.collection(CollectionName.restaurantOrders).doc(orderModel.value.id).snapshots().listen((event) {
+        final data = event.data();
+        if (data == null) return;
+        orderModel.value = OrderModel.fromJson(data);
+        _handleOrderUpdate();
       });
     }
 
     isLoading.value = false;
     update();
+  }
+
+  void _handleOrderUpdate() {
+    if (orderModel.value.status == Constant.orderCompleted) {
+      _cancelGoogleAnim();
+      _cancelOsmAnim();
+      _driverSub?.cancel();
+      _driverSub = null;
+      Get.back();
+      return;
+    }
+
+    final String? driverId = orderModel.value.driverID;
+    if (driverId != null && driverId.isNotEmpty) {
+      // Re-subscribe to a SINGLE driver listener. Previously a new listener was
+      // attached on every order-doc change and never cancelled, so multiple
+      // listeners stacked up and fought over the marker animation (jitter) while
+      // multiplying Firestore reads. Cancel the old one before re-subscribing.
+      _driverSub?.cancel();
+      _driverSub = FireStoreUtils.fireStore.collection(CollectionName.users).doc(driverId).snapshots().listen((event) {
+        final data = event.data();
+        if (data == null) return;
+        driverUserModel.value = UserModel.fromJson(data);
+        _handleDriverUpdate();
+      });
+    }
+  }
+
+  void _handleDriverUpdate() {
+    final loc = driverUserModel.value.location;
+    if (loc == null) return;
+    final double rotation = double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0;
+    final String status = orderModel.value.status ?? '';
+
+    if (Constant.selectedMapType != 'osm') {
+      // Fetch a fresh Directions route only when needed; the marker still
+      // animates smoothly along the last-known route on every ping below.
+      if (_shouldFetchRoute(status)) {
+        _fetchGoogleRoute(status);
+      }
+    } else {
+      current.value = location.LatLng(loc.latitude ?? 0.0, loc.longitude ?? 0.0);
+      _updateOsmEndpoints(status);
+      if (_shouldFetchRoute(status)) {
+        _fetchOsmRoute(status);
+      }
+    }
+
+    onDriverLocationUpdate(lat: loc.latitude, lng: loc.longitude, rotation: rotation);
+  }
+
+  // Returns true only when the route genuinely needs re-fetching.
+  bool _shouldFetchRoute(String status) {
+    final now = DateTime.now();
+    final bool statusChanged = status != _lastRouteStatus;
+    final bool intervalElapsed = now.difference(_lastRouteFetch) >= _routeMinInterval;
+    final bool haveRoute = Constant.selectedMapType != 'osm' ? polyLines.isNotEmpty : routePoints.isNotEmpty;
+    if (!statusChanged && !intervalElapsed && haveRoute) return false;
+    _lastRouteStatus = status;
+    _lastRouteFetch = now;
+    return true;
+  }
+
+  void _fetchGoogleRoute(String status) {
+    final loc = driverUserModel.value.location;
+    if (loc == null) return;
+    if (status == Constant.orderShipped) {
+      getPolyline(
+          sourceLatitude: loc.latitude,
+          sourceLongitude: loc.longitude,
+          destinationLatitude: orderModel.value.vendor?.latitude,
+          destinationLongitude: orderModel.value.vendor?.longitude);
+    } else if (status == Constant.orderInTransit) {
+      getPolyline(
+          sourceLatitude: loc.latitude,
+          sourceLongitude: loc.longitude,
+          destinationLatitude: orderModel.value.address?.location?.latitude,
+          destinationLongitude: orderModel.value.address?.location?.longitude);
+    } else {
+      getPolyline(
+          sourceLatitude: orderModel.value.address?.location?.latitude,
+          sourceLongitude: orderModel.value.address?.location?.longitude,
+          destinationLatitude: orderModel.value.vendor?.latitude,
+          destinationLongitude: orderModel.value.vendor?.longitude);
+    }
+  }
+
+  void _updateOsmEndpoints(String status) {
+    // Endpoints are cheap local state (drive the pickup/dropoff markers), so
+    // they are refreshed every ping even though the route fetch is throttled.
+    source.value = location.LatLng(orderModel.value.vendor?.latitude ?? 0.0, orderModel.value.vendor?.longitude ?? 0.0);
+    destination.value = location.LatLng(orderModel.value.address?.location?.latitude ?? 0.0, orderModel.value.address?.location?.longitude ?? 0.0);
+  }
+
+  void _fetchOsmRoute(String status) {
+    if (status == Constant.orderInTransit) {
+      awaitFetchRouteAndAnimateOSM(current.value, destination.value);
+    } else {
+      awaitFetchRouteAndAnimateOSM(current.value, source.value);
+    }
   }
 
   Future<void> awaitFetchRouteAndAnimateOSM(location.LatLng cur, location.LatLng dest) async {
@@ -389,11 +436,11 @@ class LiveTrackingController extends GetxController {
 
   // ---------- Smooth animation for Google Marker ----------
   Future<void> animateDriverMarkerGoogle(
-      LatLng newPos, {
-        double? newRotation,
-        Duration duration = const Duration(milliseconds: 900),
-        bool followCamera = true,
-      }) async {
+    LatLng newPos, {
+    double? newRotation,
+    Duration duration = const Duration(milliseconds: 900),
+    bool followCamera = true,
+  }) async {
     _cancelGoogleAnim();
     final int myKey = ++_googleAnimKey;
 
@@ -487,13 +534,13 @@ class LiveTrackingController extends GetxController {
 
   // ---------- Smooth animation for OSM marker ----------
   Future<void> animateDriverMarkerOsm(
-      location.LatLng newPos, {
-        double? newRotation,
-        Duration duration = const Duration(milliseconds: 1000),
-        double osmZoom = 14.0,
-        bool followCamera = true,
-        int cameraUpdateEveryNthFrame = 3,
-      }) async {
+    location.LatLng newPos, {
+    double? newRotation,
+    Duration duration = const Duration(milliseconds: 1000),
+    double osmZoom = 14.0,
+    bool followCamera = true,
+    int cameraUpdateEveryNthFrame = 3,
+  }) async {
     _cancelOsmAnim();
     final int myKey = ++_osmAnimKey;
 
@@ -526,7 +573,7 @@ class LiveTrackingController extends GetxController {
 
     _osmAnimTimer = Timer.periodic(
       Duration(milliseconds: (1000 / fps).round()),
-          (timer) async {
+      (timer) async {
         if (myKey != _osmAnimKey) {
           timer.cancel();
           return;

@@ -9,11 +9,14 @@ import 'package:customer/models/user_model.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/notification_service.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
@@ -40,12 +43,26 @@ class OtpScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Verify Your Number 📱".tr,
-                            style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 22, fontFamily: AppThemeData.semiBold),
+                          Container(
+                            height: 64,
+                            width: 64,
+                            decoration: BoxDecoration(
+                              gradient: AppThemeData.primaryGradient,
+                              borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                              boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
+                            ),
+                            child: const Center(
+                              child: Icon(Icons.mark_email_read_outlined, size: 30, color: AppThemeData.grey50),
+                            ),
                           ),
-                          Text(
-                            "${'Enter the OTP sent to your mobile number.'.tr} ${controller.countryCode.value} ${Constant.maskingString(controller.phoneNumber.value, 3)}".tr,
+                          const SizedBox(height: AppThemeData.spaceLg),
+                          TranslatedText(
+                            "Verify Your Number",
+                            style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 24, fontFamily: AppThemeData.bold),
+                          ),
+                          const SizedBox(height: AppThemeData.spaceXs),
+                          TranslatedText(
+                            "${'Enter the OTP sent to your mobile number.'} ${controller.countryCode.value} ${Constant.maskingString(controller.phoneNumber.value, 3)}",
                             textAlign: TextAlign.start,
                             style: TextStyle(
                               color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey700,
@@ -59,43 +76,52 @@ class OtpScreen extends StatelessWidget {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: PinCodeTextField(
+                            child: MaterialPinField(
                               length: 6,
-                              appContext: context,
-                              keyboardType: TextInputType.phone,
-                              enablePinAutofill: true,
+                              keyboardType: TextInputType.number,
+                              enableAutofill: true,
+                              autofillHints: const [AutofillHints.oneTimeCode],
                               hintCharacter: "-",
-                              textStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.regular),
-                              pinTheme: PinTheme(
-                                  fieldHeight: 50,
-                                  fieldWidth: 50,
-                                  inactiveFillColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                  selectedFillColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                  activeFillColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                  selectedColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                  activeColor: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                  inactiveColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                  disabledColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                  shape: PinCodeFieldShape.box,
-                                  errorBorderColor: themeChange.getThem() ? AppThemeData.grey600 : AppThemeData.grey300,
-                                  borderRadius: const BorderRadius.all(Radius.circular(10))),
-                              cursorColor: AppThemeData.primary300,
-                              enableActiveFill: true,
-                              controller: controller.otpController.value,
-                              onCompleted: (v) async {},
+                              pinController: controller.otpController.value,
+                              theme: MaterialPinTheme(
+                                cellSize: const Size(50, 50),
+                                shape: MaterialPinShape.outlined,
+                                borderRadius: BorderRadius.circular(AppThemeData.radiusMd),
+
+                                // Text Style
+                                textStyle: TextStyle(
+                                  fontFamily: AppThemeData.semiBold,
+                                  fontSize: 18,
+                                  color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                ),
+
+                                // Fill Color (like enableActiveFill: true)
+                                fillColor: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+
+                                // Border Colors
+                                borderColor: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey200,
+
+                                focusedBorderColor: AppThemeData.primary300,
+                                cursorColor: AppThemeData.primary300,
+
+                                errorColor: themeChange.getThem() ? AppThemeData.grey600 : AppThemeData.grey300,
+                              ),
                               onChanged: (value) {},
+                              onCompleted: (pin) async {
+                                // Handle completed OTP
+                              },
                             ),
                           ),
                           const SizedBox(
                             height: 50,
                           ),
                           RoundedButtonFill(
-                            title: "Verify & Next".tr,
+                            title: "Verify & Next",
                             color: AppThemeData.primary300,
                             textColor: AppThemeData.grey50,
                             onPress: () async {
                               if (controller.otpController.value.text.length == 6) {
-                                ShowToastDialog.showLoader("Verify otp".tr);
+                                ShowToastDialog.showLoader("Verify otp");
 
                                 PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: controller.verificationId.value, smsCode: controller.otpController.value.text);
                                 String? fcmToken = await NotificationService.getToken();
@@ -134,14 +160,14 @@ class OtpScreen extends StatelessWidget {
                                               Get.offAll(const LocationPermissionScreen());
                                             }
                                           } else {
-                                            ShowToastDialog.showToast("This user is disable please contact to administrator".tr);
+                                            ShowToastDialog.showToast("This user is disable please contact to administrator");
                                             await FirebaseAuth.instance.signOut();
                                             Get.offAll(const LoginScreen());
                                           }
                                         } else {
                                           await FirebaseAuth.instance.signOut();
                                           Get.offAll(const LoginScreen());
-                                          ShowToastDialog.showToast("This user is not created in customer application.".tr);
+                                          ShowToastDialog.showToast("This user is not created in customer application.");
                                         }
                                       } else {
                                         UserModel userModel = UserModel();
@@ -161,45 +187,49 @@ class OtpScreen extends StatelessWidget {
                                   }
                                 }).catchError((error) {
                                   ShowToastDialog.closeLoader();
-                                  ShowToastDialog.showToast("Invalid Code".tr);
+                                  ShowToastDialog.showToast("Invalid Code");
                                 });
                               } else {
-                                ShowToastDialog.showToast("Enter Valid otp".tr);
+                                ShowToastDialog.showToast("Enter Valid otp");
                               }
                             },
                           ),
                           const SizedBox(
                             height: 40,
                           ),
-                          Text.rich(
-                            textAlign: TextAlign.start,
-                            TextSpan(
-                              text: "${'Did’t receive any code? '.tr} ",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                                fontFamily: AppThemeData.medium,
-                                color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      controller.otpController.value.clear();
-                                      controller.sendOTP();
-                                    },
-                                  text: 'Send Again'.tr,
-                                  style: TextStyle(
-                                      color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                          ValueListenableBuilder(
+                              valueListenable: TranslationNotifier.refresh,
+                              builder: (_, __, ___) {
+                                return Text.rich(
+                                  textAlign: TextAlign.start,
+                                  TextSpan(
+                                    text: "${'Did’t receive any code? '} ".tr,
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 14,
                                       fontFamily: AppThemeData.medium,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: AppThemeData.primary300),
-                                ),
-                              ],
-                            ),
-                          )
+                                      color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
+                                    ),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            controller.otpController.value.clear();
+                                            controller.sendOTP();
+                                          },
+                                        text: 'Send Again'.tr,
+                                        style: TextStyle(
+                                            color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                            fontFamily: AppThemeData.medium,
+                                            decoration: TextDecoration.underline,
+                                            decorationColor: AppThemeData.primary300),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              })
                         ],
                       ),
                     ),

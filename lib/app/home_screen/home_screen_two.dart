@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:badges/badges.dart' as badges;
 import 'package:customer/app/address_screens/address_list_screen.dart';
 import 'package:customer/app/advertisement_screens/all_advertisement_screen.dart';
 import 'package:customer/app/auth_screen/login_screen.dart';
@@ -30,14 +31,19 @@ import 'package:customer/themes/responsive.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/utils/preferences.dart';
+import 'package:customer/utils/translation_notifier.dart';
+import 'package:customer/widget/fade_in_section.dart';
+import 'package:customer/widget/home_skeleton.dart';
 import 'package:customer/widget/gradiant_text.dart';
 import 'package:customer/widget/osm_map/map_picker_page.dart';
 import 'package:customer/widget/place_picker/location_picker_screen.dart';
 import 'package:customer/widget/place_picker/selected_location_model.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -59,7 +65,7 @@ class HomeScreenTwo extends StatelessWidget {
         return Scaffold(
           backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
           body: controller.isLoading.value
-              ? Constant.loader()
+              ? const HomeSkeleton()
               : Constant.isZoneAvailable == false
                   ? Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -74,15 +80,15 @@ class HomeScreenTwo extends StatelessWidget {
                           const SizedBox(
                             height: 12,
                           ),
-                          Text(
-                            "No Restaurants Found in Your Area".tr,
+                          TranslatedText(
+                            "No Restaurants Found in Your Area",
                             style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontSize: 22, fontFamily: AppThemeData.semiBold),
                           ),
                           const SizedBox(
                             height: 5,
                           ),
-                          Text(
-                            "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.".tr,
+                          TranslatedText(
+                            "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.",
                             textAlign: TextAlign.center,
                             style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.bold),
                           ),
@@ -90,7 +96,7 @@ class HomeScreenTwo extends StatelessWidget {
                             height: 20,
                           ),
                           RoundedButtonFill(
-                            title: "Change Zone".tr,
+                            title: "Change Zone",
                             width: 55,
                             height: 5.5,
                             color: AppThemeData.primary300,
@@ -102,14 +108,20 @@ class HomeScreenTwo extends StatelessWidget {
                         ],
                       ),
                     )
-                  : Padding(
-                      padding: EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top),
-                      child: controller.isListView.value == false
-                          ? const MapView()
-                          : Column(
+                  : controller.isListView.value == false
+                      ? Padding(
+                          padding: EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top),
+                          child: const MapView(),
+                        )
+                      : Column(
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top + 8, left: 16, right: 16, bottom: 18),
+                                  decoration: BoxDecoration(
+                                    gradient: AppThemeData.brandGradientSoft,
+                                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(AppThemeData.radiusXl)),
+                                  ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -124,16 +136,29 @@ class HomeScreenTwo extends StatelessWidget {
                                                 dashBoardController.selectedIndex.value = 4;
                                               }
                                             },
-                                            child: ClipOval(
-                                              child: NetworkImageWidget(
-                                                imageUrl: Constant.userModel == null ? "" : Constant.userModel!.profilePictureURL.toString(),
-                                                height: 40,
-                                                width: 40,
-                                                errorWidget: Image.asset(
-                                                  Constant.userPlaceHolder,
-                                                  fit: BoxFit.cover,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(2),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: AppThemeData.grey50.withOpacity(0.25),
+                                                border: Border.all(color: AppThemeData.grey50.withOpacity(0.6), width: 1.5),
+                                              ),
+                                              child: ClipOval(
+                                                child: SizedBox(
                                                   height: 40,
                                                   width: 40,
+                                                  child: NetworkImageWidget(
+                                                    imageUrl: Constant.userModel == null ? "" : Constant.userModel!.profilePictureURL.toString(),
+                                                    height: 40,
+                                                    width: 40,
+                                                    fit: BoxFit.cover,
+                                                    errorWidget: Image.asset(
+                                                      Constant.userPlaceHolder,
+                                                      fit: BoxFit.cover,
+                                                      height: 40,
+                                                      width: 40,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -151,22 +176,22 @@ class HomeScreenTwo extends StatelessWidget {
                                                         onTap: () {
                                                           Get.offAll(const LoginScreen());
                                                         },
-                                                        child: Text(
-                                                          "Login".tr,
+                                                        child: TranslatedText(
+                                                          "Login",
                                                           textAlign: TextAlign.center,
-                                                          style: TextStyle(
+                                                          style: const TextStyle(
                                                             fontFamily: AppThemeData.medium,
-                                                            color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                            color: AppThemeData.primary50,
                                                             fontSize: 12,
                                                           ),
                                                         ),
                                                       )
-                                                    : Text(
+                                                    : TranslatedText(
                                                         "${Constant.userModel!.fullName()}",
                                                         textAlign: TextAlign.center,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                           fontFamily: AppThemeData.medium,
-                                                          color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                          color: AppThemeData.primary50,
                                                           fontSize: 12,
                                                         ),
                                                       ),
@@ -185,11 +210,11 @@ class HomeScreenTwo extends StatelessWidget {
                                                     } else {
                                                       Constant.checkPermission(
                                                           onTap: () async {
-                                                            ShowToastDialog.showLoader("Please wait".tr);
+                                                            ShowToastDialog.showLoader("Please wait");
                                                             ShippingAddress addressModel = ShippingAddress();
                                                             try {
                                                               await Geolocator.requestPermission();
-                                                              await Geolocator.getCurrentPosition();
+                                                              await Geolocator.getCurrentPosition().timeout(const Duration(seconds: 8));
                                                               ShowToastDialog.closeLoader();
                                                               if (Constant.selectedMapType == 'osm') {
                                                                 final result = await Get.to(() => MapPickerPage());
@@ -223,7 +248,7 @@ class HomeScreenTwo extends StatelessWidget {
                                                                 });
                                                               }
                                                             } catch (e) {
-                                                              await placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
+                                                              await Geocoding().placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
                                                                 Placemark placeMark = valuePlaceMaker[0];
                                                                 addressModel.addressAs = "Home";
                                                                 addressModel.location = UserLocation(latitude: 19.228825, longitude: 72.854118);
@@ -240,26 +265,33 @@ class HomeScreenTwo extends StatelessWidget {
                                                           context: context);
                                                     }
                                                   },
-                                                  child: Text.rich(
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: Constant.selectedLocation.getFullAddress(),
-                                                          style: TextStyle(
-                                                            fontFamily: AppThemeData.medium,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                                            fontSize: 14,
+                                                  child: ValueListenableBuilder(
+                                                      valueListenable: TranslationNotifier.refresh,
+                                                      builder: (_, __, ___) {
+                                                        return Text.rich(
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          TextSpan(
+                                                            children: [
+                                                              TextSpan(
+                                                                text: Constant.selectedLocation.getFullAddress(),
+                                                                style: const TextStyle(
+                                                                  fontFamily: AppThemeData.semiBold,
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                  color: AppThemeData.grey50,
+                                                                  fontSize: 14,
+                                                                ),
+                                                              ),
+                                                              WidgetSpan(
+                                                                child: SvgPicture.asset(
+                                                                  "assets/icons/ic_down.svg",
+                                                                  colorFilter: const ColorFilter.mode(AppThemeData.grey50, BlendMode.srcIn),
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
-                                                        ),
-                                                        WidgetSpan(
-                                                          child: SvgPicture.asset("assets/icons/ic_down.svg"),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
+                                                        );
+                                                      }),
                                                 ),
                                               ],
                                             ),
@@ -267,37 +299,75 @@ class HomeScreenTwo extends StatelessWidget {
                                           const SizedBox(
                                             width: 5,
                                           ),
-                                          InkWell(
-                                            onTap: () async {
-                                              (await Get.to(const CartScreen()));
-                                              controller.getCartData();
-                                            },
-                                            child: ClipOval(
-                                              child: Container(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                                  child: SvgPicture.asset(
-                                                    "assets/icons/ic_shoping_cart.svg",
-                                                    colorFilter: ColorFilter.mode(themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, BlendMode.srcIn),
-                                                  )),
+                                          Obx(
+                                            () => badges.Badge(
+                                              showBadge: cartItem.isNotEmpty,
+                                              badgeContent: Text(
+                                                "${cartItem.length}",
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontFamily: AppThemeData.semiBold,
+                                                  color: AppThemeData.grey50,
+                                                ),
+                                              ),
+                                              badgeStyle: const badges.BadgeStyle(
+                                                shape: badges.BadgeShape.circle,
+                                                badgeColor: AppThemeData.secondary300,
+                                              ),
+                                              child: InkWell(
+                                                onTap: () async {
+                                                  (await Get.to(const CartScreen()));
+                                                  controller.getCartData();
+                                                },
+                                                child: ClipOval(
+                                                  child: Container(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      decoration: BoxDecoration(
+                                                        color: AppThemeData.grey50.withOpacity(0.22),
+                                                        shape: BoxShape.circle,
+                                                        border: Border.all(color: AppThemeData.grey50.withOpacity(0.35)),
+                                                      ),
+                                                      child: SvgPicture.asset(
+                                                        "assets/icons/ic_shoping_cart.svg",
+                                                        colorFilter: const ColorFilter.mode(AppThemeData.grey50, BlendMode.srcIn),
+                                                      )),
+                                                ),
+                                              ),
                                             ),
                                           )
                                         ],
                                       ),
                                       const SizedBox(
-                                        height: 10,
+                                        height: 16,
+                                      ),
+                                      TranslatedText(
+                                        "What would you like to eat today?",
+                                        style: const TextStyle(
+                                          fontFamily: AppThemeData.extraBold,
+                                          color: AppThemeData.grey50,
+                                          fontSize: 22,
+                                          height: 1.15,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 14,
                                       ),
                                       InkWell(
                                         onTap: () {
                                           Get.to(const SearchScreen(), arguments: {"vendorList": controller.allNearestRestaurant});
                                         },
                                         child: TextFieldWidget(
-                                          hintText: 'Search the dish, restaurant, food, meals'.tr,
+                                          hintText: 'Search the dish, restaurant, food, meals',
                                           controller: null,
                                           enable: false,
                                           prefix: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                                            child: SvgPicture.asset("assets/icons/ic_search.svg"),
+                                            padding: const EdgeInsets.only(left: 14, right: 10),
+                                            child: SvgPicture.asset(
+                                              "assets/icons/ic_search.svg",
+                                              width: 20,
+                                              height: 20,
+                                              colorFilter: const ColorFilter.mode(AppThemeData.grey500, BlendMode.srcIn),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -311,43 +381,54 @@ class HomeScreenTwo extends StatelessWidget {
                                   child: SingleChildScrollView(
                                     child: Column(
                                       children: [
+                                        const SizedBox(
+                                          height: 18,
+                                        ),
+                                        FadeInSection(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                                            child: CategoryView(controller: controller),
+                                          ),
+                                        ),
                                         controller.bannerModel.isEmpty
                                             ? const SizedBox()
-                                            : Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                child: BannerView(controller: controller),
+                                            : FadeInSection(
+                                                delayMs: 120,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(left: 16, right: 16, top: 20),
+                                                  child: BannerView(controller: controller),
+                                                ),
                                               ),
-                                        const SizedBox(
-                                          height: 20,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                                          child: CategoryView(controller: controller),
-                                        ),
                                         controller.couponRestaurantList.isEmpty
                                             ? const SizedBox()
-                                            : Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                child: Column(
-                                                  children: [
-                                                    const SizedBox(
-                                                      height: 20,
-                                                    ),
-                                                    OfferView(controller: controller),
-                                                  ],
+                                            : FadeInSection(
+                                                delayMs: 160,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                  child: Column(
+                                                    children: [
+                                                      const SizedBox(
+                                                        height: 20,
+                                                      ),
+                                                      OfferView(controller: controller),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                         controller.storyList.isEmpty || Constant.storyEnable == false
                                             ? const SizedBox()
-                                            : Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                child: Column(
-                                                  children: [
-                                                    const SizedBox(
-                                                      height: 20,
-                                                    ),
-                                                    StoryView(controller: controller),
-                                                  ],
+                                            : FadeInSection(
+                                                delayMs: 80,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                  child: Column(
+                                                    children: [
+                                                      const SizedBox(
+                                                        height: 20,
+                                                      ),
+                                                      StoryView(controller: controller),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                         Visibility(
@@ -373,8 +454,8 @@ class HomeScreenTwo extends StatelessWidget {
                                                           Row(
                                                             children: [
                                                               Expanded(
-                                                                child: Text(
-                                                                  "Highlights for you".tr,
+                                                                child: TranslatedText(
+                                                                  "Highlights for you",
                                                                   textAlign: TextAlign.start,
                                                                   style: TextStyle(
                                                                     fontFamily: AppThemeData.semiBold,
@@ -389,8 +470,8 @@ class HomeScreenTwo extends StatelessWidget {
                                                                     controller.getFavouriteRestaurant();
                                                                   });
                                                                 },
-                                                                child: Text(
-                                                                  "See all".tr,
+                                                                child: TranslatedText(
+                                                                  "See all",
                                                                   textAlign: TextAlign.center,
                                                                   style: TextStyle(
                                                                     fontFamily: AppThemeData.regular,
@@ -423,26 +504,37 @@ class HomeScreenTwo extends StatelessWidget {
                                         ),
                                         controller.allNearestRestaurant.isEmpty
                                             ? const SizedBox()
-                                            : Column(
-                                                children: [
-                                                  const SizedBox(
-                                                    height: 20,
-                                                  ),
-                                                  RestaurantView(
-                                                    controller: controller,
-                                                  ),
-                                                ],
+                                            : FadeInSection(
+                                                delayMs: 120,
+                                                child: Column(
+                                                  children: [
+                                                    const SizedBox(
+                                                      height: 20,
+                                                    ),
+                                                    RestaurantView(
+                                                      controller: controller,
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
+                                        const SizedBox(
+                                          height: 110,
+                                        ),
                                       ],
                                     ),
                                   ),
                                 )
                               ],
                             ),
-                    ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: Container(
-            decoration: BoxDecoration(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, borderRadius: const BorderRadius.all(Radius.circular(30))),
+            margin: const EdgeInsets.only(bottom: 78),
+            decoration: BoxDecoration(
+              color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+              borderRadius: const BorderRadius.all(Radius.circular(30)),
+              border: Border.all(color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey100),
+              boxShadow: AppThemeData.floatShadow,
+            ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Row(
@@ -523,13 +615,13 @@ class HomeScreenTwo extends StatelessWidget {
                   DropdownButton<String>(
                     isDense: false,
                     underline: const SizedBox(),
-                    value: controller.selectedOrderTypeValue.value.tr,
+                    value: controller.selectedOrderTypeValue.value,
                     icon: const Icon(Icons.keyboard_arrow_down),
                     items: <String>['Delivery', 'TakeAway'].map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(
-                          value.tr,
+                        child: TranslatedText(
+                          value,
                           style: TextStyle(
                             fontFamily: AppThemeData.semiBold,
                             fontSize: 16,
@@ -548,10 +640,10 @@ class HomeScreenTwo extends StatelessWidget {
                             context: context,
                             builder: (BuildContext context) {
                               return CustomDialogBox(
-                                title: "Alert".tr,
-                                descriptions: "Do you really want to change the delivery option? Your cart will be empty.".tr,
-                                positiveString: "Ok".tr,
-                                negativeString: "Cancel".tr,
+                                title: "Alert",
+                                descriptions: "Do you really want to change the delivery option? Your cart will be empty.",
+                                positiveString: "Ok",
+                                negativeString: "Cancel",
                                 positiveClick: () async {
                                   await Preferences.setString(Preferences.foodDeliveryType, value!);
                                   controller.selectedOrderTypeValue.value = value;
@@ -589,11 +681,11 @@ class CategoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return Container(
-      decoration: ShapeDecoration(
-        color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+      decoration: BoxDecoration(
+        color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+        borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+        boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+        border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -611,8 +703,8 @@ class CategoryView extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          "Our Categories".tr,
+                        child: TranslatedText(
+                          "Our Categories",
                           style: TextStyle(
                             fontFamily: AppThemeData.semiBold,
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -624,8 +716,8 @@ class CategoryView extends StatelessWidget {
                         onTap: () {
                           Get.to(const ViewAllCategoryScreen());
                         },
-                        child: Text(
-                          "See all".tr,
+                        child: TranslatedText(
+                          "See all",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: AppThemeData.medium,
@@ -637,15 +729,15 @@ class CategoryView extends StatelessWidget {
                     ],
                   ),
                   GradientText(
-                    'Best Servings Food'.tr,
-                    style: TextStyle(
+                    'Best Servings Food',
+                    style: const TextStyle(
                       fontSize: 24,
-                      fontFamily: 'Inter Tight',
+                      fontFamily: AppThemeData.extraBold,
                       fontWeight: FontWeight.w800,
                     ),
                     gradient: LinearGradient(colors: [
-                      Color(0xFF3961F1),
-                      Color(0xFF11D0EA),
+                      AppThemeData.primaryGradientStart,
+                      AppThemeData.primaryGradientEnd,
                     ]),
                   ),
                 ],
@@ -667,23 +759,48 @@ class CategoryView extends StatelessWidget {
                     Get.to(const CategoryRestaurantScreen(), arguments: {"vendorCategoryModel": vendorCategoryModel, "dineIn": false});
                   },
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      ClipOval(
-                        child: SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: NetworkImageWidget(imageUrl: vendorCategoryModel.photo.toString(), fit: BoxFit.cover),
+                      // Expanded + square AspectRatio: the circle sizes itself to the
+                      // grid cell (no fixed Responsive height that overflows), and
+                      // BoxFit.contain shows the whole icon instead of cropping it.
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio: 0.8/1,
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.primary50,
+                              shape: BoxShape.circle,
+                              boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                            ),
+                            child: ClipOval(
+                              child: SizedBox.expand(
+                                child: NetworkImageWidget(
+                                  imageUrl: vendorCategoryModel.photo.toString(),
+                                  fit: BoxFit.contain,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      Text(
+                      const SizedBox(height: 6),
+                      TranslatedText(
                         "${vendorCategoryModel.title}",
                         textAlign: TextAlign.center,
+                        maxLines: 1,
                         style: TextStyle(
-                          fontFamily: AppThemeData.medium,
+                          fontFamily: AppThemeData.semiBold,
+                          overflow: TextOverflow.ellipsis,
                           color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                           fontSize: 12,
                         ),
                       ),
+                      const SizedBox(height: 6),
+
                     ],
                   ),
                 );
@@ -705,11 +822,11 @@ class OfferView extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return Container(
-      decoration: ShapeDecoration(
-        color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+      decoration: BoxDecoration(
+        color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+        borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+        boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+        border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -727,8 +844,8 @@ class OfferView extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          "Large Discounts".tr,
+                        child: TranslatedText(
+                          "Large Discounts",
                           style: TextStyle(
                             fontFamily: AppThemeData.semiBold,
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -741,8 +858,8 @@ class OfferView extends StatelessWidget {
                           Get.to(const DiscountRestaurantListScreen(),
                               arguments: {"vendorList": controller.couponRestaurantList, "couponList": controller.couponList, "title": "Discounts Restaurants"});
                         },
-                        child: Text(
-                          "See all".tr,
+                        child: TranslatedText(
+                          "See all",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: AppThemeData.medium,
@@ -754,7 +871,7 @@ class OfferView extends StatelessWidget {
                     ],
                   ),
                   GradientText(
-                    'Save Upto 50% Off'.tr,
+                    'Save Upto 50% Off',
                     style: TextStyle(
                       fontSize: 24,
                       fontFamily: 'Inter Tight',
@@ -817,7 +934,7 @@ class OfferView extends StatelessWidget {
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          Text(
+                                          TranslatedText(
                                             vendorModel.title.toString(),
                                             textAlign: TextAlign.start,
                                             maxLines: 1,
@@ -833,7 +950,7 @@ class OfferView extends StatelessWidget {
                                           ),
                                           RoundedButtonFill(
                                             title:
-                                                "${offerModel.discountType == "Fix Price" ? "${Constant.currencyModel!.symbol}" : ""}${offerModel.discount}${offerModel.discountType == "Percentage" ? "% off".tr : "off".tr}",
+                                                "${offerModel.discountType == "Fix Price" ? "${Constant.currencyModel!.symbol}" : ""}${offerModel.discount}${offerModel.discountType == "Percentage" ? "% off" : "off"}",
                                             color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
                                             textColor: AppThemeData.grey50,
                                             width: 20,
@@ -885,7 +1002,7 @@ class BannerView extends StatelessWidget {
           return InkWell(
             onTap: () async {
               if (bannerModel.redirect_type == "store") {
-                ShowToastDialog.showLoader("Please wait".tr);
+                ShowToastDialog.showLoader("Please wait");
                 VendorModel? vendorModel = await FireStoreUtils.getVendorById(bannerModel.redirect_id.toString());
 
                 if (vendorModel!.zoneId == Constant.selectedZone!.id) {
@@ -893,10 +1010,10 @@ class BannerView extends StatelessWidget {
                   Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                 } else {
                   ShowToastDialog.closeLoader();
-                  ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                  ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                 }
               } else if (bannerModel.redirect_type == "product") {
-                ShowToastDialog.showLoader("Please wait".tr);
+                ShowToastDialog.showLoader("Please wait");
                 ProductModel? productModel = await FireStoreUtils.getProductById(bannerModel.redirect_id.toString());
                 VendorModel? vendorModel = await FireStoreUtils.getVendorById(productModel!.vendorID.toString());
 
@@ -905,14 +1022,14 @@ class BannerView extends StatelessWidget {
                   Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                 } else {
                   ShowToastDialog.closeLoader();
-                  ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                  ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                 }
               } else if (bannerModel.redirect_type == "external_link") {
                 final uri = Uri.parse(bannerModel.redirect_id.toString());
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri);
                 } else {
-                  ShowToastDialog.showToast("Could not launch".tr);
+                  ShowToastDialog.showToast("Could not launch");
                 }
               }
             },
@@ -955,8 +1072,8 @@ class StoryView extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        "Stories".tr,
+                      child: TranslatedText(
+                        "Stories",
                         style: TextStyle(
                           fontFamily: AppThemeData.semiBold,
                           color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50,
@@ -967,7 +1084,7 @@ class StoryView extends StatelessWidget {
                   ],
                 ),
                 GradientText(
-                  'Best Food Stories Ever'.tr,
+                  'Best Food Stories Ever',
                   style: TextStyle(
                     fontSize: 24,
                     fontFamily: 'Inter Tight',
@@ -1024,7 +1141,7 @@ class StoryView extends StatelessWidget {
                                         return Constant.loader();
                                       } else {
                                         if (snapshot.hasError) {
-                                          return Center(child: Text('Error: ${snapshot.error}'));
+                                          return Center(child: TranslatedText('Error: ${snapshot.error}'));
                                         } else if (snapshot.data == null) {
                                           return const SizedBox();
                                         } else {
@@ -1049,7 +1166,7 @@ class StoryView extends StatelessWidget {
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
+                                                    TranslatedText(
                                                       vendorModel.title.toString(),
                                                       textAlign: TextAlign.center,
                                                       maxLines: 1,
@@ -1067,7 +1184,7 @@ class StoryView extends StatelessWidget {
                                                           width: 5,
                                                         ),
                                                         Text(
-                                                          "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum!.toStringAsFixed(0))} ${'reviews'.tr}",
+                                                          "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum!.toStringAsFixed(0))} ${'reviews'}",
                                                           textAlign: TextAlign.center,
                                                           maxLines: 1,
                                                           style: const TextStyle(
@@ -1116,7 +1233,6 @@ class RestaurantView extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return Container(
-      color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
@@ -1130,12 +1246,12 @@ class RestaurantView extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      "Best Restaurants".tr,
+                    child: TranslatedText(
+                      "Best Restaurants",
                       style: TextStyle(
-                        fontFamily: AppThemeData.semiBold,
+                        fontFamily: AppThemeData.bold,
                         color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                        fontSize: 18,
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -1143,8 +1259,8 @@ class RestaurantView extends StatelessWidget {
                     onTap: () {
                       Get.to(const RestaurantListScreen(), arguments: {"vendorList": controller.allNearestRestaurant, "title": "Best Restaurants"});
                     },
-                    child: Text(
-                      "See all".tr,
+                    child: TranslatedText(
+                      "See all",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: AppThemeData.medium,
@@ -1160,13 +1276,14 @@ class RestaurantView extends StatelessWidget {
               height: 10,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: ListView.builder(
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
-                itemCount: controller.allNearestRestaurant.length,
+                // Cap cards built on home (non-lazy shrinkWrap list); full list is behind "See all".
+                itemCount: controller.allNearestRestaurant.length > 15 ? 15 : controller.allNearestRestaurant.length,
                 itemBuilder: (BuildContext context, int index) {
                   VendorModel vendorModel = controller.allNearestRestaurant[index];
 
@@ -1183,17 +1300,20 @@ class RestaurantView extends StatelessWidget {
                       Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                     },
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.only(bottom: 16),
                       child: Container(
-                        decoration: ShapeDecoration(
-                          color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                          borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                          boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                          border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             ClipRRect(
-                              borderRadius: const BorderRadius.all(Radius.circular(16)),
+                              borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
                               child: Stack(
                                 children: [
                                   NetworkImageWidget(
@@ -1225,8 +1345,8 @@ class RestaurantView extends StatelessWidget {
                                               mainAxisSize: MainAxisSize.min,
                                               crossAxisAlignment: CrossAxisAlignment.center,
                                               children: [
-                                                Text(
-                                                  "Upto".tr,
+                                                TranslatedText(
+                                                  "Upto",
                                                   textAlign: TextAlign.center,
                                                   maxLines: 1,
                                                   style: TextStyle(
@@ -1237,7 +1357,7 @@ class RestaurantView extends StatelessWidget {
                                                   ),
                                                 ),
                                                 Text(
-                                                  discountAmountTempList.reduce(min).toString() + "% OFF".tr,
+                                                  "${discountAmountTempList.reduce(min)}${"% OFF".tr}",
                                                   textAlign: TextAlign.center,
                                                   maxLines: 1,
                                                   style: TextStyle(
@@ -1262,7 +1382,7 @@ class RestaurantView extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  TranslatedText(
                                     vendorModel.title.toString(),
                                     textAlign: TextAlign.start,
                                     maxLines: 1,
@@ -1273,7 +1393,7 @@ class RestaurantView extends StatelessWidget {
                                       color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                     ),
                                   ),
-                                  Text(
+                                  TranslatedText(
                                     vendorModel.location.toString(),
                                     textAlign: TextAlign.start,
                                     maxLines: 2,
@@ -1287,89 +1407,88 @@ class RestaurantView extends StatelessWidget {
                                   const SizedBox(
                                     height: 5,
                                   ),
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: [
-                                        Visibility(
-                                          visible: (vendorModel.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true),
-                                          child: Row(
-                                            children: [
-                                              SvgPicture.asset(
-                                                "assets/icons/ic_free_delivery.svg",
-                                                width: 18,
-                                              ),
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                "Free Delivery".tr,
-                                                style: TextStyle(
-                                                  overflow: TextOverflow.ellipsis,
-                                                  fontFamily: AppThemeData.medium,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey400,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                width: 10,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 6,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    children: [
+                                      if (vendorModel.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true)
                                         Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                                              child: SvgPicture.asset(
-                                                "assets/icons/ic_star.svg",
-                                                width: 18,
-                                                colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                            SvgPicture.asset(
+                                              "assets/icons/ic_free_delivery.svg",
+                                              width: 18,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            TranslatedText(
+                                              "Free Delivery",
+                                              style: TextStyle(
+                                                overflow: TextOverflow.ellipsis,
+                                                fontFamily: AppThemeData.medium,
+                                                fontWeight: FontWeight.w500,
+                                                color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey400,
                                               ),
                                             ),
+                                          ],
+                                        ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: AppThemeData.lightGreen,
+                                          borderRadius: BorderRadius.circular(AppThemeData.radiusSm),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SvgPicture.asset(
+                                              "assets/icons/ic_star.svg",
+                                              width: 14,
+                                              colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
+                                            ),
+                                            const SizedBox(width: 4),
                                             Text(
                                               "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount.toString(), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
-                                              style: TextStyle(
+                                              style: const TextStyle(
+                                                fontSize: 12,
                                                 overflow: TextOverflow.ellipsis,
-                                                fontFamily: AppThemeData.medium,
-                                                fontWeight: FontWeight.w500,
-                                                color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey400,
+                                                fontFamily: AppThemeData.bold,
+                                                color: AppThemeData.darkGreen,
                                               ),
                                             ),
                                           ],
                                         ),
-                                        Row(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                                              child: Icon(
-                                                Icons.circle,
-                                                size: 5,
-                                                color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
-                                              ),
+                                      ),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.location_on_outlined,
+                                            size: 14,
+                                            color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
+                                          ),
+                                          const SizedBox(width: 2),
+                                          TranslatedText(
+                                            "${Constant.getDistance(
+                                              lat1: vendorModel.latitude.toString(),
+                                              lng1: vendorModel.longitude.toString(),
+                                              lat2: Constant.selectedLocation.location!.latitude.toString(),
+                                              lng2: Constant.selectedLocation.location!.longitude.toString(),
+                                            )} ${Constant.distanceType}",
+                                            textAlign: TextAlign.start,
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                              overflow: TextOverflow.ellipsis,
+                                              fontFamily: AppThemeData.medium,
+                                              fontWeight: FontWeight.w500,
+                                              color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey400,
                                             ),
-                                            Text(
-                                              "${Constant.getDistance(
-                                                lat1: vendorModel.latitude.toString(),
-                                                lng1: vendorModel.longitude.toString(),
-                                                lat2: Constant.selectedLocation.location!.latitude.toString(),
-                                                lng2: Constant.selectedLocation.location!.longitude.toString(),
-                                              )} ${Constant.distanceType}",
-                                              textAlign: TextAlign.start,
-                                              maxLines: 1,
-                                              style: TextStyle(
-                                                overflow: TextOverflow.ellipsis,
-                                                fontFamily: AppThemeData.medium,
-                                                fontWeight: FontWeight.w500,
-                                                color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey400,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

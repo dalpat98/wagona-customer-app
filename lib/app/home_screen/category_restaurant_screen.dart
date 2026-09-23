@@ -7,6 +7,7 @@ import 'package:customer/themes/responsive.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/widget/restaurant_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class CategoryRestaurantScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return GetX(
         init: CategoryRestaurantController(),
         builder: (controller) {
@@ -29,7 +31,7 @@ class CategoryRestaurantScreen extends StatelessWidget {
             body: controller.isLoading.value
                 ? Constant.loader()
                 : controller.allNearestRestaurant.isEmpty
-                    ? Constant.showEmptyView(message: "No Restaurant found".tr)
+                    ? Constant.showEmptyView(message: "No Restaurant found")
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: ListView.builder(
@@ -45,9 +47,11 @@ class CategoryRestaurantScreen extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.only(bottom: 20),
                                 child: Container(
-                                  decoration: ShapeDecoration(
-                                    color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  decoration: BoxDecoration(
+                                    color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                                    borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                    boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+                                    border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +121,7 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                             ),
                                           ),
                                           Transform.translate(
-                                            offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                                            offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                                             child: Row(
                                               mainAxisAlignment: MainAxisAlignment.end,
                                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -140,8 +144,8 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                                             const SizedBox(
                                                               width: 5,
                                                             ),
-                                                            Text(
-                                                              "Free Delivery".tr,
+                                                            TranslatedText(
+                                                              "Free Delivery",
                                                               style: TextStyle(
                                                                 fontSize: 14,
                                                                 color: AppThemeData.darkGreen,
@@ -159,9 +163,9 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                                   ),
                                                 ),
                                                 Container(
-                                                  decoration: ShapeDecoration(
-                                                    color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
+                                                  decoration: BoxDecoration(
+                                                    color: AppThemeData.lightGreen,
+                                                    borderRadius: BorderRadius.circular(120),
                                                   ),
                                                   child: Padding(
                                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
@@ -169,17 +173,18 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                                       children: [
                                                         SvgPicture.asset(
                                                           "assets/icons/ic_star.svg",
-                                                          colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                                          width: 14,
+                                                          colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                                         ),
                                                         const SizedBox(
                                                           width: 5,
                                                         ),
                                                         Text(
                                                           "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount!.toStringAsFixed(0), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                                          style: TextStyle(
+                                                          style: const TextStyle(
                                                             fontSize: 14,
-                                                            color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                            fontFamily: AppThemeData.semiBold,
+                                                            color: AppThemeData.darkGreen,
+                                                            fontFamily: AppThemeData.bold,
                                                             fontWeight: FontWeight.w600,
                                                           ),
                                                         ),
@@ -206,7 +211,7 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                                         const SizedBox(
                                                           width: 5,
                                                         ),
-                                                        Text(
+                                                        TranslatedText(
                                                           "${Constant.getDistance(
                                                             lat1: vendorModel.latitude.toString(),
                                                             lng1: vendorModel.longitude.toString(),
@@ -237,7 +242,7 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
+                                            TranslatedText(
                                               vendorModel.title.toString(),
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
@@ -248,7 +253,7 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                               ),
                                             ),
-                                            Text(
+                                            TranslatedText(
                                               vendorModel.location.toString(),
                                               textAlign: TextAlign.start,
                                               maxLines: 1,
@@ -263,7 +268,7 @@ class CategoryRestaurantScreen extends StatelessWidget {
                                                 ? Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(
+                                                      TranslatedText(
                                                         Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                                         maxLines: 1,
                                                         overflow: TextOverflow.ellipsis,

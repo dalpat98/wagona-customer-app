@@ -7,6 +7,7 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -36,8 +37,8 @@ class OrderPlacingScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Order Placed".tr,
+                            TranslatedText(
+                              "Order Placed",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
@@ -46,8 +47,8 @@ class OrderPlacingScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            Text(
-                              "Your delicious meal is on its way! Sit tight and we’ll handle the rest.".tr,
+                            TranslatedText(
+                              "Your delicious meal is on its way! Sit tight and we’ll handle the rest.",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
@@ -81,8 +82,8 @@ class OrderPlacingScreen extends StatelessWidget {
                                           width: 10,
                                         ),
                                         Expanded(
-                                          child: Text(
-                                            "Order ID".tr,
+                                          child: TranslatedText(
+                                            "Order ID",
                                             textAlign: TextAlign.start,
                                             style: TextStyle(
                                               fontFamily: AppThemeData.semiBold,
@@ -96,7 +97,7 @@ class OrderPlacingScreen extends StatelessWidget {
                                     const SizedBox(
                                       height: 5,
                                     ),
-                                    Text(
+                                    TranslatedText(
                                       controller.orderModel.value.id.toString(),
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
@@ -128,8 +129,8 @@ class OrderPlacingScreen extends StatelessWidget {
                             const SizedBox(
                               height: 20,
                             ),
-                            Text(
-                              "Placing your order".tr,
+                            TranslatedText(
+                              "Placing your order",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
@@ -138,8 +139,8 @@ class OrderPlacingScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            Text(
-                              "Review your items and proceed to checkout for a delicious experience.".tr,
+                            TranslatedText(
+                              "Review your items and proceed to checkout for a delicious experience.",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
@@ -173,8 +174,8 @@ class OrderPlacingScreen extends StatelessWidget {
                                           width: 10,
                                         ),
                                         Expanded(
-                                          child: Text(
-                                            "Delivery Address".tr,
+                                          child: TranslatedText(
+                                            "Delivery Address",
                                             textAlign: TextAlign.start,
                                             style: TextStyle(
                                               fontFamily: AppThemeData.semiBold,
@@ -188,7 +189,7 @@ class OrderPlacingScreen extends StatelessWidget {
                                     const SizedBox(
                                       height: 5,
                                     ),
-                                    Text(
+                                    TranslatedText(
                                       controller.orderModel.value.address?.getFullAddress() ?? '',
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
@@ -226,8 +227,8 @@ class OrderPlacingScreen extends StatelessWidget {
                                           width: 10,
                                         ),
                                         Expanded(
-                                          child: Text(
-                                            "Order Summary".tr,
+                                          child: TranslatedText(
+                                            "Order Summary",
                                             textAlign: TextAlign.start,
                                             style: TextStyle(
                                               fontFamily: AppThemeData.semiBold,
@@ -249,8 +250,8 @@ class OrderPlacingScreen extends StatelessWidget {
                                         return Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              "${cartProductModel.quantity} x".tr,
+                                            TranslatedText(
+                                              "${cartProductModel.quantity} x",
                                               textAlign: TextAlign.start,
                                               style: TextStyle(
                                                 color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
@@ -259,8 +260,8 @@ class OrderPlacingScreen extends StatelessWidget {
                                                 fontWeight: FontWeight.w400,
                                               ),
                                             ),
-                                            Text(
-                                              "${cartProductModel.name}".tr,
+                                            TranslatedText(
+                                              "${cartProductModel.name}",
                                               textAlign: TextAlign.start,
                                               style: TextStyle(
                                                 color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
@@ -287,7 +288,7 @@ class OrderPlacingScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: controller.isPlacing.value
                     ? RoundedButtonFill(
-                        title: "Track Order".tr,
+                        title: "Track Order",
                         height: 5.5,
                         color: AppThemeData.primary300,
                         textColor: AppThemeData.grey50,
@@ -299,7 +300,7 @@ class OrderPlacingScreen extends StatelessWidget {
                         },
                       )
                     : RoundedButtonFill(
-                        title: "Track Order".tr,
+                        title: "Track Order",
                         height: 5.5,
                         color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200,
                         textColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,

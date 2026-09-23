@@ -9,6 +9,7 @@ import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,20 +36,21 @@ class EditProfileScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Profile Information".tr,
+                    TranslatedText(
+                      "Profile Information",
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 26,
                         color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                        fontFamily: AppThemeData.semiBold,
-                        fontWeight: FontWeight.w500,
+                        fontFamily: AppThemeData.bold,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    Text(
-                      "View and update your personal details, contact information, and preferences.".tr,
+                    const SizedBox(height: 4),
+                    TranslatedText(
+                      "View and update your personal details, contact information, and preferences.",
                       style: TextStyle(
-                        fontSize: 16,
-                        color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                        fontSize: 15,
+                        color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
                         fontFamily: AppThemeData.regular,
                         fontWeight: FontWeight.w400,
                       ),
@@ -57,8 +59,21 @@ class EditProfileScreen extends StatelessWidget {
                       height: 20,
                     ),
                     Center(
-                      child: Stack(
-                        children: [
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: AppThemeData.primaryGradient,
+                          boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
+                          ),
+                          child: Stack(
+                            children: [
                           controller.profileImage.isEmpty
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(60),
@@ -101,8 +116,26 @@ class EditProfileScreen extends StatelessWidget {
                                   onTap: () {
                                     buildBottomSheet(context, controller);
                                   },
-                                  child: SvgPicture.asset("assets/icons/ic_edit.svg")))
-                        ],
+                                  child: Container(
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: AppThemeData.primaryGradient,
+                                      border: Border.all(
+                                        color: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: SvgPicture.asset(
+                                      "assets/icons/ic_edit.svg",
+                                      height: 16,
+                                      width: 16,
+                                      colorFilter: const ColorFilter.mode(AppThemeData.grey50, BlendMode.srcIn),
+                                    ),
+                                  )))
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(
@@ -112,9 +145,9 @@ class EditProfileScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: TextFieldWidget(
-                            title: 'First Name'.tr,
+                            title: 'First Name',
                             controller: controller.firstNameController.value,
-                            hintText: 'First Name'.tr,
+                            hintText: 'First Name',
                           ),
                         ),
                         const SizedBox(
@@ -122,25 +155,25 @@ class EditProfileScreen extends StatelessWidget {
                         ),
                         Expanded(
                           child: TextFieldWidget(
-                            title: 'Last Name'.tr,
+                            title: 'Last Name',
                             controller: controller.lastNameController.value,
-                            hintText: 'Last Name'.tr,
+                            hintText: 'Last Name',
                           ),
                         ),
                       ],
                     ),
                     TextFieldWidget(
-                      title: 'Email'.tr,
+                      title: 'Email',
                       textInputType: TextInputType.emailAddress,
                       controller: controller.emailController.value,
-                      hintText: 'Email'.tr,
+                      hintText: 'Email',
                       enable: false,
                     ),
                     TextFieldWidget(
-                      title: 'Phone Number'.tr,
+                      title: 'Phone Number',
                       textInputType: TextInputType.emailAddress,
                       controller: controller.phoneNumberController.value,
-                      hintText: 'Phone Number'.tr,
+                      hintText: 'Phone Number',
                       enable: false,
                     ),
                   ],
@@ -148,12 +181,19 @@ class EditProfileScreen extends StatelessWidget {
               ),
             ),
             bottomNavigationBar: Container(
-              color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+              decoration: BoxDecoration(
+                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(AppThemeData.radiusLg),
+                  topRight: Radius.circular(AppThemeData.radiusLg),
+                ),
+                boxShadow: themeChange.getThem() ? null : AppThemeData.floatShadow,
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Padding(
                   padding: const EdgeInsets.only(bottom: 20),
                   child: RoundedButtonFill(
-                    title: "Save Details".tr,
+                    title: "Save Details",
                     height: 5.5,
                     color: AppThemeData.primary300,
                     textColor: AppThemeData.grey50,
@@ -180,7 +220,7 @@ class EditProfileScreen extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
-                    child: Text("please select".tr,
+                    child: TranslatedText("please select",
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -203,8 +243,8 @@ class EditProfileScreen extends StatelessWidget {
                                 )),
                             Padding(
                               padding: const EdgeInsets.only(top: 3),
-                              child: Text(
-                                "camera".tr,
+                              child: TranslatedText(
+                                "camera",
                                 style: const TextStyle(),
                               ),
                             ),
@@ -226,8 +266,8 @@ class EditProfileScreen extends StatelessWidget {
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 3),
-                              child: Text(
-                                "gallery".tr,
+                              child: TranslatedText(
+                                "gallery",
                                 style: const TextStyle(),
                               ),
                             ),

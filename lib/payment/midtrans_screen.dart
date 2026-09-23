@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -34,9 +35,6 @@ class _MidtransScreenState extends State<MidtransScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
-            setState(() {
-              isLoading = false;
-            });
             ShowToastDialog.closeLoader();
           },
           onNavigationRequest: (NavigationRequest navigation) async {
@@ -83,7 +81,7 @@ class _MidtransScreenState extends State<MidtransScreen> {
                     color: Colors.white,
                   ),
                 )),
-            body: Stack(alignment: Alignment.center, children: [WebViewWidget(controller: controller), Visibility(visible: isLoading, child: const Center(child: CircularProgressIndicator()))])));
+            body: Stack(alignment: Alignment.center, children: [WebViewWidget(controller: controller)])));
   }
 
   Future<void> _showMyDialog() async {
@@ -92,14 +90,14 @@ class _MidtransScreenState extends State<MidtransScreen> {
       barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Cancel Payment'.tr),
+          title: TranslatedText('Cancel Payment'),
           content: SingleChildScrollView(
-            child: Text("cancelPayment?".tr),
+            child: TranslatedText("Cancel Payment?"),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(
-                'Cancel'.tr,
+              child: TranslatedText(
+                'Cancel',
                 style: const TextStyle(color: Colors.red),
               ),
               onPressed: () {
@@ -108,8 +106,8 @@ class _MidtransScreenState extends State<MidtransScreen> {
               },
             ),
             TextButton(
-              child: Text(
-                'Continue'.tr,
+              child: TranslatedText(
+                'Continue',
                 style: const TextStyle(color: Colors.green),
               ),
               onPressed: () {

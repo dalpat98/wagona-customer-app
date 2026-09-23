@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/constant/constant.dart';
 import 'package:customer/models/subscription_plan_model.dart';
 
@@ -34,6 +34,7 @@ class UserModel {
   String? subscriptionPlanId;
   Timestamp? subscriptionExpiryDate;
   SubscriptionPlanModel? subscriptionPlan;
+  bool? isAutoVerify;
 
   UserModel(
       {this.id,
@@ -65,7 +66,8 @@ class UserModel {
       this.provider,
       this.subscriptionPlanId,
       this.subscriptionExpiryDate,
-      this.subscriptionPlan});
+      this.subscriptionPlan,
+      this.isAutoVerify});
 
   fullName() {
     return "${firstName ?? ''} ${lastName ?? ''}";
@@ -108,6 +110,7 @@ class UserModel {
     subscriptionPlanId = json['subscriptionPlanId'];
     subscriptionExpiryDate = json['subscriptionExpiryDate'];
     subscriptionPlan = json['subscription_plan'] != null ? SubscriptionPlanModel.fromJson(json['subscription_plan']) : null;
+    isAutoVerify = json['isAutoVerify'];
   }
 
   Map<String, dynamic> toJson() {
@@ -154,7 +157,7 @@ class UserModel {
     }
     data['appIdentifier'] = appIdentifier;
     data['provider'] = provider;
-
+    data['isAutoVerify'] = isAutoVerify;
     return data;
   }
 }

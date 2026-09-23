@@ -1,6 +1,7 @@
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 
 class RoundedButtonBorder extends StatelessWidget {
   final String title;
@@ -30,27 +31,30 @@ class RoundedButtonBorder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
-        onPress!();
-      },
-      child: Container(
-        width: Responsive.width(width ?? 100, context),
-        height: Responsive.height(height ?? 6, context),
-        decoration: ShapeDecoration(
-          color: color ?? Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(200),
-            side: BorderSide(color: borderColor ?? AppThemeData.primary300),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+          onPress!();
+        },
+        child: Container(
+          width: Responsive.width(width ?? 100, context),
+          height: Responsive.height(height ?? 6, context),
+          decoration: ShapeDecoration(
+            color: color ?? Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+              side: BorderSide(color: borderColor ?? AppThemeData.primary300, width: 1.5),
+            ),
           ),
-        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             (isRight == false) ? Padding(padding: const EdgeInsets.only(right: 10), child: icon) : const SizedBox(),
-            Text(
+            TranslatedText(
               title.toString(),
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -61,6 +65,7 @@ class RoundedButtonBorder extends StatelessWidget {
             ),
             (isRight == true) ? Padding(padding: const EdgeInsets.only(left: 10), child: icon) : const SizedBox(),
           ],
+          ),
         ),
       ),
     );

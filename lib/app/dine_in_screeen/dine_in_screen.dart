@@ -20,6 +20,7 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/restaurant_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -72,8 +73,8 @@ class DineInScreen extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    "Dine-In Reservations".tr,
+                                  TranslatedText(
+                                    "Dine-In Reservations",
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontFamily: AppThemeData.semiBold,
@@ -81,8 +82,8 @@ class DineInScreen extends StatelessWidget {
                                       color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey900,
                                     ),
                                   ),
-                                  Text(
-                                    "Book a table at your favorite restaurant and enjoy a delightful dining experience.".tr,
+                                  TranslatedText(
+                                    "Book a table at your favorite restaurant and enjoy a delightful dining experience.",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 14,
@@ -116,15 +117,15 @@ class DineInScreen extends StatelessWidget {
                               const SizedBox(
                                 height: 12,
                               ),
-                              Text(
-                                "No Restaurants Found in Your Area".tr,
+                              TranslatedText(
+                                "No Restaurants Found in Your Area",
                                 style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontSize: 22, fontFamily: AppThemeData.semiBold),
                               ),
                               const SizedBox(
                                 height: 5,
                               ),
-                              Text(
-                                "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.".tr,
+                              TranslatedText(
+                                "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.bold),
                               ),
@@ -132,7 +133,7 @@ class DineInScreen extends StatelessWidget {
                                 height: 20,
                               ),
                               RoundedButtonFill(
-                                title: "Change Zone".tr,
+                                title: "Change Zone",
                                 width: 55,
                                 height: 5.5,
                                 color: AppThemeData.primary300,
@@ -156,7 +157,7 @@ class DineInScreen extends StatelessWidget {
                                     const SizedBox(
                                       height: 10,
                                     ),
-                                    titleView(themeChange, "Explore the Categories".tr, () {
+                                    titleView(themeChange, "Explore the Categories", () {
                                       Get.to(const ViewAllCategoryDineInScreen());
                                     }),
                                     const SizedBox(
@@ -182,8 +183,8 @@ class DineInScreen extends StatelessWidget {
                                             Row(
                                               children: [
                                                 Expanded(
-                                                  child: Text(
-                                                    "New Arrivals".tr,
+                                                  child: TranslatedText(
+                                                    "New Arrivals",
                                                     textAlign: TextAlign.start,
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.semiBold,
@@ -196,8 +197,8 @@ class DineInScreen extends StatelessWidget {
                                                   onTap: () {
                                                     Get.to(const DineInRestaurantListScreen(), arguments: {"vendorList": controller.newArrivalRestaurantList, "title": "New Arrival"});
                                                   },
-                                                  child: Text(
-                                                    "View all".tr,
+                                                  child: TranslatedText(
+                                                    "View all",
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       fontFamily: AppThemeData.regular,
@@ -250,8 +251,8 @@ class DineInScreen extends StatelessWidget {
                                                     ),
                                               child: Padding(
                                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                child: Text(
-                                                  "Popular Restaurants".tr,
+                                                child: TranslatedText(
+                                                  "Popular Restaurants",
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     fontFamily: AppThemeData.semiBold,
@@ -278,8 +279,8 @@ class DineInScreen extends StatelessWidget {
                                                     ),
                                               child: Padding(
                                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                child: Text(
-                                                  "All Restaurants".tr,
+                                                child: TranslatedText(
+                                                  "All Restaurants",
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     fontFamily: AppThemeData.semiBold,
@@ -317,7 +318,7 @@ class DineInScreen extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(
+          child: TranslatedText(
             name,
             textAlign: TextAlign.start,
             style: TextStyle(
@@ -330,8 +331,8 @@ class DineInScreen extends StatelessWidget {
           onTap: () {
             onPress!();
           },
-          child: Text(
-            "View all".tr,
+          child: TranslatedText(
+            "View all",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: AppThemeData.regular,
@@ -352,6 +353,7 @@ class PopularRestaurant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return ListView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero,
@@ -425,7 +427,7 @@ class PopularRestaurant extends StatelessWidget {
                         ),
                       ),
                       Transform.translate(
-                        offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                        offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -477,7 +479,7 @@ class PopularRestaurant extends StatelessWidget {
                                     const SizedBox(
                                       width: 5,
                                     ),
-                                    Text(
+                                    TranslatedText(
                                       "${Constant.getDistance(
                                         lat1: vendorModel.latitude.toString(),
                                         lng1: vendorModel.longitude.toString(),
@@ -507,7 +509,7 @@ class PopularRestaurant extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        TranslatedText(
                           vendorModel.title.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -518,7 +520,7 @@ class PopularRestaurant extends StatelessWidget {
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                           ),
                         ),
-                        Text(
+                        TranslatedText(
                           vendorModel.location.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -553,6 +555,7 @@ class AllRestaurant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return ListView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero,
@@ -667,7 +670,7 @@ class AllRestaurant extends StatelessWidget {
                         ),
                       ),
                       Transform.translate(
-                        offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                        offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -719,7 +722,7 @@ class AllRestaurant extends StatelessWidget {
                                     const SizedBox(
                                       width: 5,
                                     ),
-                                    Text(
+                                    TranslatedText(
                                       "${Constant.getDistance(
                                         lat1: vendorModel.latitude.toString(),
                                         lng1: vendorModel.longitude.toString(),
@@ -749,7 +752,7 @@ class AllRestaurant extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        TranslatedText(
                           vendorModel.title.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -760,7 +763,7 @@ class AllRestaurant extends StatelessWidget {
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                           ),
                         ),
-                        Text(
+                        TranslatedText(
                           vendorModel.location.toString(),
                           textAlign: TextAlign.start,
                           maxLines: 1,
@@ -775,7 +778,7 @@ class AllRestaurant extends StatelessWidget {
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  TranslatedText(
                                     Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -881,7 +884,7 @@ class NewArrival extends StatelessWidget {
                     const SizedBox(
                       height: 5,
                     ),
-                    Text(
+                    TranslatedText(
                       vendorModel.title.toString(),
                       textAlign: TextAlign.start,
                       maxLines: 1,
@@ -925,7 +928,7 @@ class NewArrival extends StatelessWidget {
                             const SizedBox(
                               width: 10,
                             ),
-                            Text(
+                            TranslatedText(
                               "${Constant.getDistance(
                                 lat1: vendorModel.latitude.toString(),
                                 lng1: vendorModel.longitude.toString(),
@@ -945,7 +948,7 @@ class NewArrival extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Text(
+                    TranslatedText(
                       vendorModel.location.toString(),
                       textAlign: TextAlign.start,
                       maxLines: 1,
@@ -960,7 +963,7 @@ class NewArrival extends StatelessWidget {
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              TranslatedText(
                                 Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1024,15 +1027,18 @@ class CategoryView extends StatelessWidget {
                         width: 60,
                         height: 60,
                         child: ClipOval(
-                          child: NetworkImageWidget(
-                            imageUrl: vendorCategoryModel.photo.toString(),
-                            fit: BoxFit.cover,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: NetworkImageWidget(
+                              imageUrl: vendorCategoryModel.photo.toString(),
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: Text(
+                        child: TranslatedText(
                           '${vendorCategoryModel.title}',
                           textAlign: TextAlign.center,
                           maxLines: 1,
@@ -1080,7 +1086,7 @@ class BannerBottomView extends StatelessWidget {
               return InkWell(
                 onTap: () async {
                   if (bannerModel.redirect_type == "store") {
-                    ShowToastDialog.showLoader("Please wait".tr);
+                    ShowToastDialog.showLoader("Please wait");
                     VendorModel? vendorModel = await FireStoreUtils.getVendorById(bannerModel.redirect_id.toString());
 
                     if (vendorModel!.zoneId == Constant.selectedZone!.id) {
@@ -1088,10 +1094,10 @@ class BannerBottomView extends StatelessWidget {
                       Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                     } else {
                       ShowToastDialog.closeLoader();
-                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                     }
                   } else if (bannerModel.redirect_type == "product") {
-                    ShowToastDialog.showLoader("Please wait".tr);
+                    ShowToastDialog.showLoader("Please wait");
                     ProductModel? productModel = await FireStoreUtils.getProductById(bannerModel.redirect_id.toString());
                     VendorModel? vendorModel = await FireStoreUtils.getVendorById(productModel!.vendorID.toString());
 
@@ -1100,14 +1106,14 @@ class BannerBottomView extends StatelessWidget {
                       Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
                     } else {
                       ShowToastDialog.closeLoader();
-                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.".tr);
+                      ShowToastDialog.showToast("Sorry, The Zone is not available in your area. change the other location first.");
                     }
                   } else if (bannerModel.redirect_type == "external_link") {
                     final uri = Uri.parse(bannerModel.redirect_id.toString());
                     if (await canLaunchUrl(uri)) {
                       await launchUrl(uri);
                     } else {
-                      ShowToastDialog.showToast("Could not launch".tr);
+                      ShowToastDialog.showToast("Could not launch");
                     }
                   }
                 },

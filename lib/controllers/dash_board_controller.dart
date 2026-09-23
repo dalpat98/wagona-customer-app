@@ -15,9 +15,9 @@ class DashBoardController extends GetxController {
   @override
   void onInit() {
     // TODO: implement onInit
-    getInit();
 
     super.onInit();
+    getInit();
   }
 
   Future<void> getInit() async {

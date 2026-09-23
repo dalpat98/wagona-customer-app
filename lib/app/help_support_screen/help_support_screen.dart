@@ -12,13 +12,16 @@ import 'package:customer/models/conversation_model.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/utils/preferences.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:customer/widget/firebase_pagination/src/firestore_pagination.dart';
 import 'package:customer/widget/firebase_pagination/src/models/view_type.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -64,8 +67,8 @@ class HelpSupportScreen extends StatelessWidget {
                     color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                   ),
                 ),
-                title: Text(
-                  'Help & Support'.tr,
+                title: TranslatedText(
+                  'Help & Support',
                   style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontFamily: AppThemeData.bold, fontSize: 18),
                 ),
                 elevation: 0,
@@ -96,7 +99,7 @@ class HelpSupportScreen extends StatelessWidget {
                           isLive: true,
                           shrinkWrap: true,
                           reverse: true,
-                          onEmpty: Constant.showEmptyView(message: "No conversion found".tr),
+                          onEmpty: Constant.showEmptyView(message: "No conversion found"),
                           viewType: ViewType.list,
                           // to fetch real-time data
                           itemBuilder: (context, documentSnapshots, index) {
@@ -112,64 +115,68 @@ class HelpSupportScreen extends StatelessWidget {
                         height: 50,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 10),
-                          child: TextField(
-                            style: TextStyle(color: themeChange.getThem() ? AppThemeData.primary50 : AppThemeData.secondary600, fontFamily: AppThemeData.medium, fontSize: 14),
-                            textInputAction: TextInputAction.send,
-                            keyboardType: TextInputType.text,
-                            textCapitalization: TextCapitalization.sentences,
-                            controller: controller.messageController.value,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.only(left: 10),
-                              filled: true,
-                              fillColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100,
-                              disabledBorder: OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300, width: 1),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
-                              ),
-                              suffixIcon: IconButton(
-                                onPressed: () async {
-                                  if (controller.messageController.value.text.isNotEmpty) {
-                                    controller.sendMessage(message: controller.messageController.value.text, url: null, videoThumbnail: '', messageType: 'text');
-                                    controller.messageController.value.clear();
-                                  } else {
-                                    ShowToastDialog.showToast("Please enter text".tr);
-                                  }
-                                },
-                                icon: Icon(Icons.send_rounded, color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey800),
-                              ),
-                              prefixIcon: IconButton(
-                                onPressed: () async {
-                                  _onCameraClick(themeChange: themeChange, controller: controller, context: context);
-                                },
-                                icon: Icon(Icons.camera_alt, color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey800),
-                              ),
-                              hintText: 'Start typing with admin...'.tr,
-                              hintStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey700, fontFamily: AppThemeData.medium, fontSize: 14),
-                            ),
-                            onSubmitted: (value) async {
-                              if (controller.messageController.value.text.isNotEmpty) {
-                                controller.sendMessage(message: controller.messageController.value.text, url: null, videoThumbnail: '', messageType: 'text');
-                                // Timer(const Duration(milliseconds: 500), () => _controller.jumpTo(_controller.position.maxScrollExtent));
-                                controller.messageController.value.clear();
-                              }
-                            },
-                          ),
+                          child: ValueListenableBuilder(
+                              valueListenable: TranslationNotifier.refresh,
+                              builder: (_, __, ___) {
+                                return TextField(
+                                  style: TextStyle(color: themeChange.getThem() ? AppThemeData.primary50 : AppThemeData.secondary600, fontFamily: AppThemeData.medium, fontSize: 14),
+                                  textInputAction: TextInputAction.send,
+                                  keyboardType: TextInputType.text,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  controller: controller.messageController.value,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.only(left: 10),
+                                    filled: true,
+                                    fillColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100,
+                                    disabledBorder: OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300, width: 1),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100, width: 1),
+                                    ),
+                                    suffixIcon: IconButton(
+                                      onPressed: () async {
+                                        if (controller.messageController.value.text.isNotEmpty) {
+                                          controller.sendMessage(message: controller.messageController.value.text, url: null, videoThumbnail: '', messageType: 'text');
+                                          controller.messageController.value.clear();
+                                        } else {
+                                          ShowToastDialog.showToast("Please enter text");
+                                        }
+                                      },
+                                      icon: Icon(Icons.send_rounded, color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey800),
+                                    ),
+                                    prefixIcon: IconButton(
+                                      onPressed: () async {
+                                        _onCameraClick(themeChange: themeChange, controller: controller, context: context);
+                                      },
+                                      icon: Icon(Icons.camera_alt, color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey800),
+                                    ),
+                                    hintText: 'Start typing with admin...'.tr,
+                                    hintStyle: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey700, fontFamily: AppThemeData.medium, fontSize: 14),
+                                  ),
+                                  onSubmitted: (value) async {
+                                    if (controller.messageController.value.text.isNotEmpty) {
+                                      controller.sendMessage(message: controller.messageController.value.text, url: null, videoThumbnail: '', messageType: 'text');
+                                      // Timer(const Duration(milliseconds: 500), () => _controller.jumpTo(_controller.position.maxScrollExtent));
+                                      controller.messageController.value.clear();
+                                    }
+                                  },
+                                );
+                              }),
                         ),
                       ),
                     ),
@@ -185,7 +192,7 @@ class HelpSupportScreen extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 
     return Container(
-      padding: EdgeInsets.only(left: isMe ? 80 : 10, right: isMe ? 10 : 80, top: 10, bottom: 10),
+      padding: EdgeInsets.only(left: isMe ? 10 : 10, right: isMe ? 10 : 10, top: 10, bottom: 10),
       child: isMe
           ? Align(
               alignment: Alignment.topRight,
@@ -206,7 +213,7 @@ class HelpSupportScreen extends StatelessWidget {
                                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
                               ),
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              child: Text(
+                              child: TranslatedText(
                                 data.message.toString(),
                                 softWrap: true,
                                 maxLines: null,
@@ -286,11 +293,11 @@ class HelpSupportScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
+                      TranslatedText(Constant.dateAndTimeFormatTimestamp(data.createdAt),
                           style: TextStyle(fontFamily: AppThemeData.regular, fontSize: 12, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800)),
                       data.seen == true
-                          ? Text("✓✓", style: TextStyle(fontSize: 10, color: AppThemeData.primary300))
-                          : Text("✓", style: TextStyle(fontSize: 10, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800))
+                          ? Icon(Icons.done_all, size: 14, color: AppThemeData.primary300)
+                          : Icon(Icons.done, size: 14, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800)
                     ],
                   ),
                 ],
@@ -301,89 +308,91 @@ class HelpSupportScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  data.messageType == "text"
-                      ? Container(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.75, // prevent overflow
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                            color: themeChange.getThem() ? AppThemeData.grey900 : Colors.grey.shade300,
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          child: Text(
-                            data.message.toString(),
-                            softWrap: true,
-                            maxLines: null,
-                            style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontFamily: AppThemeData.regular, fontSize: 14),
-                          ),
-                        )
-                      : data.messageType == "image"
-                          ? ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                minWidth: 50,
-                                maxWidth: 200,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                child: Stack(alignment: Alignment.center, children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Get.to(FullScreenImageViewer(
-                                        imageUrl: data.url!.url,
-                                      ));
-                                    },
-                                    child: Hero(
-                                      tag: data.url!.url,
-                                      child: CachedNetworkImage(
-                                        imageUrl: data.url!.url,
-                                        placeholder: (context, url) => Constant.loader(),
-                                        errorWidget: (context, url, error) => const Icon(Icons.error),
-                                      ),
-                                    ),
-                                  ),
-                                ]),
-                              ))
-                          : ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                minWidth: 50,
-                                maxWidth: 200,
-                              ),
-                              child: InkWell(
-                                onTap: () {
-                                  Get.to(FullScreenVideoViewer(
-                                    heroTag: data.id.toString(),
-                                    videoUrl: data.url!.url,
-                                  ));
-                                },
+                  Row(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    data.messageType == "text"
+                        ? Container(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.75, // prevent overflow
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                              color: themeChange.getThem() ? AppThemeData.grey900 : Colors.grey.shade300,
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            child: TranslatedText(
+                              data.message.toString(),
+                              softWrap: true,
+                              maxLines: null,
+                              style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontFamily: AppThemeData.regular, fontSize: 14),
+                            ),
+                          )
+                        : data.messageType == "image"
+                            ? ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minWidth: 50,
+                                  maxWidth: 200,
+                                ),
                                 child: ClipRRect(
                                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
                                   child: Stack(alignment: Alignment.center, children: [
-                                    Hero(
-                                      tag: data.url!.url,
-                                      child: CachedNetworkImage(
-                                        imageUrl: data.videoThumbnail ?? '',
-                                        placeholder: (context, url) => Constant.loader(),
-                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.to(FullScreenImageViewer(
+                                          imageUrl: data.url!.url,
+                                        ));
+                                      },
+                                      child: Hero(
+                                        tag: data.url!.url,
+                                        child: CachedNetworkImage(
+                                          imageUrl: data.url!.url,
+                                          placeholder: (context, url) => Constant.loader(),
+                                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                                        ),
                                       ),
                                     ),
-                                    Icon(Icons.play_arrow, size: 50)
                                   ]),
+                                ))
+                            : ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minWidth: 50,
+                                  maxWidth: 200,
                                 ),
-                              )),
+                                child: InkWell(
+                                  onTap: () {
+                                    Get.to(FullScreenVideoViewer(
+                                      heroTag: data.id.toString(),
+                                      videoUrl: data.url!.url,
+                                    ));
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                                    child: Stack(alignment: Alignment.center, children: [
+                                      Hero(
+                                        tag: data.url!.url,
+                                        child: CachedNetworkImage(
+                                          imageUrl: data.videoThumbnail ?? '',
+                                          placeholder: (context, url) => Constant.loader(),
+                                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                                        ),
+                                      ),
+                                      Icon(Icons.play_arrow, size: 50)
+                                    ]),
+                                  ),
+                                )),
+                  ]),
                   const SizedBox(
                     height: 2,
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Admin",
+                      TranslatedText("Admin",
                           style: TextStyle(
                             color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
                             fontFamily: AppThemeData.semiBold,
                             fontSize: 12,
                           )),
-                      Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
+                      TranslatedText(Constant.dateAndTimeFormatTimestamp(data.createdAt),
                           style: TextStyle(fontFamily: AppThemeData.regular, fontSize: 12, color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800)),
                     ],
                   ),
@@ -397,11 +406,11 @@ class HelpSupportScreen extends StatelessWidget {
 
   void _onCameraClick({required DarkThemeProvider themeChange, required HelpSupportController controller, required BuildContext context}) {
     final action = CupertinoActionSheet(
-      message: Text('Send Media'.tr,
+      message: TranslatedText('Send Media',
           style: TextStyle(
-            color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+            color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800,
             fontFamily: AppThemeData.semiBold,
-            fontSize: 12,
+            fontSize: 18,
           )),
       actions: <Widget>[
         CupertinoActionSheetAction(
@@ -418,7 +427,7 @@ class HelpSupportScreen extends StatelessWidget {
               ShowToastDialog.showToast("Storage permission is not enabled. Please allow it.");
             }
           },
-          child: Text("Choose image from gallery".tr),
+          child: TranslatedText("Choose image from gallery"),
         ),
         CupertinoActionSheetAction(
           isDefaultAction: false,
@@ -434,7 +443,7 @@ class HelpSupportScreen extends StatelessWidget {
               }
             }
           },
-          child: Text("Choose video from gallery".tr),
+          child: TranslatedText("Choose video from gallery"),
         ),
         CupertinoActionSheetAction(
           isDestructiveAction: false,
@@ -450,7 +459,7 @@ class HelpSupportScreen extends StatelessWidget {
               ShowToastDialog.showToast("Camera access is not enabled. Please allow camera permission.");
             }
           },
-          child: Text("Take a Photo".tr),
+          child: TranslatedText("Take a Photo"),
         ),
         CupertinoActionSheetAction(
           isDestructiveAction: false,
@@ -466,12 +475,12 @@ class HelpSupportScreen extends StatelessWidget {
               }
             }
           },
-          child: Text("Record video".tr),
+          child: TranslatedText("Record video"),
         )
       ],
       cancelButton: CupertinoActionSheetAction(
-        child: Text(
-          'Cancel'.tr,
+        child: TranslatedText(
+          'Cancel',
         ),
         onPressed: () {
           Navigator.pop(context);

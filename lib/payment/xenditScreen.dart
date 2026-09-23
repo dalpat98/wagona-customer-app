@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/payment/xenditModel.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -117,14 +119,14 @@ import 'package:webview_flutter/webview_flutter.dart';
 //       barrierDismissible: true, // user must tap button!
 //       builder: (BuildContext context) {
 //         return AlertDialog(
-//           title: Text('Cancel Payment'.tr),
+//           title: TranslatedText('Cancel Payment'),
 //           content: SingleChildScrollView(
-//             child: Text("cancelPayment?".tr),
+//             child: TranslatedText("cancel Payment?"),
 //           ),
 //           actions: <Widget>[
 //             TextButton(
-//               child: Text(
-//                 'Cancel'.tr,
+//               child: TranslatedText(
+//                 'Cancel',
 //                 style: const TextStyle(color: Colors.red),
 //               ),
 //               onPressed: () {
@@ -133,8 +135,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 //               },
 //             ),
 //             TextButton(
-//               child: Text(
-//                 'Continue'.tr,
+//               child: TranslatedText(
+//                 'Continue',
 //                 style: const TextStyle(color: Colors.green),
 //               ),
 //               onPressed: () {
@@ -209,10 +211,8 @@ class _XenditScreenState extends State<XenditScreen> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageStarted: (_) {
-            if (mounted) {
-              setState(() => isLoading = false);
-            }
+          onPageStarted: (String url) {
+            ShowToastDialog.closeLoader();
           },
         ),
       )
@@ -258,16 +258,16 @@ class _XenditScreenState extends State<XenditScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Cancel Payment'.tr),
-        content: Text('cancelPayment?'.tr),
+        title: TranslatedText('Cancel Payment'),
+        content: TranslatedText('CancelPayment?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Cancel'.tr, style: const TextStyle(color: Colors.red)),
+            child: TranslatedText('Cancel', style: const TextStyle(color: Colors.red)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Continue'.tr, style: const TextStyle(color: Colors.green)),
+            child: TranslatedText('Continue', style: const TextStyle(color: Colors.green)),
           ),
         ],
       ),
@@ -327,7 +327,6 @@ class _XenditScreenState extends State<XenditScreen> {
           alignment: Alignment.center,
           children: [
             WebViewWidget(controller: controller),
-            if (isLoading) const Center(child: CircularProgressIndicator()),
           ],
         ),
       ),

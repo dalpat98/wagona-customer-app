@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/dash_board_screens/dash_board_screen.dart';
 import 'package:customer/app/location_permission_screen/location_permission_screen.dart';
 import 'package:customer/constant/constant.dart';
@@ -11,6 +11,7 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 class SignupController extends GetxController {
@@ -61,7 +62,7 @@ class SignupController extends GetxController {
         if (value == true) {
           signUp();
         } else {
-          ShowToastDialog.showToast("Referral code is Invalid".tr);
+          ShowToastDialog.showToast("Referral code is Invalid");
         }
       });
     } else {
@@ -70,7 +71,7 @@ class SignupController extends GetxController {
   }
 
   Future<void> signUp() async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     if (type.value == "google" || type.value == "apple" || type.value == "mobileNumber") {
       userModel.value.firstName = firstNameEditingController.value.text.toString();
       userModel.value.lastName = lastNameEditingController.value.text.toString();
@@ -106,7 +107,7 @@ class SignupController extends GetxController {
           } else {
             Get.offAll(const LocationPermissionScreen());
           }
-          ShowToastDialog.showToast("Account create successfully".tr);
+          ShowToastDialog.showToast("Account create successfully");
         },
       );
     } else {
@@ -157,11 +158,11 @@ class SignupController extends GetxController {
         }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
-          ShowToastDialog.showToast("The password provided is too weak.".tr);
+          ShowToastDialog.showToast("The password provided is too weak.");
         } else if (e.code == 'email-already-in-use') {
-          ShowToastDialog.showToast("The account already exists for that email.".tr);
+          ShowToastDialog.showToast("The account already exists for that email.");
         } else if (e.code == 'invalid-email') {
-          ShowToastDialog.showToast("Enter email is Invalid".tr);
+          ShowToastDialog.showToast("Enter email is Invalid");
         }
       } catch (e) {
         ShowToastDialog.showToast(e.toString());

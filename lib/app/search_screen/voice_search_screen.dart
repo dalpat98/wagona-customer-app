@@ -2,6 +2,7 @@ import 'package:customer/controllers/voice_search_controller.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -20,8 +21,8 @@ class VoiceSearchScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   controller.status.value == 'done'
-                      ? Text(
-                          "Tap the mic to start voice recognition".tr,
+                      ? TranslatedText(
+                          "Tap the mic to start voice recognition",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 22,
@@ -29,8 +30,8 @@ class VoiceSearchScreen extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         )
-                      : Text(
-                          "Speak now".tr,
+                      : TranslatedText(
+                          "Speak now",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 22,
@@ -99,8 +100,8 @@ class VoiceSearchScreen extends StatelessWidget {
                   if (controller.status.value == 'listening' || controller.recognizedText.value != 'Listening...')
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Text(
-                        controller.recognizedText.value.tr,
+                      child: TranslatedText(
+                        controller.recognizedText.value,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 18,
@@ -113,8 +114,8 @@ class VoiceSearchScreen extends StatelessWidget {
                     onTap: () {
                       controller.stopListening(duration: 0);
                     },
-                    child: Text(
-                      "Click to Back".tr,
+                    child: TranslatedText(
+                      "Click to Back",
                       style: TextStyle(
                         fontSize: 20,
                         color: AppThemeData.primary300,

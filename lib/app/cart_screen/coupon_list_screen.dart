@@ -9,6 +9,7 @@ import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/widget/my_separator.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -27,8 +28,8 @@ class CouponListScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Coupon Code".tr,
+              title: TranslatedText(
+                "Coupon Code",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,
@@ -41,7 +42,7 @@ class CouponListScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextFieldWidget(
-                    hintText: 'Enter coupon code'.tr,
+                    hintText: 'Enter coupon code',
                     controller: controller.couponCodeController.value,
                     suffix: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -53,10 +54,10 @@ class CouponListScreen extends StatelessWidget {
                             controller.calculatePrice();
                             Get.back();
                           } else {
-                            ShowToastDialog.showToast("Invalid Coupon".tr);
+                            ShowToastDialog.showToast("Invalid Coupon");
                           }
                         },
-                        child: Text(
+                        child: TranslatedText(
                           "Apply",
                           textAlign: TextAlign.start,
                           style: TextStyle(
@@ -101,8 +102,8 @@ class CouponListScreen extends StatelessWidget {
                                   alignment: Alignment.center,
                                   child: RotatedBox(
                                     quarterTurns: -1,
-                                    child: Text(
-                                      "${couponModel.discountType == "Fix Price" ? Constant.amountShow(amount: couponModel.discount) : "${couponModel.discount}%"} ${'Off'.tr}",
+                                    child: TranslatedText(
+                                      "${couponModel.discountType == "Fix Price" ? Constant.amountShow(amount: couponModel.discount) : "${couponModel.discount}%"} ${'Off'}",
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontFamily: AppThemeData.semiBold,
@@ -132,7 +133,7 @@ class CouponListScreen extends StatelessWidget {
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                                        child: Text(
+                                        child: TranslatedText(
                                           "${couponModel.code}",
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
@@ -156,11 +157,11 @@ class CouponListScreen extends StatelessWidget {
                                           controller.calculatePrice();
                                           Get.back();
                                         } else {
-                                          ShowToastDialog.showToast("Coupon code not applied".tr);
+                                          ShowToastDialog.showToast("Coupon code not applied");
                                         }
                                       },
-                                      child: Text(
-                                        "Tap To Apply".tr,
+                                      child: TranslatedText(
+                                        "Tap To Apply",
                                         textAlign: TextAlign.start,
                                         style: TextStyle(
                                           fontFamily: AppThemeData.medium,
@@ -177,7 +178,7 @@ class CouponListScreen extends StatelessWidget {
                                 const SizedBox(
                                   height: 20,
                                 ),
-                                Text(
+                                TranslatedText(
                                   "${couponModel.description}",
                                   textAlign: TextAlign.start,
                                   style: TextStyle(

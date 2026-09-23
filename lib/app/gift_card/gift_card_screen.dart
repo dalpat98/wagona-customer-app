@@ -12,6 +12,7 @@ import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -31,8 +32,8 @@ class GiftCardScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Customize Gift Card".tr,
+              title: TranslatedText(
+                "Customize Gift Card",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,
@@ -113,9 +114,9 @@ class GiftCardScreen extends StatelessWidget {
                             height: 20,
                           ),
                           TextFieldWidget(
-                            title: 'Choose an amount'.tr,
+                            title: 'Choose an amount',
                             controller: controller.amountController.value,
-                            hintText: 'Enter gift card amount'.tr,
+                            hintText: 'Enter gift card amount',
                             textInputType: const TextInputType.numberWithOptions(signed: true, decimal: true),
                             textInputAction: TextInputAction.done,
                             inputFormatters: [
@@ -124,7 +125,7 @@ class GiftCardScreen extends StatelessWidget {
                             prefix: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                               child: Text(
-                                "${Constant.currencyModel!.symbol}".tr,
+                                Constant.currencyModel?.symbol ?? '',
                                 style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.semiBold, fontSize: 18),
                               ),
                             ),
@@ -180,9 +181,9 @@ class GiftCardScreen extends StatelessWidget {
                             height: 40,
                           ),
                           TextFieldWidget(
-                            title: 'Add Message (Optional)'.tr,
+                            title: 'Add Message (Optional)',
                             controller: controller.messageController.value,
-                            hintText: 'Add message here....'.tr,
+                            hintText: 'Add message here....',
                             maxLine: 6,
                           ),
                         ],
@@ -195,7 +196,7 @@ class GiftCardScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 20),
                 child: RoundedButtonFill(
-                  title: "Continue".tr,
+                  title: "Continue",
                   height: 5.5,
                   color: AppThemeData.primary300,
                   textColor: AppThemeData.grey50,
@@ -203,12 +204,12 @@ class GiftCardScreen extends StatelessWidget {
                   onPress: () async {
                     if (controller.amountController.value.text.isNotEmpty) {
                       if (Constant.userModel == null) {
-                        ShowToastDialog.showToast("Please log in to the application. You are not logged in.".tr);
+                        ShowToastDialog.showToast("Please log in to the application. You are not logged in.");
                       } else {
                         giftCardBottomSheet(context, controller);
                       }
                     } else {
-                      ShowToastDialog.showToast("Please enter Amount".tr);
+                      ShowToastDialog.showToast("Please enter Amount");
                     }
                   },
                 ),
@@ -266,8 +267,8 @@ class GiftCardScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: Text(
-                                  'Complete payment and share this e-gift card with loved ones using any app'.tr,
+                                child: TranslatedText(
+                                  'Complete payment and share this e-gift card with loved ones using any app',
                                   style: const TextStyle(
                                     color: AppThemeData.secondary300,
                                     fontSize: 14,
@@ -280,8 +281,8 @@ class GiftCardScreen extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Bill Details".tr,
+                                TranslatedText(
+                                  "Bill Details",
                                   textAlign: TextAlign.start,
                                   style: TextStyle(
                                     fontFamily: AppThemeData.semiBold,
@@ -306,8 +307,8 @@ class GiftCardScreen extends StatelessWidget {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Expanded(
-                                              child: Text(
-                                                "Sub Total".tr,
+                                              child: TranslatedText(
+                                                "Sub Total",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                   fontFamily: AppThemeData.regular,
@@ -334,8 +335,8 @@ class GiftCardScreen extends StatelessWidget {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Expanded(
-                                              child: Text(
-                                                "Grand Total".tr,
+                                              child: TranslatedText(
+                                                "Grand Total",
                                                 textAlign: TextAlign.start,
                                                 style: TextStyle(
                                                   fontFamily: AppThemeData.regular,
@@ -365,8 +366,8 @@ class GiftCardScreen extends StatelessWidget {
                               height: 20,
                             ),
                             Center(
-                              child: Text(
-                                "${'Gift Card expire'.tr} ${controller.selectedGiftCard.value.expiryDay} ${'days after purchase'.tr}".tr,
+                              child: TranslatedText(
+                                "${'Gift Card expire'} ${controller.selectedGiftCard.value.expiryDay} ${'days after purchase'}",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: AppThemeData.medium,
@@ -385,7 +386,7 @@ class GiftCardScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 20),
                         child: RoundedButtonFill(
-                          title: "${'Pay'.tr} ${Constant.amountShow(amount: controller.amountController.value.text)}",
+                          title: "${'Pay'} ${Constant.amountShow(amount: controller.amountController.value.text)}",
                           height: 5.5,
                           color: AppThemeData.primary300,
                           textColor: AppThemeData.grey50,

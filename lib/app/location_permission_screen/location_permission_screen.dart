@@ -12,6 +12,7 @@ import 'package:customer/widget/osm_map/map_picker_page.dart';
 import 'package:customer/widget/place_picker/location_picker_screen.dart';
 import 'package:customer/widget/place_picker/selected_location_model.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -38,12 +39,12 @@ class LocationPermissionScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    "Enable Location Services 📍".tr,
+                  TranslatedText(
+                    "Enable Location Services",
                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey900, fontSize: 22, fontFamily: AppThemeData.semiBold),
                   ),
-                  Text(
-                    "To provide the best dining experience, allow Wagona to access your location.".tr,
+                  TranslatedText(
+                    "To provide the best dining experience, allow Wagona to access your location.",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey900, fontSize: 16, fontFamily: AppThemeData.bold),
                   ),
@@ -51,20 +52,20 @@ class LocationPermissionScreen extends StatelessWidget {
                     height: 32,
                   ),
                   RoundedButtonFill(
-                    title: "Use Current Location".tr,
+                    title: "Use Current Location",
                     color: AppThemeData.primary300,
                     textColor: AppThemeData.grey50,
                     onPress: () async {
                       Constant.checkPermission(
                         context: context,
                         onTap: () async {
-                          ShowToastDialog.showLoader("Please wait".tr);
+                          ShowToastDialog.showLoader("Please wait");
                           ShippingAddress addressModel = ShippingAddress();
                           try {
                             await Geolocator.requestPermission();
                             Position newLocalData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
-                            await placemarkFromCoordinates(newLocalData.latitude, newLocalData.longitude).then((valuePlaceMaker) {
+                            await Geocoding().placemarkFromCoordinates(newLocalData.latitude, newLocalData.longitude).then((valuePlaceMaker) {
                               Placemark placeMark = valuePlaceMaker[0];
                               addressModel.addressAs = "Home";
                               addressModel.location = UserLocation(latitude: newLocalData.latitude, longitude: newLocalData.longitude);
@@ -78,7 +79,7 @@ class LocationPermissionScreen extends StatelessWidget {
 
                             Get.offAll(const DashBoardScreen());
                           } catch (e) {
-                            await placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
+                            await Geocoding().placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
                               Placemark placeMark = valuePlaceMaker[0];
                               addressModel.addressAs = "Home";
                               addressModel.location = UserLocation(latitude: 19.228825, longitude: 72.854118);
@@ -100,7 +101,7 @@ class LocationPermissionScreen extends StatelessWidget {
                     height: 10,
                   ),
                   RoundedButtonFill(
-                    title: "Set From Map".tr,
+                    title: "Set From Map",
                     color: AppThemeData.primary300,
                     textColor: AppThemeData.grey50,
                     icon: Padding(
@@ -115,7 +116,7 @@ class LocationPermissionScreen extends StatelessWidget {
                       Constant.checkPermission(
                         context: context,
                         onTap: () async {
-                          ShowToastDialog.showLoader("Please wait".tr);
+                          ShowToastDialog.showLoader("Please wait");
                           ShippingAddress addressModel = ShippingAddress();
                           try {
                             await Geolocator.requestPermission();
@@ -152,7 +153,7 @@ class LocationPermissionScreen extends StatelessWidget {
                               });
                             }
                           } catch (e) {
-                            await placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
+                            await Geocoding().placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
                               Placemark placeMark = valuePlaceMaker[0];
                               addressModel.addressAs = "Home";
                               addressModel.location = UserLocation(latitude: 19.228825, longitude: 72.854118);
@@ -176,7 +177,7 @@ class LocationPermissionScreen extends StatelessWidget {
                   Constant.userModel == null
                       ? const SizedBox()
                       : RoundedButtonFill(
-                          title: "Enter Manually location".tr,
+                          title: "Enter Manually location",
                           color: AppThemeData.primary300,
                           textColor: AppThemeData.grey50,
                           isRight: false,

@@ -5,6 +5,7 @@ import 'package:customer/models/vendor_model.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_dart_scan/qr_code_dart_scan.dart';
@@ -23,8 +24,8 @@ class ScanQrCodeScreen extends StatelessWidget {
             centerTitle: false,
             titleSpacing: 0,
             backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
-            title: Text(
-              "Scan QRcode".tr,
+            title: TranslatedText(
+              "Scan QRcode",
               style: TextStyle(
                 fontSize: 16,
                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -35,9 +36,9 @@ class ScanQrCodeScreen extends StatelessWidget {
           ),
           body: QRCodeDartScanView(
             typeScan: TypeScan.live, // if TypeScan.takePicture will try decode when click to take a picture(default TypeScan.live)
-            onCapture: (Result result) {
+            onCapture: (ScanResult result) {
               Get.back();
-              ShowToastDialog.showLoader("Please wait".tr);
+              ShowToastDialog.showLoader("Please wait");
               if (controller.allNearestRestaurant.isNotEmpty) {
                 for (VendorModel storeModel in controller.allNearestRestaurant) {
                   if (storeModel.id == result.text) {
@@ -48,7 +49,7 @@ class ScanQrCodeScreen extends StatelessWidget {
                 }
               } else {
                 Get.back();
-                ShowToastDialog.showToast("Store is not available".tr);
+                ShowToastDialog.showToast("Store is not available");
               }
               // do anything with result
               // result.text
@@ -67,7 +68,7 @@ class ScanQrCodeScreen extends StatelessWidget {
           //     final List<Barcode> barcodes = capture.barcodes;
           //     for (final barcode in barcodes) {
           //       Get.back();
-          //       ShowToastDialog.showLoader("Please wait".tr);
+          //       ShowToastDialog.showLoader("Please wait");
           //       if (controller.allNearestRestaurant.isNotEmpty) {
           //         for (VendorModel storeModel in controller.allNearestRestaurant) {
           //           if (storeModel.id == barcode.rawValue) {

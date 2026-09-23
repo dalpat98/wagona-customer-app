@@ -29,7 +29,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> loginWithEmailAndPassword() async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     try {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailEditingController.value.text.trim(),
@@ -53,18 +53,18 @@ class LoginController extends GetxController {
           }
         } else {
           await FirebaseAuth.instance.signOut();
-          ShowToastDialog.showToast("This user is disable please contact to administrator".tr);
+          ShowToastDialog.showToast("This user is disable please contact to administrator");
         }
       } else {
         await FirebaseAuth.instance.signOut();
-        ShowToastDialog.showToast("This user is not created in customer application.".tr);
+        ShowToastDialog.showToast("This user is not created in customer application.");
       }
     } on FirebaseAuthException catch (e) {
       print(e.code);
       if (e.code == 'user-not-found') {
-        ShowToastDialog.showToast("No user found for that email.".tr);
+        ShowToastDialog.showToast("No user found for that email.");
       } else if (e.code == 'wrong-password') {
-        ShowToastDialog.showToast("Wrong password provided for that user.".tr);
+        ShowToastDialog.showToast("Wrong password provided for that user.");
       } else if (e.code == 'invalid-email') {
         ShowToastDialog.showToast("Invalid Email.");
       }
@@ -73,7 +73,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> loginWithGoogle() async {
-    ShowToastDialog.showLoader("please wait...".tr);
+    ShowToastDialog.showLoader("please wait...");
     await signInWithGoogle().then((value) async {
       ShowToastDialog.closeLoader();
       if (value != null) {
@@ -111,11 +111,11 @@ class LoginController extends GetxController {
                   }
                 } else {
                   await FirebaseAuth.instance.signOut();
-                  ShowToastDialog.showToast("This user is disable please contact to administrator".tr);
+                  ShowToastDialog.showToast("This user is disable please contact to administrator");
                 }
               } else {
                 await FirebaseAuth.instance.signOut();
-                // ShowToastDialog.showToast("This user is disable please contact to administrator".tr);
+                // ShowToastDialog.showToast("This user is disable please contact to administrator");
               }
             } else {
               UserModel userModel = UserModel();
@@ -137,7 +137,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> loginWithApple() async {
-    ShowToastDialog.showLoader("please wait...".tr);
+    ShowToastDialog.showLoader("please wait...");
     await signInWithApple().then((value) async {
       ShowToastDialog.closeLoader();
       if (value != null) {
@@ -178,11 +178,11 @@ class LoginController extends GetxController {
                   }
                 } else {
                   await FirebaseAuth.instance.signOut();
-                  ShowToastDialog.showToast("This user is disable please contact to administrator".tr);
+                  ShowToastDialog.showToast("This user is disable please contact to administrator");
                 }
               } else {
                 await FirebaseAuth.instance.signOut();
-                // ShowToastDialog.showToast("This user is disable please contact to administrator".tr);
+                // ShowToastDialog.showToast("This user is disable please contact to administrator");
               }
             } else {
               UserModel userModel = UserModel();
@@ -216,13 +216,13 @@ class LoginController extends GetxController {
 
       if (userModel?.provider != "google" && userModel?.provider != "apple" && userModel?.provider != null) {
         ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("The account already exists for that email.".tr);
+        ShowToastDialog.showToast("The account already exists for that email.");
         return null;
       }
 
       if ((userModel?.provider == "google" || userModel?.provider == "apple") && userModel?.role != "customer") {
         ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("The account already exists for that email.".tr);
+        ShowToastDialog.showToast("The account already exists for that email.");
         return null;
       }
 
@@ -266,13 +266,13 @@ class LoginController extends GetxController {
 
         if (userModel?.provider != "google" && userModel?.provider != "apple" && userModel?.provider != null) {
           ShowToastDialog.closeLoader();
-          ShowToastDialog.showToast("The account already exists for that email.".tr);
+          ShowToastDialog.showToast("The account already exists for that email.");
           return null;
         }
 
         if ((userModel?.provider == "google" || userModel?.provider == "apple") && userModel?.role != Constant.userRoleCustomer) {
           ShowToastDialog.closeLoader();
-          ShowToastDialog.showToast("The account already exists for that email.".tr);
+          ShowToastDialog.showToast("The account already exists for that email.");
           return null;
         }
       }

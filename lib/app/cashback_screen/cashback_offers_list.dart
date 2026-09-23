@@ -3,6 +3,7 @@ import 'package:customer/controllers/cashback_controller.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -19,8 +20,8 @@ class CashbackOffersListScreen extends StatelessWidget {
             appBar: AppBar(
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Cashback Offers".tr,
+              title: TranslatedText(
+                "Cashback Offers",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,
@@ -56,10 +57,10 @@ class CashbackOffersListScreen extends StatelessWidget {
                             Row(
                               children: [
                                 Expanded(
-                                  child: Text(controller.cashbackList[index].title ?? '',
+                                  child: TranslatedText(controller.cashbackList[index].title ?? '',
                                       style: TextStyle(fontFamily: AppThemeData.semiBold, fontSize: 16, color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900)),
                                 ),
-                                Text(
+                                TranslatedText(
                                   controller.cashbackList[index].cashbackType == 'Percent'
                                       ? "${controller.cashbackList[index].cashbackAmount}%"
                                       : Constant.amountShow(amount: "${controller.cashbackList[index].cashbackAmount}"),
@@ -68,12 +69,12 @@ class CashbackOffersListScreen extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(
-                              "${"Min spent".tr} ${Constant.amountShow(amount: "${controller.cashbackList[index].minimumPurchaseAmount ?? 0.0}")} | ${"Valid till".tr} ${Constant.timestampToDateTime2(controller.cashbackList[index].endDate!)}",
+                            TranslatedText(
+                              "${"Min spent"} ${Constant.amountShow(amount: "${controller.cashbackList[index].minimumPurchaseAmount ?? 0.0}")} | ${"Valid till"} ${Constant.timestampToDateTime2(controller.cashbackList[index].endDate!)}",
                               style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.regular, fontSize: 14),
                             ),
-                            Text(
-                              "${"Maximum cashback up to".tr} ${Constant.amountShow(amount: "${controller.cashbackList[index].maximumDiscount ?? 0.0}")}",
+                            TranslatedText(
+                              "${"Maximum cashback up to"} ${Constant.amountShow(amount: "${controller.cashbackList[index].maximumDiscount ?? 0.0}")}",
                               style: TextStyle(color: themeChange.getThem() ? AppThemeData.primary200 : AppThemeData.primary300, fontFamily: AppThemeData.regular, fontSize: 14),
                             ),
                           ],

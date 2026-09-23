@@ -5,6 +5,7 @@ import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -31,7 +32,16 @@ class OnBoardingScreen extends StatelessWidget {
                                   ? "assets/images/image_2.png"
                                   : "assets/images/image_3.png"),
                           fit: BoxFit.cover)),
-                  child: Padding(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.transparent, Color(0xF2000000)],
+                        stops: [0.0, 0.4, 1.0],
+                      ),
+                    ),
+                    child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -54,15 +64,15 @@ class OnBoardingScreen extends StatelessWidget {
                                         width: 72,
                                         height: 72,
                                       ),
-                                      Text(
-                                        "Wagona".tr,
+                                      TranslatedText(
+                                        "Wagona",
                                         style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50, fontSize: 24, fontFamily: AppThemeData.bold),
                                       ),
                                       const SizedBox(
                                         height: 30,
                                       ),
-                                      Text(
-                                        controller.onBoardingList[index].title.toString().tr,
+                                      TranslatedText(
+                                        controller.onBoardingList[index].title.toString(),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
@@ -71,8 +81,8 @@ class OnBoardingScreen extends StatelessWidget {
                                           fontWeight: FontWeight.w400,
                                         ),
                                       ),
-                                      Text(
-                                        controller.onBoardingList[index].description.toString().tr,
+                                      TranslatedText(
+                                        controller.onBoardingList[index].description.toString(),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: themeChange.getThem() ? AppThemeData.grey600 : AppThemeData.grey300,
@@ -89,8 +99,31 @@ class OnBoardingScreen extends StatelessWidget {
                         const SizedBox(
                           height: 20,
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            controller.onBoardingList.length,
+                            (index) {
+                              final bool active = controller.selectedPageIndex.value == index;
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                height: 8,
+                                width: active ? 24 : 8,
+                                decoration: BoxDecoration(
+                                  color: active ? AppThemeData.primary300 : AppThemeData.grey50.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
                         RoundedButtonFill(
-                          title: "Get Started".tr,
+                          title: controller.selectedPageIndex.value == 2 ? "Get Started" : "Next",
+                          gradient: AppThemeData.primaryGradient,
                           color: AppThemeData.primary300,
                           textColor: AppThemeData.grey50,
                           onPress: () {
@@ -107,6 +140,7 @@ class OnBoardingScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 ),
         );

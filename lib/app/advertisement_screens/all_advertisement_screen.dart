@@ -12,6 +12,7 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/video_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -30,8 +31,8 @@ class AllAdvertisementScreen extends StatelessWidget {
                 backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
                 centerTitle: false,
                 titleSpacing: 0,
-                title: Text(
-                  "Highlights for you".tr,
+                title: TranslatedText(
+                  "Highlights for you",
                   textAlign: TextAlign.start,
                   style: TextStyle(
                     fontFamily: AppThemeData.medium,
@@ -69,7 +70,7 @@ class AdvertisementCard extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return InkWell(
       onTap: () async {
-        ShowToastDialog.showLoader("Please wait".tr);
+        ShowToastDialog.showLoader("Please wait");
         VendorModel? vendorModel = await FireStoreUtils.getVendorById(model.vendorId!);
         ShowToastDialog.closeLoader();
         Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": vendorModel});
@@ -181,7 +182,7 @@ class AdvertisementCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        TranslatedText(
                           model.title ?? '',
                           style: TextStyle(
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -190,7 +191,7 @@ class AdvertisementCard extends StatelessWidget {
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
+                        TranslatedText(
                           model.description ?? '',
                           style: TextStyle(fontSize: 14, fontFamily: AppThemeData.medium, color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey600),
                           overflow: TextOverflow.ellipsis,

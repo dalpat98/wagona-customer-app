@@ -1,6 +1,9 @@
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -48,66 +51,74 @@ class TextFieldWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title ?? "".tr, style: TextStyle(fontFamily: AppThemeData.medium, fontSize: 14, color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900)),
+                TranslatedText(title ?? "", style: TextStyle(fontFamily: AppThemeData.medium, fontSize: 14, color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900)),
                 const SizedBox(
                   height: 5,
                 ),
               ],
             ),
           ),
-          TextFormField(
-            keyboardType: textInputType ?? TextInputType.text,
-            textCapitalization: TextCapitalization.sentences,
-            controller: controller,
-            maxLines: maxLine ?? 1,
-            textInputAction: textInputAction ?? TextInputAction.done,
-            inputFormatters: inputFormatters,
-            obscureText: obscureText ?? false,
-            obscuringCharacter: '●',
-            onChanged: onchange,
-            style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.medium),
-            decoration: InputDecoration(
-              errorStyle: const TextStyle(color: Colors.red),
-              filled: true,
-              enabled: enable ?? true,
-              contentPadding: EdgeInsets.symmetric(
-                  vertical: title == null
-                      ? 12
-                      : enable == false
-                          ? 13
-                          : 8,
-                  horizontal: 10),
-              fillColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-              prefixIcon: prefix,
-              suffixIcon: suffix,
-              disabledBorder: UnderlineInputBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50, width: 1),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300, width: 1),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50, width: 1),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50, width: 1),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50, width: 1),
-              ),
-              hintText: hintText.tr,
-              hintStyle: TextStyle(
-                fontSize: 14,
-                color: themeChange.getThem() ? AppThemeData.grey600 : AppThemeData.grey400,
-                fontFamily: AppThemeData.regular,
-              ),
-            ),
-          ),
+          ValueListenableBuilder(
+              valueListenable: TranslationNotifier.refresh,
+              builder: (_, __, ___) {
+                return TextFormField(
+                  keyboardType: textInputType ?? TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
+                  controller: controller,
+                  maxLines: maxLine ?? 1,
+                  textInputAction: textInputAction ?? TextInputAction.done,
+                  inputFormatters: inputFormatters,
+                  obscureText: obscureText ?? false,
+                  obscuringCharacter: '●',
+                  onChanged: onchange,
+                  style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.medium),
+                  decoration: InputDecoration(
+                    errorStyle: const TextStyle(color: Colors.red),
+                    filled: true,
+                    enabled: enable ?? true,
+                    contentPadding: EdgeInsets.symmetric(
+                        vertical: title == null
+                            ? 16
+                            : enable == false
+                                ? 16
+                                : 14,
+                        horizontal: 16),
+                    fillColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                    prefixIcon: prefix,
+                    suffixIcon: suffix,
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
+                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey200, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
+                      borderSide: BorderSide(color: AppThemeData.primary300, width: 1.6),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
+                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey200, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
+                      borderSide: const BorderSide(color: AppThemeData.danger300, width: 1),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
+                      borderSide: const BorderSide(color: AppThemeData.danger300, width: 1.6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
+                      borderSide: BorderSide(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey200, width: 1),
+                    ),
+                    hintText: hintText.tr,
+                    hintStyle: TextStyle(
+                      fontSize: 14,
+                      color: themeChange.getThem() ? AppThemeData.grey600 : AppThemeData.grey400,
+                      fontFamily: AppThemeData.regular,
+                    ),
+                  ),
+                );
+              }),
         ],
       ),
     );

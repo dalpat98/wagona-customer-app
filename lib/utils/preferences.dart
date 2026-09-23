@@ -20,6 +20,12 @@ class Preferences {
   static const midTransSettings = "midTransSettings";
   static const orangeMoneySettings = "orangeMoneySettings";
   static const xenditSettings = "xenditSettings";
+  static const mtnMomoSettings = "mtnMomotSettings";
+  static const phonePaySettings = "phonepaySettings";
+  static const foloosiSettings = "foloosiSettings";
+  static const cashFreeSettings = "cashFreeSettings";
+  static const payMongoSettings = "payMongoSettings";
+  static const instamojoSettings = "instamojoSettings";
 
   static const isClickOnNotification = "isClickOnNotification";
 

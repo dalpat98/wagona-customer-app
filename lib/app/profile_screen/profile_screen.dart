@@ -23,6 +23,7 @@ import 'package:customer/utils/preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:in_app_review/in_app_review.dart';
@@ -50,20 +51,26 @@ class ProfileScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "My Profile".tr,
+                            const SizedBox(
+                              height: 8,
+                            ),
+                            TranslatedText(
+                              "My Profile",
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: 26,
                                 color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                fontFamily: AppThemeData.semiBold,
-                                fontWeight: FontWeight.w500,
+                                fontFamily: AppThemeData.bold,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            Text(
-                              "Manage your personal information, preferences, and settings all in one place.".tr,
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            TranslatedText(
+                              "Manage your personal information, preferences, and settings all in one place.",
                               style: TextStyle(
-                                fontSize: 16,
-                                color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                fontSize: 15,
+                                color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
                                 fontFamily: AppThemeData.regular,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -71,8 +78,8 @@ class ProfileScreen extends StatelessWidget {
                             const SizedBox(
                               height: 20,
                             ),
-                            Text(
-                              "General Information".tr,
+                            TranslatedText(
+                              "General Information",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -85,12 +92,14 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             Container(
                               width: Responsive.width(100, context),
-                              decoration: ShapeDecoration(
+                              decoration: BoxDecoration(
                                 color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 child: Column(
                                   children: [
                                     Constant.userModel == null
@@ -120,8 +129,8 @@ class ProfileScreen extends StatelessWidget {
                                 ? Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        "Bookings Information".tr,
+                                      TranslatedText(
+                                        "Bookings Information",
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -134,12 +143,14 @@ class ProfileScreen extends StatelessWidget {
                                       ),
                                       Container(
                                         width: Responsive.width(100, context),
-                                        decoration: ShapeDecoration(
+                                        decoration: BoxDecoration(
                                           color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                          border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                          boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                         ),
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                           child: Column(
                                             children: [
                                               cardDecoration(themeChange, controller, "assets/icons/ic_dinin_order.svg", "Dine-In Booking", () {
@@ -155,8 +166,8 @@ class ProfileScreen extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            Text(
-                              "Preferences".tr,
+                            TranslatedText(
+                              "Preferences",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -169,12 +180,14 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             Container(
                               width: Responsive.width(100, context),
-                              decoration: ShapeDecoration(
+                              decoration: BoxDecoration(
                                 color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 child: Column(
                                   children: [
                                     cardDecoration(themeChange, controller, "assets/icons/ic_change_language.svg", "Change Language", () {
@@ -188,8 +201,8 @@ class ProfileScreen extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            Text(
-                              "Social".tr,
+                            TranslatedText(
+                              "Social",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -202,12 +215,14 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             Container(
                               width: Responsive.width(100, context),
-                              decoration: ShapeDecoration(
+                              decoration: BoxDecoration(
                                 color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 child: Column(
                                   children: [
                                     Constant.userModel == null
@@ -217,8 +232,8 @@ class ProfileScreen extends StatelessWidget {
                                           }),
                                     cardDecoration(themeChange, controller, "assets/icons/ic_share.svg", "Share app", () {
                                       Share.share(
-                                          '${'Check out Wagona, your ultimate food delivery application!'.tr} \n\n${'Google Play:'.tr} ${Constant.googlePlayLink} \n\n${'App Store:'.tr} ${Constant.appStoreLink}',
-                                          subject: 'Look what I made!'.tr);
+                                          '${'Check out Wagona, your ultimate food delivery application!'} \n\n${'Google Play:'} ${Constant.googlePlayLink} \n\n${'App Store:'} ${Constant.appStoreLink}',
+                                          subject: 'Look what I made!');
                                     }),
                                     cardDecoration(themeChange, controller, "assets/icons/ic_rate.svg", "Rate the app", () {
                                       final InAppReview inAppReview = InAppReview.instance;
@@ -236,8 +251,8 @@ class ProfileScreen extends StatelessWidget {
                                 : Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        "Communication".tr,
+                                      TranslatedText(
+                                        "Communication",
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -250,12 +265,14 @@ class ProfileScreen extends StatelessWidget {
                                       ),
                                       Container(
                                         width: Responsive.width(100, context),
-                                        decoration: ShapeDecoration(
+                                        decoration: BoxDecoration(
                                           color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                          border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                          boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                         ),
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                           child: Column(
                                             children: [
                                               cardDecoration(themeChange, controller, "assets/icons/ic_restaurant_chat.svg", "Restaurant Inbox", () {
@@ -273,8 +290,8 @@ class ProfileScreen extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                            Text(
-                              "Legal".tr,
+                            TranslatedText(
+                              "Legal",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
@@ -287,12 +304,14 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             Container(
                               width: Responsive.width(100, context),
-                              decoration: ShapeDecoration(
+                              decoration: BoxDecoration(
                                 color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 child: Column(
                                   children: [
                                     if (Constant.userModel?.id != null)
@@ -318,16 +337,18 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             Container(
                               width: Responsive.width(100, context),
-                              decoration: ShapeDecoration(
+                              decoration: BoxDecoration(
                                 color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+                                boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 child: Column(
                                   children: [
                                     if (Constant.userModel?.provider == 'email')
-                                      cardDecoration(themeChange, controller, "assets/icons/ic_lock.svg", "Change Password".tr, () {
+                                      cardDecoration(themeChange, controller, "assets/icons/ic_lock.svg", "Change Password", () {
                                         Get.to(const ChangePasswordScreen());
                                       }),
                                     Constant.userModel == null
@@ -339,10 +360,10 @@ class ProfileScreen extends StatelessWidget {
                                                 context: context,
                                                 builder: (BuildContext context) {
                                                   return CustomDialogBox(
-                                                    title: "Log out".tr,
-                                                    descriptions: "Are you sure you want to log out? You will need to enter your credentials to log back in.".tr,
-                                                    positiveString: "Log out".tr,
-                                                    negativeString: "Cancel".tr,
+                                                    title: "Log out",
+                                                    descriptions: "Are you sure you want to log out? You will need to enter your credentials to log back in.",
+                                                    positiveString: "Log out",
+                                                    negativeString: "Cancel",
                                                     positiveClick: () async {
                                                       Constant.userModel!.fcmToken = "";
                                                       await FireStoreUtils.updateUser(Constant.userModel!);
@@ -378,20 +399,20 @@ class ProfileScreen extends StatelessWidget {
                                             context: context,
                                             builder: (BuildContext context) {
                                               return CustomDialogBox(
-                                                title: "Delete Account".tr,
-                                                descriptions: "Are you sure you want to delete your account? This action is irreversible and will permanently remove all your data.".tr,
-                                                positiveString: "Delete".tr,
-                                                negativeString: "Cancel".tr,
+                                                title: "Delete Account",
+                                                descriptions: "Are you sure you want to delete your account? This action is irreversible and will permanently remove all your data.",
+                                                positiveString: "Delete",
+                                                negativeString: "Cancel",
                                                 positiveClick: () async {
-                                                  ShowToastDialog.showLoader("Please wait".tr);
+                                                  ShowToastDialog.showLoader("Please wait");
                                                   controller.deleteUserFromServer();
                                                   await FireStoreUtils.deleteUser().then((value) {
                                                     ShowToastDialog.closeLoader();
                                                     if (value == true) {
-                                                      ShowToastDialog.showToast("Account deleted successfully".tr);
+                                                      ShowToastDialog.showToast("Account deleted successfully");
                                                       Get.offAll(const LoginScreen());
                                                     } else {
-                                                      ShowToastDialog.showToast("Contact Administrator".tr);
+                                                      ShowToastDialog.showToast("Contact Administrator");
                                                     }
                                                   });
                                                 },
@@ -406,39 +427,54 @@ class ProfileScreen extends StatelessWidget {
                                               );
                                             });
                                       },
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset("assets/icons/ic_delete.svg"),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            "Delete Account".tr,
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(
-                                              fontFamily: AppThemeData.medium,
-                                              fontSize: 16,
-                                              color: themeChange.getThem() ? AppThemeData.danger300 : AppThemeData.danger300,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.danger50,
+                                          borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                          border: Border.all(color: AppThemeData.danger100, width: 1),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            SvgPicture.asset(
+                                              "assets/icons/ic_delete.svg",
+                                              height: 20,
+                                              width: 20,
+                                              colorFilter: const ColorFilter.mode(AppThemeData.danger300, BlendMode.srcIn),
                                             ),
-                                          )
-                                        ],
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            TranslatedText(
+                                              "Delete Account",
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontFamily: AppThemeData.semiBold,
+                                                fontSize: 16,
+                                                color: themeChange.getThem() ? AppThemeData.danger300 : AppThemeData.danger300,
+                                              ),
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
+                            const SizedBox(height: 16),
                             Center(
-                              child: Text(
+                              child: TranslatedText(
                                 "V : ${Constant.appVersion}",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: AppThemeData.medium,
                                   fontSize: 14,
-                                  color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                  color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
                                 ),
                               ),
                             ),
-                            SizedBox(height: 10)
+                            // Clearance so the last rows aren't hidden behind the floating bottom nav.
+                            const SizedBox(height: 110)
                           ],
                         ),
                       ),
@@ -448,7 +484,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Padding cardDecoration(themeChange, MyProfileController controller, String image, String title, Function()? onPress) {
+  Padding cardDecoration(DarkThemeProvider themeChange, MyProfileController controller, String image, String title, Function()? onPress) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: InkWell(
@@ -458,23 +494,42 @@ class ProfileScreen extends StatelessWidget {
         },
         child: Row(
           children: [
-            SvgPicture.asset(
-              image,
-              colorFilter: title == 'Help & Support'
-                  ? ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn)
-                  : title == "Log In"
-                      ? const ColorFilter.mode(AppThemeData.success500, BlendMode.srcIn)
-                      : null,
-              fit: BoxFit.cover,
-              height: 24,
-              width: 24,
+            Container(
+              height: 40,
+              width: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: title == "Log out"
+                    ? AppThemeData.danger50
+                    : title == "Log In"
+                        ? AppThemeData.success50
+                        : themeChange.getThem()
+                            ? AppThemeData.grey800
+                            : AppThemeData.primary50,
+                borderRadius: BorderRadius.circular(AppThemeData.radiusSm),
+              ),
+              child: SvgPicture.asset(
+                image,
+                colorFilter: title == 'Change Password'
+                    ? themeChange.getThem()
+                        ? ColorFilter.mode(AppThemeData.info50, BlendMode.srcIn)
+                        : ColorFilter.mode(AppThemeData.primary600, BlendMode.srcIn)
+                    : title == 'Help & Support'
+                        ? ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn)
+                        : title == "Log In"
+                            ? const ColorFilter.mode(AppThemeData.success500, BlendMode.srcIn)
+                            : null,
+                fit: BoxFit.contain,
+                height: 22,
+                width: 22,
+              ),
             ),
             SizedBox(
-              width: 10,
+              width: 12,
             ),
             Expanded(
-              child: Text(
-                title.tr,
+              child: TranslatedText(
+                title,
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,
@@ -510,7 +565,10 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                   )
-                : const Icon(Icons.keyboard_arrow_right)
+                : Icon(
+                    Icons.keyboard_arrow_right_rounded,
+                    color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey400,
+                  )
           ],
         ),
       ),

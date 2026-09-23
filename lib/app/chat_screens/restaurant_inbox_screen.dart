@@ -12,6 +12,7 @@ import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/firebase_pagination/src/firestore_pagination.dart';
 import 'package:customer/widget/firebase_pagination/src/models/view_type.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -26,8 +27,8 @@ class RestaurantInboxScreen extends StatelessWidget {
         backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
         centerTitle: false,
         titleSpacing: 0,
-        title: Text(
-          "Restaurant Inbox".tr,
+        title: TranslatedText(
+          "Restaurant Inbox",
           textAlign: TextAlign.start,
           style: TextStyle(
             fontFamily: AppThemeData.medium,
@@ -58,7 +59,7 @@ class RestaurantInboxScreen extends StatelessWidget {
                   UserModel? restaurant = snapshot.data;
                   return InkWell(
                     onTap: () async {
-                      ShowToastDialog.showLoader("Please wait".tr);
+                      ShowToastDialog.showLoader("Please wait");
                       UserModel? customer = await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid());
 
                       ShowToastDialog.closeLoader();
@@ -105,7 +106,7 @@ class RestaurantInboxScreen extends StatelessWidget {
                                     Row(
                                       children: [
                                         Expanded(
-                                          child: Text(
+                                          child: TranslatedText(
                                             "${restaurant?.fullName()}",
                                             textAlign: TextAlign.start,
                                             style: TextStyle(
@@ -115,7 +116,7 @@ class RestaurantInboxScreen extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                        Text(
+                                        TranslatedText(
                                           Constant.timestampToDate(inboxModel.createdAt!),
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
@@ -129,8 +130,8 @@ class RestaurantInboxScreen extends StatelessWidget {
                                     const SizedBox(
                                       height: 5,
                                     ),
-                                    Text(
-                                      "${"Order".tr} ${Constant.orderId(orderId: inboxModel.orderId.toString())}",
+                                    TranslatedText(
+                                      "${"Order"} ${Constant.orderId(orderId: inboxModel.orderId.toString())}",
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontFamily: AppThemeData.medium,
@@ -152,7 +153,7 @@ class RestaurantInboxScreen extends StatelessWidget {
         },
 
         shrinkWrap: true,
-        onEmpty: Constant.showEmptyView(message: "No Conversion found".tr),
+        onEmpty: Constant.showEmptyView(message: "No Conversion found"),
         // orderBy is compulsory to enable pagination
         //Change types customerId
         viewType: ViewType.list,

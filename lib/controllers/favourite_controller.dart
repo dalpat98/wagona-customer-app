@@ -1,4 +1,3 @@
-import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/models/favourite_item_model.dart';
 import 'package:customer/models/favourite_model.dart';
@@ -20,45 +19,46 @@ class FavouriteController extends GetxController {
   @override
   void onInit() {
     // TODO: implement onInit
-    getData();
+
     super.onInit();
+    getData();
+  }
+
+  // Kept identical to the previous inline subscription-gating logic, extracted so
+  // both the restaurant and the item->vendor paths share one implementation.
+  bool _vendorPassesSubscription(VendorModel value) {
+    if (value.subscriptionTotalOrders == "-1") return true;
+    if ((value.subscriptionExpiryDate != null && value.subscriptionExpiryDate!.toDate().isBefore(DateTime.now()) == false) || value.subscriptionPlan?.expiryDay == '-1') {
+      return value.subscriptionTotalOrders != '0';
+    }
+    return false;
   }
 
   Future<void> getData() async {
     reset();
     if (Constant.userModel != null) {
-      await FireStoreUtils.getFavouriteRestaurant().then(
-        (value) {
-          favouriteList.value = value;
-        },
-      );
+      // Fetch both favourite lists concurrently instead of one after the other.
+      final results = await Future.wait([
+        FireStoreUtils.getFavouriteRestaurant(),
+        FireStoreUtils.getFavouriteItem(),
+      ]);
+      favouriteList.value = results[0] as List<FavouriteModel>;
+      favouriteItemList.value = results[1] as List<FavouriteItemModel>;
 
-      await FireStoreUtils.getFavouriteItem().then(
-        (value) {
-          favouriteItemList.value = value;
-        },
+      final bool subscriptionActive = Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true;
+
+      // ---- Favourite restaurants: fetch every vendor in PARALLEL (was N sequential reads) ----
+      final vendors = await Future.wait(
+        favouriteList.map((e) => FireStoreUtils.getVendorById(e.restaurantId.toString())),
       );
-      List<VendorModel> favouriteVendorData = [];
-      for (var element in favouriteList) {
-        await FireStoreUtils.getVendorById(element.restaurantId.toString()).then(
-          (value) async {
-            if (value != null) {
-              if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && value.subscriptionPlan != null) {
-                if (value.subscriptionTotalOrders == "-1") {
-                  favouriteVendorData.add(value);
-                } else {
-                  if ((value.subscriptionExpiryDate != null && value.subscriptionExpiryDate!.toDate().isBefore(DateTime.now()) == false) || value.subscriptionPlan?.expiryDay == '-1') {
-                    if (value.subscriptionTotalOrders != '0') {
-                      favouriteVendorData.add(value);
-                    }
-                  }
-                }
-              } else {
-                favouriteVendorData.add(value);
-              }
-            }
-          },
-        );
+      final List<VendorModel> favouriteVendorData = [];
+      for (final value in vendors) {
+        if (value == null) continue;
+        if (subscriptionActive && value.subscriptionPlan != null) {
+          if (_vendorPassesSubscription(value)) favouriteVendorData.add(value);
+        } else {
+          favouriteVendorData.add(value);
+        }
       }
       favouriteVendorData.sort((a, b) {
         final aOpen = Constant.statusCheckOpenORClose(vendorModel: a);
@@ -68,36 +68,30 @@ class FavouriteController extends GetxController {
       });
       favouriteVendorList.value = favouriteVendorData;
 
-      for (var element in favouriteItemList) {
-        await FireStoreUtils.getProductById(element.productId.toString()).then(
-          (value) async {
-            if (value != null && value.publish == true) {
-              if (Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) {
-                await FireStoreUtils.fireStore.collection(CollectionName.vendors).doc(value.vendorID.toString()).get().then((value1) async {
-                  if (value1.exists) {
-                    VendorModel vendorModel = VendorModel.fromJson(value1.data()!);
-                    if (vendorModel.subscriptionPlan != null) {
-                      if (vendorModel.subscriptionTotalOrders == "-1") {
-                        favouriteFoodList.add(value);
-                      } else {
-                        if ((vendorModel.subscriptionExpiryDate != null && vendorModel.subscriptionExpiryDate!.toDate().isBefore(DateTime.now()) == false) ||
-                            vendorModel.subscriptionPlan?.expiryDay == "-1") {
-                          if (vendorModel.subscriptionTotalOrders != '0') {
-                            favouriteFoodList.add(value);
-                          }
-                        }
-                      }
-                    }
-                  }
-                });
-              } else {
-                favouriteFoodList.add(value);
-              }
+      // ---- Favourite items: fetch every product in PARALLEL (was N sequential reads) ----
+      final products = await Future.wait(
+        favouriteItemList.map((e) => FireStoreUtils.getProductById(e.productId.toString())),
+      );
+      final publishedProducts = products.where((p) => p != null && p.publish == true).cast<ProductModel>().toList();
 
-              // favouriteFoodList.add(value);
-            }
-          },
-        );
+      if (subscriptionActive) {
+        // Dedupe vendor lookups: many favourite items can share a vendor, so fetch
+        // each unique vendor exactly once (was one nested read per item).
+        final vendorIds = publishedProducts.map((p) => p.vendorID.toString()).toSet().toList();
+        final vendorDocs = await Future.wait(vendorIds.map((id) => FireStoreUtils.getVendorById(id)));
+        final Map<String, VendorModel> vendorCache = {};
+        for (int i = 0; i < vendorIds.length; i++) {
+          final v = vendorDocs[i];
+          if (v != null) vendorCache[vendorIds[i]] = v;
+        }
+        for (final product in publishedProducts) {
+          final vendorModel = vendorCache[product.vendorID.toString()];
+          if (vendorModel?.subscriptionPlan != null && _vendorPassesSubscription(vendorModel!)) {
+            favouriteFoodList.add(product);
+          }
+        }
+      } else {
+        favouriteFoodList.addAll(publishedProducts);
       }
     }
     List<ProductModel> favouriteFoodData = favouriteFoodList;

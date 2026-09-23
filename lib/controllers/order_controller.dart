@@ -1,4 +1,6 @@
+import 'package:customer/app/cart_screen/cart_screen.dart';
 import 'package:customer/constant/constant.dart';
+import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/models/cart_product_model.dart';
 import 'package:customer/models/order_model.dart';
 import 'package:customer/services/cart_provider.dart';
@@ -16,8 +18,8 @@ class OrderController extends GetxController {
 
   @override
   void onInit() {
-    getOrder();
     super.onInit();
+    getOrder();
   }
 
   Future<void> getOrder() async {
@@ -45,14 +47,44 @@ class OrderController extends GetxController {
     update();
   }
 
+  /// True when AT LEAST ONE product from the order is still available to buy.
+  /// Previously this returned false if *any* single item was unpublished, which
+  /// hid "Reorder" on most past orders as soon as one item was removed.
   Future<bool> hasAnyPublishedProduct(List<CartProductModel>? products) async {
     if (products == null || products.isEmpty) return false;
     for (final item in products) {
-      final product = await FireStoreUtils.getProductById(item.id ?? '');
-      if (product == null || product.publish == false) {
-        return false;
+      final product = await FireStoreUtils.getProductById(item.id?.split('~').first ?? '');
+      if (product != null && product.publish != false) {
+        return true;
       }
     }
-    return true;
+    return false;
+  }
+
+  /// Re-adds an order's still-available products to the cart, then opens the
+  /// cart. Unavailable (deleted/unpublished) items are skipped and reported.
+  Future<void> reorder(OrderModel orderModel) async {
+    ShowToastDialog.showLoader("Please wait");
+    int added = 0;
+    int skipped = 0;
+
+    for (final item in (orderModel.products ?? [])) {
+      final product = await FireStoreUtils.getProductById(item.id?.split('~').first ?? '');
+      if (product == null || product.publish == false) {
+        skipped++;
+        continue;
+      }
+      cartProvider.addToCart(Get.context!, item, item.quantity ?? 1);
+      added++;
+    }
+    update();
+    ShowToastDialog.closeLoader();
+
+    if (added == 0) {
+      ShowToastDialog.showToast("These items are no longer available.");
+      return;
+    }
+    ShowToastDialog.showToast(skipped > 0 ? "$added item(s) added. $skipped no longer available." : "Items added to your cart");
+    await Get.to(const CartScreen());
   }
 }

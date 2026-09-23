@@ -4,6 +4,7 @@ import 'package:customer/widget/firebase_pagination/src/models/view_type.dart';
 import 'package:customer/widget/firebase_pagination/src/models/wrap_options.dart';
 import 'package:flutter/material.dart';
 
+
 /// A [ScrollView] to use for the provided [items].
 ///
 /// The [items] are loaded into the [ScrollView] based on the [viewType].

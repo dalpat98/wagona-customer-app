@@ -28,6 +28,7 @@ import 'package:customer/widget/place_picker/selected_location_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -93,6 +94,10 @@ class Constant {
   static const String orderInTransit = "In Transit";
   static const String orderCompleted = "Order Completed";
 
+  static String currentLangCode = 'en';
+  static String localisationType = "Deepl"; // AI/ML or Deepl
+  static String apiKeyOfDeepl = ""; // AI/ML or Deepl
+
   static CurrencyModel? currencyModel;
   static PlatformFeeModel? platformFeeModel;
   static AdminCommission? adminCommission;
@@ -106,6 +111,8 @@ class Constant {
 
   static bool isSubscriptionModelApplied = false;
   static bool packagingChargeEnable = false;
+
+  static bool isDineInEnable = false;
 
   static String getTaxDisplayText(List<TaxModel>? taxes) {
     if (taxes == null || taxes.isEmpty) return '';
@@ -276,7 +283,7 @@ class Constant {
 
   static Widget showEmptyView({required String message}) {
     return Center(
-      child: Text(message.tr, style: const TextStyle(fontFamily: AppThemeData.medium, fontSize: 18)),
+      child: TranslatedText(message, style: const TextStyle(fontFamily: AppThemeData.medium, fontSize: 18)),
     );
   }
 
@@ -446,7 +453,19 @@ class Constant {
   }
 
   static DateTime stringToDate(String openDineTime) {
-    return DateFormat('HH:mm').parse(DateFormat('HH:mm').format(DateFormat("hh:mm a").parse((Intl.getCurrentLocale() == "en_US") ? openDineTime : openDineTime.toLowerCase())));
+    final input = ((Intl.getCurrentLocale() == "en_US") ? openDineTime : openDineTime.toLowerCase()).trim();
+    // Restaurants may store times as 12-hour ("09:00 AM") or 24-hour ("09:00").
+    // Accept both instead of crashing on the format that wasn't expected.
+    try {
+      final parsed = DateFormat("hh:mm a").parse(input);
+      return DateFormat('HH:mm').parse(DateFormat('HH:mm').format(parsed));
+    } catch (_) {
+      try {
+        return DateFormat('HH:mm').parse(input);
+      } catch (_) {
+        return DateFormat('HH:mm').parse('00:00');
+      }
+    }
   }
 
   static LanguageModel getLanguage() {

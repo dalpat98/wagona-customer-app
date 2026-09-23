@@ -1,6 +1,7 @@
 // Flutter Packages
 import 'package:flutter/material.dart';
 
+
 /// A circular progress indicator that spins when the [Stream] is loading.
 ///
 /// Used when the [Stream] is loading the first time.

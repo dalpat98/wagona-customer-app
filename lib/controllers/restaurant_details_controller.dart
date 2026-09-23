@@ -12,6 +12,7 @@ import 'package:customer/models/vendor_model.dart';
 import 'package:customer/services/cart_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -90,15 +91,13 @@ class RestaurantDetailsController extends GetxController {
 
   Future<void> getProduct() async {
     await FireStoreUtils.getProductByVendorId(vendorModel.value.id.toString()).then((value) {
-      if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) &&
-          vendorModel.value.subscriptionPlan != null) {
+      if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && vendorModel.value.subscriptionPlan != null) {
         if (vendorModel.value.subscriptionPlan?.itemLimit == '-1') {
           allProductList.value = value;
           productList.value = value;
         } else {
-          int selectedProduct = value.length < int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0')
-              ? (value.isEmpty ? 0 : (value.length))
-              : int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0');
+          int selectedProduct =
+              value.length < int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0') ? (value.isEmpty ? 0 : (value.length)) : int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0');
           allProductList.value = value.sublist(0, selectedProduct);
           productList.value = value.sublist(0, selectedProduct);
         }
@@ -218,16 +217,12 @@ class RestaurantDetailsController extends GetxController {
 
     if (productModel.itemAttribute != null) {
       if (productModel.itemAttribute!.variants!.where((element) => element.variantSku == selectedVariants.join('-')).isNotEmpty) {
-        variantPrice = Constant.productCommissionPrice(
-            vendorModel.value,
-            productModel.itemAttribute!.variants!.where((element) => element.variantSku == selectedVariants.join('-')).first.variantPrice ??
-                '0');
+        variantPrice =
+            Constant.productCommissionPrice(vendorModel.value, productModel.itemAttribute!.variants!.where((element) => element.variantSku == selectedVariants.join('-')).first.variantPrice ?? '0');
       }
     } else {
       String price = Constant.productCommissionPrice(vendorModel.value, productModel.price.toString());
-      String disPrice = double.parse(productModel.disPrice.toString()) <= 0
-          ? "0"
-          : Constant.productCommissionPrice(vendorModel.value, productModel.disPrice.toString());
+      String disPrice = double.parse(productModel.disPrice.toString()) <= 0 ? "0" : Constant.productCommissionPrice(vendorModel.value, productModel.disPrice.toString());
       if (double.parse(disPrice) <= 0) {
         variantPrice = price;
       } else {
@@ -237,14 +232,11 @@ class RestaurantDetailsController extends GetxController {
 
     for (int i = 0; i < productModel.addOnsPrice!.length; i++) {
       if (selectedAddOns.contains(productModel.addOnsTitle![i]) == true) {
-        adOnsPrice = (double.parse(adOnsPrice.toString()) +
-                double.parse(Constant.productCommissionPrice(vendorModel.value, productModel.addOnsPrice![i].toString())))
-            .toString();
+        adOnsPrice = (double.parse(adOnsPrice.toString()) + double.parse(Constant.productCommissionPrice(vendorModel.value, productModel.addOnsPrice![i].toString()))).toString();
       }
     }
     adOnsPrice = (quantity.value * double.parse(adOnsPrice)).toString();
-    mainPrice = ((double.parse(variantPrice.toString()) * double.parse(quantity.value.toString())) + double.parse(adOnsPrice.toString()))
-        .toString();
+    mainPrice = ((double.parse(variantPrice.toString()) * double.parse(quantity.value.toString())) + double.parse(adOnsPrice.toString())).toString();
     return mainPrice;
   }
 
@@ -269,9 +261,7 @@ class RestaurantDetailsController extends GetxController {
     String adOnsPrice = "0";
     for (int i = 0; i < productModel.addOnsPrice!.length; i++) {
       if (selectedAddOns.contains(productModel.addOnsTitle![i]) == true && productModel.addOnsPrice![i] != '0') {
-        adOnsPrice = (double.parse(adOnsPrice.toString()) +
-                double.parse(Constant.productCommissionPrice(vendorModel.value, productModel.addOnsPrice![i].toString())))
-            .toString();
+        adOnsPrice = (double.parse(adOnsPrice.toString()) + double.parse(Constant.productCommissionPrice(vendorModel.value, productModel.addOnsPrice![i].toString()))).toString();
       }
     }
 
@@ -287,11 +277,8 @@ class RestaurantDetailsController extends GetxController {
       cartProductModel.variantInfo = variantInfo;
       cartProductModel.extrasPrice = adOnsPrice;
       cartProductModel.extras = selectedAddOns.isEmpty ? [] : selectedAddOns;
-      cartProductModel.taxSetting = Constant.taxScope == "order"
-          ? []
-          : Constant.taxProductList
-              ?.where((activeTax) => productModel.taxSetting?.any((productTax) => productTax.id == activeTax.id) ?? false)
-              .toList();
+      cartProductModel.taxSetting =
+          Constant.taxScope == "order" ? [] : Constant.taxProductList?.where((activeTax) => productModel.taxSetting?.any((productTax) => productTax.id == activeTax.id) ?? false).toList();
     } else {
       cartProductModel.id = productModel.id!;
       cartProductModel.name = productModel.name!;
@@ -304,11 +291,8 @@ class RestaurantDetailsController extends GetxController {
       cartProductModel.variantInfo = VariantInfo();
       cartProductModel.extrasPrice = adOnsPrice;
       cartProductModel.extras = selectedAddOns.isEmpty ? [] : selectedAddOns;
-      cartProductModel.taxSetting = Constant.taxScope == "order"
-          ? []
-          : Constant.taxProductList
-              ?.where((activeTax) => productModel.taxSetting?.any((productTax) => productTax.id == activeTax.id) ?? false)
-              .toList();
+      cartProductModel.taxSetting =
+          Constant.taxScope == "order" ? [] : Constant.taxProductList?.where((activeTax) => productModel.taxSetting?.any((productTax) => productTax.id == activeTax.id) ?? false).toList();
     }
 
     if (isIncrement) {

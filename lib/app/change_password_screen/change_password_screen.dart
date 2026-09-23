@@ -5,6 +5,7 @@ import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -31,8 +32,8 @@ class ChangePasswordScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Change Password".tr,
+                          TranslatedText(
+                            "Change Password",
                             style: TextStyle(
                               fontSize: 24,
                               color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -40,8 +41,8 @@ class ChangePasswordScreen extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          Text(
-                            "Update your password to keep your account secure.".tr,
+                          TranslatedText(
+                            "Update your password to keep your account secure.",
                             style: TextStyle(
                               fontSize: 16,
                               color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -52,9 +53,8 @@ class ChangePasswordScreen extends StatelessWidget {
                           const SizedBox(
                             height: 20,
                           ),
-                          Text(
-                            "Enter your registered email address and we’ll send you a secure link to reset your password. Open the link in your inbox and follow the steps to create a new password."
-                                .tr,
+                          TranslatedText(
+                            "Enter your registered email address and we’ll send you a secure link to reset your password. Open the link in your inbox and follow the steps to create a new password.",
                             style: TextStyle(
                               fontSize: 14,
                               color: themeChange.getThem() ? AppThemeData.danger300 : AppThemeData.danger300,
@@ -66,10 +66,10 @@ class ChangePasswordScreen extends StatelessWidget {
                             height: 20,
                           ),
                           TextFieldWidget(
-                            title: 'Email Address'.tr,
+                            title: 'Email Address',
                             textInputType: TextInputType.emailAddress,
                             controller: controller.emailEditingController.value,
-                            hintText: 'Enter Email Address'.tr,
+                            hintText: 'Enter Email Address',
                             prefix: Padding(
                               padding: const EdgeInsets.all(12),
                               child: SvgPicture.asset(
@@ -85,7 +85,7 @@ class ChangePasswordScreen extends StatelessWidget {
                             height: 20,
                           ),
                           RoundedButtonFill(
-                            title: "Change Password".tr,
+                            title: "Change Password",
                             color: AppThemeData.primary300,
                             textColor: AppThemeData.grey50,
                             onPress: () async {

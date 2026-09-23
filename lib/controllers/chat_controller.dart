@@ -7,6 +7,7 @@ import 'package:customer/models/inbox_model.dart';
 import 'package:customer/models/user_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -117,7 +118,7 @@ class ChatController extends GetxController {
 //     sendMessage('', url, '', 'image');
 //     Get.back();
 //   } on PlatformException catch (e) {
-//     ShowToastDialog.showToast("${"failed_to_pick".tr} : \n $e");
+//     ShowToastDialog.showToast("${"failed_to_pick"} : \n $e");
 //   }
 // }
 }

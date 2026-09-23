@@ -6,6 +6,7 @@ import 'package:customer/themes/responsive.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -55,8 +56,8 @@ class ReferFriendScreen extends StatelessWidget {
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                Text(
-                                  "Refer your friend and earn".tr,
+                                TranslatedText(
+                                  "Refer your friend and earn",
                                   style: TextStyle(
                                     fontSize: 22,
                                     color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50,
@@ -67,8 +68,8 @@ class ReferFriendScreen extends StatelessWidget {
                                 const SizedBox(
                                   width: 4,
                                 ),
-                                Text(
-                                  "${Constant.amountShow(amount: Constant.referralAmount)} ${'Each🎉'.tr}",
+                                TranslatedText(
+                                  "${Constant.amountShow(amount: Constant.referralAmount)} ${'Each'}",
                                   style: TextStyle(
                                     fontSize: 24,
                                     color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50,
@@ -79,8 +80,8 @@ class ReferFriendScreen extends StatelessWidget {
                                 const SizedBox(
                                   height: 32,
                                 ),
-                                Text(
-                                  "Invite Friends & Businesses".tr,
+                                TranslatedText(
+                                  "Invite Friends & Businesses",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: themeChange.getThem() ? AppThemeData.secondary100 : AppThemeData.secondary100,
@@ -91,9 +92,8 @@ class ReferFriendScreen extends StatelessWidget {
                                 const SizedBox(
                                   height: 8,
                                 ),
-                                Text(
-                                  "${'Invite your friends to sign up with Wagona using your code, and you’ll earn'.tr} ${Constant.amountShow(amount: Constant.referralAmount)} ${'after their Success the first order! 💸🍔'.tr}"
-                                      .tr,
+                                TranslatedText(
+                                  "${'Invite your friends to sign up with Wagona using your code, and you’ll earn'} ${Constant.amountShow(amount: Constant.referralAmount)} ${'after their Success the first order!'}",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 16,
@@ -144,7 +144,7 @@ class ReferFriendScreen extends StatelessWidget {
                                         InkWell(
                                             onTap: () {
                                               Clipboard.setData(ClipboardData(text: controller.referralModel.value.referralCode.toString()));
-                                              ShowToastDialog.showToast("Copied".tr);
+                                              ShowToastDialog.showToast("Copied");
                                             },
                                             child: const Icon(
                                               Icons.copy,
@@ -166,8 +166,8 @@ class ReferFriendScreen extends StatelessWidget {
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                                        child: Text(
-                                          "or".tr,
+                                        child: TranslatedText(
+                                          "or",
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: themeChange.getThem() ? AppThemeData.secondary200 : AppThemeData.secondary200,
@@ -186,13 +186,13 @@ class ReferFriendScreen extends StatelessWidget {
                                   ),
                                 ),
                                 RoundedButtonFill(
-                                  title: "Share Code".tr,
+                                  title: "Share Code",
                                   width: 55,
                                   color: AppThemeData.secondary300,
                                   textColor: AppThemeData.grey50,
                                   onPress: () async {
                                     await Share.share(
-                                      "${"Hey there, thanks for choosing Wagona. Hope you love our product. If you do, share it with your friends using code".tr} ${controller.referralModel.value.referralCode.toString()} ${"and get".tr}${Constant.amountShow(amount: Constant.referralAmount.toString())} ${"when order completed".tr}",
+                                      "${"Hey there, thanks for choosing Wagona. Hope you love our product. If you do, share it with your friends using code"} ${controller.referralModel.value.referralCode.toString()} ${"and get"}${Constant.amountShow(amount: Constant.referralAmount.toString())} ${"when order completed"}",
                                     );
                                   },
                                 ),

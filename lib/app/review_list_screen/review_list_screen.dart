@@ -11,6 +11,7 @@ import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -31,8 +32,8 @@ class ReviewListScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Reviews".tr,
+              title: TranslatedText(
+                "Reviews",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,
@@ -66,7 +67,7 @@ class ReviewListScreen extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
+                                      TranslatedText(
                                         ratingModel.uname.toString(),
                                         style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 18, fontFamily: AppThemeData.semiBold),
                                       ),
@@ -76,20 +77,20 @@ class ReviewListScreen extends StatelessWidget {
                                             future: FireStoreUtils.fireStore.collection(CollectionName.vendorProducts).doc(ratingModel.productId?.split('~').first).get(),
                                             builder: (context, snapshot) {
                                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                                return const Text('');
+                                                return const TranslatedText('');
                                               } else {
                                                 if (snapshot.hasError) {
-                                                  return const Text('');
+                                                  return const TranslatedText('');
                                                 } else if (snapshot.data == null) {
-                                                  return const Text('');
+                                                  return const TranslatedText('');
                                                 } else if (snapshot.data != null) {
                                                   ProductModel model = ProductModel.fromJson(snapshot.data!.data()!);
-                                                  return Text(
-                                                    '${'Rate for'.tr} - ${model.name ?? ''}',
+                                                  return TranslatedText(
+                                                    '${'Rate for'} - ${model.name ?? ''}',
                                                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 14, fontFamily: AppThemeData.semiBold),
                                                   );
                                                 } else {
-                                                  return const Text('');
+                                                  return const TranslatedText('');
                                                 }
                                               }
                                             }),
@@ -116,7 +117,7 @@ class ReviewListScreen extends StatelessWidget {
                                       ),
                                       Visibility(
                                         visible: ratingModel.comment != '' && ratingModel.comment != null,
-                                        child: Text(
+                                        child: TranslatedText(
                                           ratingModel.comment.toString(),
                                           style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 16, fontFamily: AppThemeData.medium),
                                         ),
@@ -142,16 +143,16 @@ class ReviewListScreen extends StatelessWidget {
                                                       future: FireStoreUtils.fireStore.collection(CollectionName.reviewAttributes).doc(key).get(),
                                                       builder: (context, snapshot) {
                                                         if (snapshot.connectionState == ConnectionState.waiting) {
-                                                          return const Text('');
+                                                          return const TranslatedText('');
                                                         } else {
                                                           if (snapshot.hasError) {
-                                                            return const Text('');
+                                                            return const TranslatedText('');
                                                           } else if (snapshot.data == null) {
-                                                            return const Text('');
+                                                            return const TranslatedText('');
                                                           } else {
                                                             ReviewAttributeModel model = ReviewAttributeModel.fromJson(snapshot.data!.data()!);
                                                             return Expanded(
-                                                              child: Text(
+                                                              child: TranslatedText(
                                                                 model.title.toString(),
                                                                 style: TextStyle(
                                                                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -165,7 +166,7 @@ class ReviewListScreen extends StatelessWidget {
                                                       }),
                                                   RatingBar.builder(
                                                     ignoreGestures: true,
-                                                    initialRating: value == null ? 0.0 : value ?? 0.0,
+                                                    initialRating: value == null ? 0.0 : double.parse(value.toString()),
                                                     minRating: 1,
                                                     direction: Axis.horizontal,
                                                     itemCount: 5,
@@ -214,7 +215,7 @@ class ReviewListScreen extends StatelessWidget {
                                       const SizedBox(
                                         height: 5,
                                       ),
-                                      Text(
+                                      TranslatedText(
                                         Constant.timestampToDateTime(ratingModel.createdAt!),
                                         style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600, fontSize: 14, fontFamily: AppThemeData.medium),
                                       ),

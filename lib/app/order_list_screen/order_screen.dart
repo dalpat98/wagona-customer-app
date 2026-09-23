@@ -2,7 +2,6 @@ import 'package:customer/app/auth_screen/login_screen.dart';
 import 'package:customer/app/order_list_screen/live_tracking_screen.dart';
 import 'package:customer/app/order_list_screen/order_details_screen.dart';
 import 'package:customer/constant/constant.dart';
-import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/order_controller.dart';
 import 'package:customer/models/cart_product_model.dart';
 import 'package:customer/models/order_model.dart';
@@ -11,10 +10,13 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:customer/widget/my_separator.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -46,15 +48,15 @@ class OrderScreen extends StatelessWidget {
                               const SizedBox(
                                 height: 12,
                               ),
-                              Text(
-                                "Please Log In to Continue".tr,
+                              TranslatedText(
+                                "Please Log In to Continue",
                                 style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey800, fontSize: 22, fontFamily: AppThemeData.semiBold),
                               ),
                               const SizedBox(
                                 height: 5,
                               ),
-                              Text(
-                                "You’re not logged in. Please sign in to access your account and explore all features.".tr,
+                              TranslatedText(
+                                "You’re not logged in. Please sign in to access your account and explore all features.",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.bold),
                               ),
@@ -62,7 +64,7 @@ class OrderScreen extends StatelessWidget {
                                 height: 20,
                               ),
                               RoundedButtonFill(
-                                title: "Log in".tr,
+                                title: "Log in",
                                 width: 55,
                                 height: 5.5,
                                 color: AppThemeData.primary300,
@@ -86,19 +88,21 @@ class OrderScreen extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            "My Order".tr,
+                                          TranslatedText(
+                                            "My Order",
                                             style: TextStyle(
-                                              fontSize: 24,
+                                              fontSize: 26,
                                               color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                              fontFamily: AppThemeData.semiBold,
-                                              fontWeight: FontWeight.w500,
+                                              fontFamily: AppThemeData.bold,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                           ),
-                                          Text(
-                                            "Keep track your delivered, In Progress and Rejected food all in just one place.".tr,
+                                          const SizedBox(height: 4),
+                                          TranslatedText(
+                                            "Keep track your delivered, In Progress and Rejected food all in just one place.",
                                             style: TextStyle(
-                                              color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                              fontSize: 15,
+                                              color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500,
                                               fontFamily: AppThemeData.regular,
                                               fontWeight: FontWeight.w400,
                                             ),
@@ -114,132 +118,133 @@ class OrderScreen extends StatelessWidget {
                               ),
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-                                        decoration: ShapeDecoration(
-                                          color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(120),
-                                          ),
-                                        ),
-                                        child: TabBar(
-                                          indicator: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(50), // Creates border
-                                              color: AppThemeData.primary300),
-                                          labelColor: AppThemeData.grey50,
-                                          isScrollable: true,
-                                          tabAlignment: TabAlignment.start,
-                                          indicatorWeight: 0.5,
-                                          unselectedLabelColor: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                          dividerColor: Colors.transparent,
-                                          indicatorSize: TabBarIndicatorSize.tab,
-                                          tabs: [
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 18),
-                                              child: Tab(
-                                                text: 'All'.tr,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: ValueListenableBuilder(
+                                        valueListenable: TranslationNotifier.refresh,
+                                        builder: (_, __, ___) {
+                                          return Column(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                                                decoration: ShapeDecoration(
+                                                  color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(120),
+                                                  ),
+                                                ),
+                                                child: TabBar(
+                                                  indicator: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(50), // Creates border
+                                                      color: AppThemeData.primary300),
+                                                  labelColor: AppThemeData.grey50,
+                                                  isScrollable: true,
+                                                  tabAlignment: TabAlignment.start,
+                                                  indicatorWeight: 0.5,
+                                                  unselectedLabelColor: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                                  dividerColor: Colors.transparent,
+                                                  indicatorSize: TabBarIndicatorSize.tab,
+                                                  tabs: [
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                                                      child: Tab(text: 'All'.tr),
+                                                    ),
+                                                    Tab(
+                                                      text: 'In Progress'.tr,
+                                                    ),
+                                                    Tab(
+                                                      text: 'Delivered'.tr,
+                                                    ),
+                                                    Tab(
+                                                      text: 'Cancelled'.tr,
+                                                    ),
+                                                    Tab(
+                                                      text: 'Rejected'.tr,
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            Tab(
-                                              text: 'In Progress'.tr,
-                                            ),
-                                            Tab(
-                                              text: 'Delivered'.tr,
-                                            ),
-                                            Tab(
-                                              text: 'Cancelled'.tr,
-                                            ),
-                                            Tab(
-                                              text: 'Rejected'.tr,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Expanded(
-                                        child: TabBarView(
-                                          children: [
-                                            controller.allList.isEmpty
-                                                ? Constant.showEmptyView(message: "Order Not Found".tr)
-                                                : RefreshIndicator(
-                                                    onRefresh: () => controller.getOrder(),
-                                                    child: ListView.builder(
-                                                      itemCount: controller.allList.length,
-                                                      shrinkWrap: true,
-                                                      padding: EdgeInsets.zero,
-                                                      itemBuilder: (context, index) {
-                                                        OrderModel orderModel = controller.allList[index];
-                                                        return itemView(themeChange, context, orderModel, controller);
-                                                      },
-                                                    ),
-                                                  ),
-                                            controller.inProgressList.isEmpty
-                                                ? Constant.showEmptyView(message: "Order Not Found".tr)
-                                                : RefreshIndicator(
-                                                    onRefresh: () => controller.getOrder(),
-                                                    child: ListView.builder(
-                                                      itemCount: controller.inProgressList.length,
-                                                      shrinkWrap: true,
-                                                      padding: EdgeInsets.zero,
-                                                      itemBuilder: (context, index) {
-                                                        OrderModel orderModel = controller.inProgressList[index];
-                                                        return itemView(themeChange, context, orderModel, controller);
-                                                      },
-                                                    ),
-                                                  ),
-                                            controller.deliveredList.isEmpty
-                                                ? Constant.showEmptyView(message: "Order Not Found".tr)
-                                                : RefreshIndicator(
-                                                    onRefresh: () => controller.getOrder(),
-                                                    child: ListView.builder(
-                                                      itemCount: controller.deliveredList.length,
-                                                      shrinkWrap: true,
-                                                      padding: EdgeInsets.zero,
-                                                      itemBuilder: (context, index) {
-                                                        OrderModel orderModel = controller.deliveredList[index];
-                                                        return itemView(themeChange, context, orderModel, controller);
-                                                      },
-                                                    ),
-                                                  ),
-                                            controller.cancelledList.isEmpty
-                                                ? Constant.showEmptyView(message: "Order Not Found".tr)
-                                                : RefreshIndicator(
-                                                    onRefresh: () => controller.getOrder(),
-                                                    child: ListView.builder(
-                                                      itemCount: controller.cancelledList.length,
-                                                      shrinkWrap: true,
-                                                      padding: EdgeInsets.zero,
-                                                      itemBuilder: (context, index) {
-                                                        OrderModel orderModel = controller.cancelledList[index];
-                                                        return itemView(themeChange, context, orderModel, controller);
-                                                      },
-                                                    ),
-                                                  ),
-                                            controller.rejectedList.isEmpty
-                                                ? Constant.showEmptyView(message: "Order Not Found".tr)
-                                                : RefreshIndicator(
-                                                    onRefresh: () => controller.getOrder(),
-                                                    child: ListView.builder(
-                                                      itemCount: controller.rejectedList.length,
-                                                      shrinkWrap: true,
-                                                      padding: EdgeInsets.zero,
-                                                      itemBuilder: (context, index) {
-                                                        OrderModel orderModel = controller.rejectedList[index];
-                                                        return itemView(themeChange, context, orderModel, controller);
-                                                      },
-                                                    ),
-                                                  ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              Expanded(
+                                                child: TabBarView(
+                                                  children: [
+                                                    controller.allList.isEmpty
+                                                        ? Constant.showEmptyView(message: "Order Not Found")
+                                                        : RefreshIndicator(
+                                                            onRefresh: () => controller.getOrder(),
+                                                            child: ListView.builder(
+                                                              itemCount: controller.allList.length,
+                                                              shrinkWrap: true,
+                                                              padding: const EdgeInsets.only(bottom: 100),
+                                                              itemBuilder: (context, index) {
+                                                                OrderModel orderModel = controller.allList[index];
+                                                                return itemView(themeChange, context, orderModel, controller);
+                                                              },
+                                                            ),
+                                                          ),
+                                                    controller.inProgressList.isEmpty
+                                                        ? Constant.showEmptyView(message: "Order Not Found")
+                                                        : RefreshIndicator(
+                                                            onRefresh: () => controller.getOrder(),
+                                                            child: ListView.builder(
+                                                              itemCount: controller.inProgressList.length,
+                                                              shrinkWrap: true,
+                                                              padding: const EdgeInsets.only(bottom: 100),
+                                                              itemBuilder: (context, index) {
+                                                                OrderModel orderModel = controller.inProgressList[index];
+                                                                return itemView(themeChange, context, orderModel, controller);
+                                                              },
+                                                            ),
+                                                          ),
+                                                    controller.deliveredList.isEmpty
+                                                        ? Constant.showEmptyView(message: "Order Not Found")
+                                                        : RefreshIndicator(
+                                                            onRefresh: () => controller.getOrder(),
+                                                            child: ListView.builder(
+                                                              itemCount: controller.deliveredList.length,
+                                                              shrinkWrap: true,
+                                                              padding: const EdgeInsets.only(bottom: 100),
+                                                              itemBuilder: (context, index) {
+                                                                OrderModel orderModel = controller.deliveredList[index];
+                                                                return itemView(themeChange, context, orderModel, controller);
+                                                              },
+                                                            ),
+                                                          ),
+                                                    controller.cancelledList.isEmpty
+                                                        ? Constant.showEmptyView(message: "Order Not Found")
+                                                        : RefreshIndicator(
+                                                            onRefresh: () => controller.getOrder(),
+                                                            child: ListView.builder(
+                                                              itemCount: controller.cancelledList.length,
+                                                              shrinkWrap: true,
+                                                              padding: const EdgeInsets.only(bottom: 100),
+                                                              itemBuilder: (context, index) {
+                                                                OrderModel orderModel = controller.cancelledList[index];
+                                                                return itemView(themeChange, context, orderModel, controller);
+                                                              },
+                                                            ),
+                                                          ),
+                                                    controller.rejectedList.isEmpty
+                                                        ? Constant.showEmptyView(message: "Order Not Found")
+                                                        : RefreshIndicator(
+                                                            onRefresh: () => controller.getOrder(),
+                                                            child: ListView.builder(
+                                                              itemCount: controller.rejectedList.length,
+                                                              shrinkWrap: true,
+                                                              padding: const EdgeInsets.only(bottom: 100),
+                                                              itemBuilder: (context, index) {
+                                                                OrderModel orderModel = controller.rejectedList[index];
+                                                                return itemView(themeChange, context, orderModel, controller);
+                                                              },
+                                                            ),
+                                                          ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        })),
                               )
                             ],
                           ),
@@ -249,24 +254,56 @@ class OrderScreen extends StatelessWidget {
         });
   }
 
-  Padding itemView(DarkThemeProvider themeChange, BuildContext context, OrderModel orderModel, OrderController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Container(
-        decoration: ShapeDecoration(
-          color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+  /// Secondary-style "Reorder" action shown on completed orders. Re-adds the
+  /// order's still-available items to the cart and opens the cart screen.
+  Widget reorderButton(DarkThemeProvider themeChange, OrderModel orderModel, OrderController controller) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+          onTap: () => controller.reorder(orderModel),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 9),
+            decoration: BoxDecoration(
+              color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.primary50,
+              borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+              border: Border.all(color: AppThemeData.primary300, width: 1.4),
+            ),
+            child: TranslatedText(
+              "Reorder",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppThemeData.primary300,
+                fontFamily: AppThemeData.semiBold,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Padding itemView(DarkThemeProvider themeChange, BuildContext context, OrderModel orderModel, OrderController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Container(
+        decoration: BoxDecoration(
+          color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+          borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+          border: Border.all(color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100, width: 1),
+          boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
               Row(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(16)),
+                    borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
                     child: Stack(
                       children: [
                         NetworkImageWidget(
@@ -296,20 +333,27 @@ class OrderScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          orderModel.status.toString().tr,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            color: Constant.statusColor(status: orderModel.status.toString()),
-                            fontFamily: AppThemeData.semiBold,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Constant.statusColor(status: orderModel.status.toString()).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                          ),
+                          child: TranslatedText(
+                            orderModel.status.toString(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Constant.statusColor(status: orderModel.status.toString()),
+                              fontFamily: AppThemeData.semiBold,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                         const SizedBox(
-                          height: 5,
+                          height: 6,
                         ),
-                        Text(
+                        TranslatedText(
                           orderModel.vendor!.title.toString(),
                           style: TextStyle(
                             fontSize: 16,
@@ -321,7 +365,7 @@ class OrderScreen extends StatelessWidget {
                         const SizedBox(
                           height: 5,
                         ),
-                        Text(
+                        TranslatedText(
                           Constant.timestampToDateTime(orderModel.createdAt!),
                           style: TextStyle(
                             color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
@@ -347,7 +391,7 @@ class OrderScreen extends StatelessWidget {
                   return Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: TranslatedText(
                           "${cartProduct.quantity} x ${cartProduct.name.toString()}",
                           style: TextStyle(
                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -406,48 +450,12 @@ class OrderScreen extends StatelessWidget {
                                             VendorModel vendorModel = snapshot.data!;
                                             if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && vendorModel.subscriptionPlan != null) {
                                               if (vendorModel.subscriptionTotalOrders == "-1") {
-                                                return Expanded(
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      for (var element in orderModel.products!) {
-                                                        controller.addToCart(cartProductModel: element);
-                                                        ShowToastDialog.showToast("Item Added In a cart".tr);
-                                                      }
-                                                    },
-                                                    child: Text(
-                                                      "Reorder".tr,
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(
-                                                          color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                          fontFamily: AppThemeData.semiBold,
-                                                          fontWeight: FontWeight.w600,
-                                                          fontSize: 16),
-                                                    ),
-                                                  ),
-                                                );
+                                                return reorderButton(themeChange, orderModel, controller);
                                               } else {
                                                 if ((vendorModel.subscriptionExpiryDate != null && vendorModel.subscriptionExpiryDate!.toDate().isBefore(DateTime.now()) == false) ||
                                                     vendorModel.subscriptionPlan?.expiryDay == '-1') {
                                                   if (vendorModel.subscriptionTotalOrders != '0') {
-                                                    return Expanded(
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          for (var element in orderModel.products!) {
-                                                            controller.addToCart(cartProductModel: element);
-                                                            ShowToastDialog.showToast("Item Added In a cart".tr);
-                                                          }
-                                                        },
-                                                        child: Text(
-                                                          "Reorder".tr,
-                                                          textAlign: TextAlign.center,
-                                                          style: TextStyle(
-                                                              color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                              fontFamily: AppThemeData.semiBold,
-                                                              fontWeight: FontWeight.w600,
-                                                              fontSize: 16),
-                                                        ),
-                                                      ),
-                                                    );
+                                                    return reorderButton(themeChange, orderModel, controller);
                                                   } else {
                                                     return SizedBox();
                                                   }
@@ -456,25 +464,7 @@ class OrderScreen extends StatelessWidget {
                                                 }
                                               }
                                             } else {
-                                              return Expanded(
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    for (var element in orderModel.products!) {
-                                                      controller.addToCart(cartProductModel: element);
-                                                      ShowToastDialog.showToast("Item Added In a cart".tr);
-                                                    }
-                                                  },
-                                                  child: Text(
-                                                    "Reorder".tr,
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                        color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                        fontFamily: AppThemeData.semiBold,
-                                                        fontWeight: FontWeight.w600,
-                                                        fontSize: 16),
-                                                  ),
-                                                ),
-                                              );
+                                              return reorderButton(themeChange, orderModel, controller);
                                             }
                                           }
                                         }
@@ -485,21 +475,33 @@ class OrderScreen extends StatelessWidget {
                           })
                       : orderModel.status == Constant.orderShipped || orderModel.status == Constant.orderInTransit
                           ? Expanded(
-                              child: InkWell(
-                                onTap: () {
-                                  Get.to(const LiveTrackingScreen(), arguments: {"orderModel": orderModel});
-                                },
-                                child: Text(
-                                  "Track Order".tr,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300, fontFamily: AppThemeData.semiBold, fontWeight: FontWeight.w600, fontSize: 16),
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                                  onTap: () {
+                                    Get.to(const LiveTrackingScreen(), arguments: {"orderModel": orderModel});
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 9),
+                                    decoration: BoxDecoration(
+                                      gradient: AppThemeData.primaryGradient,
+                                      borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                                      boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
+                                    ),
+                                    child: const TranslatedText(
+                                      "Track Order",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: AppThemeData.grey50, fontFamily: AppThemeData.semiBold, fontWeight: FontWeight.w600, fontSize: 15),
+                                    ),
+                                  ),
                                 ),
                               ),
                             )
                           : const SizedBox(),
                   Expanded(
                     child: InkWell(
+                      borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
                       onTap: () {
                         Get.to(const OrderDetailsScreen(), arguments: {"orderModel": orderModel})?.then((value) {
                           if (value == true) {
@@ -508,10 +510,18 @@ class OrderScreen extends StatelessWidget {
                         });
                         // Get.off(const OrderPlacingScreen(), arguments: {"orderModel": orderModel});
                       },
-                      child: Text(
-                        "View Details".tr,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.semiBold, fontWeight: FontWeight.w600, fontSize: 16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 9),
+                        decoration: BoxDecoration(
+                          color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey50,
+                          borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
+                          border: Border.all(color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200, width: 1),
+                        ),
+                        child: TranslatedText(
+                          "View Details",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontFamily: AppThemeData.semiBold, fontWeight: FontWeight.w600, fontSize: 15),
+                        ),
                       ),
                     ),
                   ),

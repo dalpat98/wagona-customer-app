@@ -9,6 +9,7 @@ import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/widget/restaurant_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,7 @@ class DineInRestaurantListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return GetX(
         init: RestaurantListController(),
         builder: (controller) {
@@ -27,7 +29,7 @@ class DineInRestaurantListScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
+              title: TranslatedText(
                 controller.title.value,
                 textAlign: TextAlign.start,
                 style: TextStyle(
@@ -151,7 +153,7 @@ class DineInRestaurantListScreen extends StatelessWidget {
                                         ),
                                       ),
                                       Transform.translate(
-                                        offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                                        offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.end,
                                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -203,7 +205,7 @@ class DineInRestaurantListScreen extends StatelessWidget {
                                                     const SizedBox(
                                                       width: 5,
                                                     ),
-                                                    Text(
+                                                    TranslatedText(
                                                       "${Constant.getDistance(
                                                         lat1: vendorModel.latitude.toString(),
                                                         lng1: vendorModel.longitude.toString(),
@@ -233,7 +235,7 @@ class DineInRestaurantListScreen extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
+                                        TranslatedText(
                                           vendorModel.title.toString(),
                                           textAlign: TextAlign.start,
                                           maxLines: 1,
@@ -244,7 +246,7 @@ class DineInRestaurantListScreen extends StatelessWidget {
                                             color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                           ),
                                         ),
-                                        Text(
+                                        TranslatedText(
                                           vendorModel.location.toString(),
                                           textAlign: TextAlign.start,
                                           maxLines: 1,

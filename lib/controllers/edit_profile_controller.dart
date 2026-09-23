@@ -5,6 +5,7 @@ import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/models/user_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -41,7 +42,7 @@ class EditProfileController extends GetxController {
   }
 
   saveData() async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     if (Constant().hasValidUrl(profileImage.value) == false && profileImage.value.isNotEmpty) {
       profileImage.value = await Constant.uploadUserImageToFireStorage(
         File(profileImage.value),

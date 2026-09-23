@@ -36,6 +36,7 @@ class SplashController extends GetxController {
             await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()).then((value) async {
               if (value != null) {
                 UserModel userModel = value;
+                // userModel.shippingAddress?[0].location = UserLocation(latitude: 23.8500, longitude: 72.1210);
                 log(userModel.toJson().toString());
                 if (userModel.role == Constant.userRoleCustomer) {
                   if (userModel.active == true) {
@@ -43,7 +44,6 @@ class SplashController extends GetxController {
                     await FireStoreUtils.updateUser(userModel);
                     RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
                     if (initialMessage != null && initialMessage.data['type'] != null) {
-                      // handleMessageClick(role: initialMessage.data['chatType'], type: initialMessage.data['type'], isBgApp: true);
                     } else if (userModel.shippingAddress != null && userModel.shippingAddress!.isNotEmpty) {
                       if (userModel.shippingAddress!.where((element) => element.isDefault == true).isNotEmpty) {
                         Constant.selectedLocation = userModel.shippingAddress!.where((element) => element.isDefault == true).single;

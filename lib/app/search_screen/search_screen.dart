@@ -11,6 +11,7 @@ import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/restaurant_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +22,7 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return GetX(
         init: SearchScreenController(),
         builder: (controller) {
@@ -29,8 +31,8 @@ class SearchScreen extends StatelessWidget {
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
               centerTitle: false,
               titleSpacing: 0,
-              title: Text(
-                "Search Food & Restaurant".tr,
+              title: TranslatedText(
+                "Search Food & Restaurant",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: AppThemeData.medium,
@@ -43,10 +45,14 @@ class SearchScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextFieldWidget(
-                    hintText: 'Search the dish, restaurant, food, meals'.tr,
+                    hintText: 'Search the dish, restaurant, food, meals',
                     prefix: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: SvgPicture.asset("assets/icons/ic_search.svg"),
+                      child: SvgPicture.asset(
+                        "assets/icons/ic_search.svg",
+                        width: 25,
+                        height: 25,
+                      ),
                     ),
                     controller: controller.searchTextController.value,
                     onchange: (value) {
@@ -64,7 +70,7 @@ class SearchScreen extends StatelessWidget {
             body: controller.isLoading.value
                 ? Constant.loader()
                 : controller.vendorSearchList.isEmpty && controller.productSearchList.isEmpty
-                    ? Center(child: Constant.showEmptyView(message: "Not Found".tr))
+                    ? Center(child: Constant.showEmptyView(message: "Not Found"))
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         child: SingleChildScrollView(
@@ -77,8 +83,8 @@ class SearchScreen extends StatelessWidget {
                                   : Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          "Restaurants".tr,
+                                        TranslatedText(
+                                          "Restaurants",
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
                                             fontFamily: AppThemeData.semiBold,
@@ -106,9 +112,15 @@ class SearchScreen extends StatelessWidget {
                                     child: Padding(
                                       padding: const EdgeInsets.only(bottom: 20),
                                       child: Container(
-                                        decoration: ShapeDecoration(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
                                           color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                          borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                                          border: Border.all(
+                                            width: 1,
+                                            color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey100,
+                                          ),
+                                          boxShadow: themeChange.getThem() ? null : AppThemeData.cardShadow,
                                         ),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +128,7 @@ class SearchScreen extends StatelessWidget {
                                             Stack(
                                               children: [
                                                 ClipRRect(
-                                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+                                                  borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
                                                   child: Stack(
                                                     children: [
                                                       ColorFiltered(
@@ -178,7 +190,7 @@ class SearchScreen extends StatelessWidget {
                                                   ),
                                                 ),
                                                 Transform.translate(
-                                                  offset: Offset(Responsive.width(-3, context), Responsive.height(17.5, context)),
+                                                  offset: Offset(Responsive.width(isRTL == true ? 3 : -3, context), Responsive.height(17.5, context)),
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.end,
                                                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -201,8 +213,8 @@ class SearchScreen extends StatelessWidget {
                                                                   const SizedBox(
                                                                     width: 5,
                                                                   ),
-                                                                  Text(
-                                                                    "Free Delivery".tr,
+                                                                  TranslatedText(
+                                                                    "Free Delivery",
                                                                     style: TextStyle(
                                                                       fontSize: 14,
                                                                       color: AppThemeData.darkGreen,
@@ -221,24 +233,24 @@ class SearchScreen extends StatelessWidget {
                                                       ),
                                                       Container(
                                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                                                        decoration: ShapeDecoration(
-                                                          color: themeChange.getThem() ? AppThemeData.primary600 : AppThemeData.primary50,
-                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(120)),
+                                                        decoration: BoxDecoration(
+                                                          color: AppThemeData.lightGreen,
+                                                          borderRadius: BorderRadius.circular(AppThemeData.radiusPill),
                                                         ),
                                                         child: Row(
                                                           children: [
                                                             SvgPicture.asset(
                                                               "assets/icons/ic_star.svg",
-                                                              colorFilter: ColorFilter.mode(AppThemeData.primary300, BlendMode.srcIn),
+                                                              colorFilter: const ColorFilter.mode(AppThemeData.darkGreen, BlendMode.srcIn),
                                                             ),
                                                             const SizedBox(
                                                               width: 5,
                                                             ),
                                                             Text(
                                                               "${Constant.calculateReview(reviewCount: vendorModel.reviewsCount!.toStringAsFixed(0), reviewSum: vendorModel.reviewsSum.toString())} (${vendorModel.reviewsCount!.toStringAsFixed(0)})",
-                                                              style: TextStyle(
+                                                              style: const TextStyle(
                                                                 fontSize: 14,
-                                                                color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                                                color: AppThemeData.darkGreen,
                                                                 fontFamily: AppThemeData.semiBold,
                                                                 fontWeight: FontWeight.w600,
                                                               ),
@@ -264,7 +276,7 @@ class SearchScreen extends StatelessWidget {
                                                             const SizedBox(
                                                               width: 5,
                                                             ),
-                                                            Text(
+                                                            TranslatedText(
                                                               "${Constant.getDistance(
                                                                 lat1: vendorModel.latitude.toString(),
                                                                 lng1: vendorModel.longitude.toString(),
@@ -294,7 +306,7 @@ class SearchScreen extends StatelessWidget {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
+                                                  TranslatedText(
                                                     vendorModel.title.toString(),
                                                     textAlign: TextAlign.start,
                                                     maxLines: 1,
@@ -305,7 +317,7 @@ class SearchScreen extends StatelessWidget {
                                                       color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
                                                     ),
                                                   ),
-                                                  Text(
+                                                  TranslatedText(
                                                     vendorModel.location.toString(),
                                                     textAlign: TextAlign.start,
                                                     maxLines: 1,
@@ -327,7 +339,7 @@ class SearchScreen extends StatelessWidget {
                                                             //   lineThickness: 1,
                                                             // ),
 
-                                                            Text(
+                                                            TranslatedText(
                                                               Constant.getNextOpeningTime(vendorModel, DateTime.now()),
                                                               maxLines: 1,
                                                               overflow: TextOverflow.ellipsis,
@@ -354,8 +366,8 @@ class SearchScreen extends StatelessWidget {
                                   : Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          "Foods".tr,
+                                        TranslatedText(
+                                          "Foods",
                                           textAlign: TextAlign.start,
                                           style: TextStyle(
                                             fontFamily: AppThemeData.semiBold,
@@ -382,7 +394,7 @@ class SearchScreen extends StatelessWidget {
                                           return Constant.loader();
                                         } else {
                                           if (snapshot.hasError) {
-                                            return Center(child: Text('Error: ${snapshot.error}'));
+                                            return Center(child: TranslatedText('Error: ${snapshot.error}'));
                                           } else if (snapshot.data == null) {
                                             return const SizedBox();
                                           } else {
@@ -416,8 +428,8 @@ class SearchScreen extends StatelessWidget {
                                                               const SizedBox(
                                                                 width: 5,
                                                               ),
-                                                              Text(
-                                                                productModel.nonveg == true ? "Non Veg.".tr : "Pure veg.".tr,
+                                                              TranslatedText(
+                                                                productModel.nonveg == true ? "Non Veg." : "Pure veg.",
                                                                 style: TextStyle(
                                                                   color: productModel.nonveg == true ? AppThemeData.danger300 : AppThemeData.success400,
                                                                   fontFamily: AppThemeData.semiBold,
@@ -429,7 +441,7 @@ class SearchScreen extends StatelessWidget {
                                                           const SizedBox(
                                                             height: 5,
                                                           ),
-                                                          Text(
+                                                          TranslatedText(
                                                             productModel.name.toString(),
                                                             style: TextStyle(
                                                               fontSize: 18,
@@ -494,7 +506,7 @@ class SearchScreen extends StatelessWidget {
                                                               ),
                                                             ],
                                                           ),
-                                                          Text(
+                                                          TranslatedText(
                                                             "${productModel.description}",
                                                             maxLines: 2,
                                                             style: TextStyle(
@@ -508,7 +520,7 @@ class SearchScreen extends StatelessWidget {
                                                       ),
                                                     ),
                                                     ClipRRect(
-                                                      borderRadius: const BorderRadius.all(Radius.circular(16)),
+                                                      borderRadius: const BorderRadius.all(Radius.circular(AppThemeData.radiusMd)),
                                                       child: Stack(
                                                         children: [
                                                           NetworkImageWidget(

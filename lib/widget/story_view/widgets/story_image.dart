@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../controller/story_controller.dart';
@@ -192,7 +193,7 @@ class StoryImageState extends State<StoryImage> {
       case LoadState.failure:
         return Center(
             child: widget.errorWidget ??
-                const Text(
+                const TranslatedText(
                   "Image failed to load.",
                   style: TextStyle(
                     color: Colors.white,

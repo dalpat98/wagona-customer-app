@@ -7,6 +7,7 @@ import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/network_image_widget.dart';
 import 'package:customer/widget/my_separator.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -27,8 +28,8 @@ class DineInBookingScreen extends StatelessWidget {
               centerTitle: false,
               titleSpacing: 0,
               backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
-              title: Text(
-                "Dine in Bookings".tr,
+              title: TranslatedText(
+                "Dine in Bookings",
                 style: TextStyle(
                   fontSize: 16,
                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -70,8 +71,8 @@ class DineInBookingScreen extends StatelessWidget {
                                             ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                        child: Text(
-                                          "Upcoming".tr,
+                                        child: TranslatedText(
+                                          "Upcoming",
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             fontFamily: AppThemeData.semiBold,
@@ -104,8 +105,8 @@ class DineInBookingScreen extends StatelessWidget {
                                             ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                        child: Text(
-                                          "History".tr,
+                                        child: TranslatedText(
+                                          "History",
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             fontFamily: AppThemeData.semiBold,
@@ -135,7 +136,7 @@ class DineInBookingScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: controller.isFeature.value
                               ? controller.featureList.isEmpty
-                                  ? Constant.showEmptyView(message: "Upcoming Booking not found.".tr)
+                                  ? Constant.showEmptyView(message: "Upcoming Booking not found.")
                                   : ListView.builder(
                                       shrinkWrap: true,
                                       padding: EdgeInsets.zero,
@@ -147,7 +148,7 @@ class DineInBookingScreen extends StatelessWidget {
                                       },
                                     )
                               : controller.historyList.isEmpty
-                                  ? Constant.showEmptyView(message: "History not found.".tr)
+                                  ? Constant.showEmptyView(message: "History not found.")
                                   : ListView.builder(
                                       itemCount: controller.historyList.length,
                                       shrinkWrap: true,
@@ -216,8 +217,8 @@ class DineInBookingScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            orderModel.status.toString().tr,
+                          TranslatedText(
+                            orderModel.status.toString(),
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: Constant.statusColor(status: orderModel.status.toString()),
@@ -229,7 +230,7 @@ class DineInBookingScreen extends StatelessWidget {
                           const SizedBox(
                             height: 5,
                           ),
-                          Text(
+                          TranslatedText(
                             orderModel.vendor!.title.toString(),
                             style: TextStyle(
                               fontSize: 16,
@@ -241,7 +242,7 @@ class DineInBookingScreen extends StatelessWidget {
                           const SizedBox(
                             height: 5,
                           ),
-                          Text(
+                          TranslatedText(
                             Constant.timestampToDateTime(orderModel.createdAt!),
                             style: TextStyle(
                               color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
@@ -262,8 +263,8 @@ class DineInBookingScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        "Name".tr,
+                      child: TranslatedText(
+                        "Name",
                         style: TextStyle(
                           color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
                           fontFamily: AppThemeData.regular,
@@ -272,7 +273,7 @@ class DineInBookingScreen extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: Text(
+                      child: TranslatedText(
                         "${orderModel.guestFirstName} ${orderModel.guestLastName}",
                         textAlign: TextAlign.end,
                         style: TextStyle(
@@ -291,8 +292,8 @@ class DineInBookingScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        "Guest Number".tr,
+                      child: TranslatedText(
+                        "Guest Number",
                         style: TextStyle(
                           color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
                           fontFamily: AppThemeData.regular,
@@ -301,7 +302,7 @@ class DineInBookingScreen extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: Text(
+                      child: TranslatedText(
                         orderModel.totalGuest.toString(),
                         textAlign: TextAlign.end,
                         style: TextStyle(
@@ -325,7 +326,7 @@ class DineInBookingScreen extends StatelessWidget {
                       width: 10,
                     ),
                     Expanded(
-                      child: Text(
+                      child: TranslatedText(
                         orderModel.vendor!.location.toString(),
                         style: TextStyle(
                           color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,

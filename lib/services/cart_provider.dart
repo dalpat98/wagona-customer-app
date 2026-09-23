@@ -6,6 +6,7 @@ import 'package:customer/models/cart_product_model.dart';
 import 'package:customer/services/database_helper.dart';
 import 'package:customer/themes/custom_dialog_box.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 class CartProvider with ChangeNotifier {
@@ -48,10 +49,10 @@ class CartProvider with ChangeNotifier {
             context: context,
             builder: (BuildContext context) {
               return CustomDialogBox(
-                title: "Alert".tr,
-                descriptions: "Your cart already contains items from another restaurant. Would you like to replace them with items from this restaurant instead?".tr,
-                positiveString: "Add".tr,
-                negativeString: "Cancel".tr,
+                title: "Alert",
+                descriptions: "Your cart already contains items from another restaurant. Would you like to replace them with items from this restaurant instead?",
+                positiveString: "Add",
+                negativeString: "Cancel",
                 positiveClick: () async {
                   cartItem.clear();
                   _cartItems.clear();

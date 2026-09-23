@@ -3,22 +3,32 @@ import 'dart:io';
 import 'dart:math' as maths;
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/gift_card/history_gift_card.dart';
 import 'package:customer/app/wallet_screen/wallet_screen.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
+import 'package:customer/controllers/cashfree_service_controller.dart';
 import 'package:customer/controllers/gift_cards_model.dart';
+import 'package:customer/controllers/instamojo_service_controller.dart';
+import 'package:customer/controllers/mtnmomo_controller.dart';
+import 'package:customer/controllers/paymongo_controller.dart';
 import 'package:customer/models/gift_cards_order_model.dart';
+import 'package:customer/models/payment_model/cashfree_model.dart';
 import 'package:customer/models/payment_model/cod_setting_model.dart';
 import 'package:customer/models/payment_model/flutter_wave_model.dart';
+import 'package:customer/models/payment_model/foloosi_model.dart';
+import 'package:customer/models/payment_model/instamojo_model.dart';
 import 'package:customer/models/payment_model/mercado_pago_model.dart';
-import 'package:customer/models/payment_model/mid_trans.dart';
+import 'package:customer/models/payment_model/midtrans_model.dart';
+import 'package:customer/models/payment_model/mtnmomo_model.dart';
 import 'package:customer/models/payment_model/orange_money.dart';
 import 'package:customer/models/payment_model/pay_fast_model.dart';
 import 'package:customer/models/payment_model/pay_stack_model.dart';
+import 'package:customer/models/payment_model/paymongo_model.dart';
 import 'package:customer/models/payment_model/paypal_model.dart';
 import 'package:customer/models/payment_model/paytm_model.dart';
+import 'package:customer/models/payment_model/phonepe_model.dart';
 import 'package:customer/models/payment_model/razorpay_model.dart';
 import 'package:customer/models/payment_model/stripe_model.dart';
 import 'package:customer/models/payment_model/wallet_setting_model.dart';
@@ -29,19 +39,23 @@ import 'package:customer/payment/MercadoPagoScreen.dart';
 import 'package:customer/payment/PayFastScreen.dart';
 import 'package:customer/payment/getPaytmTxtToken.dart';
 import 'package:customer/payment/midtrans_screen.dart';
+import 'package:customer/payment/mtn_momo_payment_screen.dart';
 import 'package:customer/payment/orangePayScreen.dart';
 import 'package:customer/payment/paystack/pay_stack_screen.dart';
 import 'package:customer/payment/paystack/pay_stack_url_model.dart';
 import 'package:customer/payment/paystack/paystack_url_genrater.dart';
 import 'package:customer/payment/stripe_failed_model.dart';
+import 'package:customer/payment/weburlservicescreen.dart';
 import 'package:customer/payment/xenditModel.dart';
 import 'package:customer/payment/xenditScreen.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_paypal/flutter_paypal.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:foloosi_plugins/foloosi_plugins.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -49,6 +63,7 @@ import 'package:uuid/uuid.dart';
 
 class GiftCardController extends GetxController {
   RxBool isLoading = true.obs;
+  RxBool isLoadingPayment = true.obs;
   RxString selectedPaymentMethod = ''.obs;
   var pageController = PageController();
 
@@ -70,7 +85,7 @@ class GiftCardController extends GetxController {
   Rx<TextEditingController> messageController = TextEditingController().obs;
   Rx<UserModel> userModel = UserModel().obs;
 
-  getGiftCard() async {
+  Future<void> getGiftCard() async {
     await FireStoreUtils.getGiftCard().then((value) {
       giftCardList = value;
       if (giftCardList.isNotEmpty) {
@@ -95,7 +110,7 @@ class GiftCardController extends GetxController {
       if (double.parse(userModel.value.walletAmount.toString()) >= double.parse(amountController.value.text)) {
         setOrder();
       } else {
-        ShowToastDialog.showToast("You don't have sufficient wallet balance to purchase gift card".tr);
+        ShowToastDialog.showToast("You don't have sufficient wallet balance to purchase gift card");
       }
     } else {
       setOrder();
@@ -104,7 +119,7 @@ class GiftCardController extends GetxController {
 
   Future<void> setOrder() async {
     ShowToastDialog.closeLoader();
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     GiftCardsOrderModel giftCardsOrderModel = GiftCardsOrderModel();
     giftCardsOrderModel.id = const Uuid().v4();
     giftCardsOrderModel.giftId = selectedGiftCard.value.id.toString();
@@ -130,8 +145,8 @@ class GiftCardController extends GetxController {
           userId: FireStoreUtils.getCurrentUid(),
           isTopup: false,
           orderId: giftCardsOrderModel.id,
-          note: "Gift card purchase amount debited".tr,
-          paymentStatus: "success".tr);
+          note: "Gift card purchase amount debited",
+          paymentStatus: "success");
 
       await FireStoreUtils.setWalletTransaction(transactionModel).then((value) async {
         if (value == true) {
@@ -142,7 +157,7 @@ class GiftCardController extends GetxController {
     await FireStoreUtils.placeGiftCardOrder(giftCardsOrderModel);
     ShowToastDialog.closeLoader();
     Get.off(const HistoryGiftCard());
-    ShowToastDialog.showToast("Gift card Purchases successfully".tr);
+    ShowToastDialog.showToast("Gift card Purchases successfully");
   }
 
   String generateGiftCode() {
@@ -173,12 +188,19 @@ class GiftCardController extends GetxController {
   Rx<PayStackModel> payStackModel = PayStackModel().obs;
   Rx<PaytmModel> paytmModel = PaytmModel().obs;
   Rx<RazorPayModel> razorPayModel = RazorPayModel().obs;
+  Rx<MtnMomo> mtnMomoModel = MtnMomo().obs;
+  Rx<PhonePe> phonePeModel = PhonePe().obs;
+  Rx<Instamojo> instamojoModel = Instamojo().obs;
+  Rx<Foloosi> foloosiModel = Foloosi().obs;
+  Rx<PayMongo> payMongoModel = PayMongo().obs;
+  Rx<Cashfree> cashfreeModel = Cashfree().obs;
 
   Rx<MidTrans> midTransModel = MidTrans().obs;
   Rx<OrangeMoney> orangeMoneyModel = OrangeMoney().obs;
   Rx<Xendit> xenditModel = Xendit().obs;
 
-  getPaymentSettings() async {
+  Future<void> getPaymentSettings() async {
+    isLoadingPayment.value = true;
     await FireStoreUtils.getPaymentSettingsData().then(
       (value) {
         payFastModel.value = PayFastModel.fromJson(jsonDecode(Preferences.getString(Preferences.payFastSettings)));
@@ -193,6 +215,13 @@ class GiftCardController extends GetxController {
         midTransModel.value = MidTrans.fromJson(jsonDecode(Preferences.getString(Preferences.midTransSettings)));
         orangeMoneyModel.value = OrangeMoney.fromJson(jsonDecode(Preferences.getString(Preferences.orangeMoneySettings)));
         xenditModel.value = Xendit.fromJson(jsonDecode(Preferences.getString(Preferences.xenditSettings)));
+        mtnMomoModel.value = MtnMomo.fromJson(jsonDecode(Preferences.getString(Preferences.mtnMomoSettings)));
+        phonePeModel.value = PhonePe.fromJson(jsonDecode(Preferences.getString(Preferences.phonePaySettings)));
+        instamojoModel.value = Instamojo.fromJson(jsonDecode(Preferences.getString(Preferences.instamojoSettings)));
+        foloosiModel.value = Foloosi.fromJson(jsonDecode(Preferences.getString(Preferences.foloosiSettings)));
+        payMongoModel.value = PayMongo.fromJson(jsonDecode(Preferences.getString(Preferences.payMongoSettings)));
+        cashfreeModel.value = Cashfree.fromJson(jsonDecode(Preferences.getString(Preferences.cashFreeSettings)));
+        isLoadingPayment.value = false;
         walletSettingModel.value = WalletSettingModel.fromJson(jsonDecode(Preferences.getString(Preferences.walletSettings)));
         if (walletSettingModel.value.isEnabled == true) {
           selectedPaymentMethod.value = PaymentGateway.wallet.name;
@@ -218,6 +247,18 @@ class GiftCardController extends GetxController {
           selectedPaymentMethod.value = PaymentGateway.orangeMoney.name;
         } else if (xenditModel.value.enable == true) {
           selectedPaymentMethod.value = PaymentGateway.xendit.name;
+        } else if (mtnMomoModel.value.enable == true) {
+          selectedPaymentMethod.value = PaymentGateway.mtnMomo.name;
+        } else if (phonePeModel.value.enable == true) {
+          selectedPaymentMethod.value = PaymentGateway.phonePe.name;
+        } else if (instamojoModel.value.enable == true) {
+          selectedPaymentMethod.value = PaymentGateway.instamojo.name;
+        } else if (foloosiModel.value.enable == true) {
+          selectedPaymentMethod.value = PaymentGateway.foloosi.name;
+        } else if (payMongoModel.value.enable == true) {
+          selectedPaymentMethod.value = PaymentGateway.payMongo.name;
+        } else if (cashfreeModel.value.enable == true) {
+          selectedPaymentMethod.value = PaymentGateway.cashfree.name;
         }
         Stripe.publishableKey = stripeModel.value.clientpublishableKey.toString();
         Stripe.merchantIdentifier = 'Wagona';
@@ -299,7 +340,8 @@ class GiftCardController extends GetxController {
   // Strip
   Future<void> stripeMakePayment({required String amount}) async {
     try {
-      ShowToastDialog.showLoader("Please wait".tr);
+      ShowToastDialog.showLoader("Please wait");
+      await Stripe.instance.resetPaymentSheetCustomer();
       Map<String, dynamic>? paymentIntentData = await createStripeIntent(amount: amount);
       if (paymentIntentData!.containsKey("error")) {
         Get.back();
@@ -309,11 +351,8 @@ class GiftCardController extends GetxController {
             paymentSheetParameters: SetupPaymentSheetParameters(
                 paymentIntentClientSecret: paymentIntentData['client_secret'],
                 allowsDelayedPaymentMethods: false,
-                googlePay: const PaymentSheetGooglePay(
-                  merchantCountryCode: 'US',
-                  testEnv: true,
-                  currencyCode: "USD",
-                ),
+                // Google Pay removed — needs full merchant + Play Services setup and
+                // crashes the payment sheet natively in dev/test. Card payment works.
                 customFlow: true,
                 style: ThemeMode.system,
                 appearance: PaymentSheetAppearance(
@@ -331,10 +370,10 @@ class GiftCardController extends GetxController {
     }
   }
 
-  displayStripePaymentSheet({required String amount}) async {
+  Future<void> displayStripePaymentSheet({required String amount}) async {
     try {
       await Stripe.instance.presentPaymentSheet().then((value) {
-        ShowToastDialog.showToast("Payment successfully".tr);
+        ShowToastDialog.showToast("Payment successfully");
         placeOrder();
       });
     } on StripeException catch (e) {
@@ -373,7 +412,8 @@ class GiftCardController extends GetxController {
   }
 
   //mercadoo
-  mercadoPagoMakePayment({required BuildContext context, required String amount}) async {
+  Future<Null> mercadoPagoMakePayment({required BuildContext context, required String amount}) async {
+    ShowToastDialog.showLoader("Please wait");
     final headers = {
       'Authorization': 'Bearer ${mercadoPagoModel.value.accessToken}',
       'Content-Type': 'application/json',
@@ -406,18 +446,19 @@ class GiftCardController extends GetxController {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      ShowToastDialog.closeLoader();
+
       Get.to(MercadoPagoScreen(initialURl: data['init_point']))!.then((value) {
+        ShowToastDialog.closeLoader();
         if (value == true) {
-          ShowToastDialog.showToast("Payment Successful!!".tr);
+          ShowToastDialog.showToast("Payment Successful!!");
           placeOrder();
         } else {
-          ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
+          ShowToastDialog.showToast("Payment UnSuccessful!!");
         }
       });
     } else {
       ShowToastDialog.closeLoader();
-      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.".tr);
+      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.");
       print('Error creating preference: ${response.body}');
       return null;
     }
@@ -425,11 +466,10 @@ class GiftCardController extends GetxController {
 
   ///PayStack Payment Method
   Future<void> payStackPayment(String totalAmount) async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     await PayStackURLGen.payStackURLGen(amount: (double.parse(totalAmount) * 100).toStringAsFixed(0), currency: "ZAR", secretKey: payStackModel.value.secretKey.toString(), userModel: userModel.value)
         .then((value) async {
       if (value != null) {
-        ShowToastDialog.closeLoader();
         PayStackUrlModel payStackModel0 = value;
         Get.to<bool>(() => PayStackScreen(
               secretKey: payStackModel.value.secretKey.toString(),
@@ -438,24 +478,25 @@ class GiftCardController extends GetxController {
               amount: totalAmount,
               reference: payStackModel0.data.reference,
             ))?.then((value) {
+          ShowToastDialog.closeLoader();
           if (value == true) {
-            ShowToastDialog.showToast("Payment Successful!!".tr);
+            ShowToastDialog.showToast("Payment Successful!!");
             placeOrder();
           } else {
             ShowToastDialog.closeLoader();
-            ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
+            ShowToastDialog.showToast("Payment UnSuccessful!!");
           }
         });
       } else {
         ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
+        ShowToastDialog.showToast("Something went wrong, please contact admin.");
       }
     });
   }
 
   //flutter wave Payment Method
-  flutterWaveInitiatePayment({required BuildContext context, required String amount}) async {
-    ShowToastDialog.showLoader("Please wait".tr);
+  Future<Null> flutterWaveInitiatePayment({required BuildContext context, required String amount}) async {
+    ShowToastDialog.showLoader("Please wait");
     final url = Uri.parse('https://api.flutterwave.com/v3/payments');
     final headers = {
       'Authorization': 'Bearer ${flutterWaveModel.value.secretKey}',
@@ -483,18 +524,18 @@ class GiftCardController extends GetxController {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      ShowToastDialog.closeLoader();
       Get.to(MercadoPagoScreen(initialURl: data['data']['link']))!.then((value) {
+        ShowToastDialog.closeLoader();
         if (value == true) {
-          ShowToastDialog.showToast("Payment Successful!!".tr);
+          ShowToastDialog.showToast("Payment Successful!!");
           placeOrder();
         } else {
-          ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
+          ShowToastDialog.showToast("Payment UnSuccessful!!");
         }
       });
     } else {
       ShowToastDialog.closeLoader();
-      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.".tr);
+      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized.Please check credentials, environment (sandbox/live), and account region.");
       return null;
     }
   }
@@ -513,17 +554,17 @@ class GiftCardController extends GetxController {
   }
 
   // payFast
-  payFastPayment({required BuildContext context, required String amount}) {
-    ShowToastDialog.showLoader("Please wait".tr);
+  void payFastPayment({required BuildContext context, required String amount}) {
+    ShowToastDialog.showLoader("Please wait");
     PayStackURLGen.getPayHTML(payFastSettingData: payFastModel.value, amount: amount.toString(), userModel: userModel.value).then((String? value) async {
-      ShowToastDialog.closeLoader();
       bool isDone = await Get.to(PayFastScreen(htmlData: value!, payFastSettingData: payFastModel.value));
+      ShowToastDialog.closeLoader();
       if (isDone) {
         Get.back();
-        ShowToastDialog.showToast("Payment successfully".tr);
+        ShowToastDialog.showToast("Payment successfully");
         placeOrder();
       } else {
-        ShowToastDialog.showToast("Payment Failed".tr);
+        ShowToastDialog.showToast("Payment Failed");
       }
     });
   }
@@ -552,15 +593,15 @@ class GiftCardController extends GetxController {
             note: "Contact us for any questions on your order.",
             onSuccess: (Map params) async {
               placeOrder();
-              ShowToastDialog.showToast("Payment Successful!!".tr);
+              ShowToastDialog.showToast("Payment Successful!!");
             },
             onError: (error) {
               Get.back();
-              ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
+              ShowToastDialog.showToast("Payment UnSuccessful!!");
             },
             onCancel: (params) {
               Get.back();
-              ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
+              ShowToastDialog.showToast("Payment UnSuccessful!!");
             }),
       ),
     );
@@ -674,7 +715,7 @@ class GiftCardController extends GetxController {
     final data = jsonDecode(response.body);
     if (data["body"]["txnToken"] == null || data["body"]["txnToken"].toString().isEmpty) {
       Get.back();
-      ShowToastDialog.showToast("something went wrong, please contact admin.".tr);
+      ShowToastDialog.showToast("something went wrong, please contact admin.");
       return null;
     }
     return GetPaymentTxtTokenModel.fromJson(data);
@@ -712,30 +753,31 @@ class GiftCardController extends GetxController {
   }
 
   void handlePaymentSuccess(PaymentSuccessResponse response) {
-    ShowToastDialog.showToast("Payment Successful!!".tr);
+    ShowToastDialog.showToast("Payment Successful!!");
     placeOrder();
   }
 
   void handleExternalWaller(ExternalWalletResponse response) {
-    ShowToastDialog.showToast("Payment Processing!! via".tr);
+    ShowToastDialog.showToast("Payment Processing!! via");
   }
 
   void handlePaymentError(PaymentFailureResponse response) {
-    ShowToastDialog.showToast("Payment Failed!!".tr);
+    ShowToastDialog.showToast("Payment Failed!!");
   }
 
   //Midtrans payment
-  midtransMakePayment({required String amount, required BuildContext context}) async {
-    ShowToastDialog.showLoader("Please wait".tr);
+  Future<void> midtransMakePayment({required String amount, required BuildContext context}) async {
+    ShowToastDialog.showLoader("Please wait");
     await createPaymentLink(amount: amount).then((url) async {
       if (url != '') {
         final result = await Get.to(() => MidtransScreen(initialURl: url));
+        ShowToastDialog.closeLoader();
         if (result == true) {
-          ShowToastDialog.showToast("Payment Successful!!".tr);
+          ShowToastDialog.showToast("Payment Successful!!");
           placeOrder();
         } else {
           ShowToastDialog.closeLoader();
-          ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
+          ShowToastDialog.showToast("Payment Unsuccessful!!");
         }
       }
     });
@@ -766,7 +808,7 @@ class GiftCardController extends GetxController {
       final responseData = jsonDecode(response.body);
       return responseData['payment_url'];
     } else {
-      ShowToastDialog.showToast("something went wrong, please contact admin.".tr);
+      ShowToastDialog.showToast("something went wrong, please contact admin.");
       return '';
     }
   }
@@ -783,10 +825,10 @@ class GiftCardController extends GetxController {
   static String orderId = '';
   static String amount = '';
 
-  orangeMakePayment({required String amount, required BuildContext context}) async {
+  Future<void> orangeMakePayment({required String amount, required BuildContext context}) async {
     reset();
     var id = const Uuid().v4();
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     var paymentURL = await fetchToken(context: context, orderId: id, amount: amount, currency: 'USD');
 
     if (paymentURL.toString() != '') {
@@ -800,14 +842,14 @@ class GiftCardController extends GetxController {
               ))!
           .then((value) {
         if (value == true) {
-          ShowToastDialog.showToast("Payment Successful!!".tr);
+          ShowToastDialog.showToast("Payment Successful!!");
           placeOrder();
           ();
         }
       });
     } else {
       ShowToastDialog.closeLoader();
-      ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
+      ShowToastDialog.showToast("Payment Unsuccessful!!");
     }
   }
 
@@ -834,7 +876,7 @@ class GiftCardController extends GetxController {
       // ignore: use_build_context_synchronously
       return await webpayment(context: context, amountData: amount, currency: currency, orderIdData: orderId);
     } else {
-      ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
+      ShowToastDialog.showToast("Something went wrong, please contact admin.");
       return '';
     }
   }
@@ -871,7 +913,7 @@ class GiftCardController extends GetxController {
         return '';
       }
     } else {
-      ShowToastDialog.showToast("Something went wrong, please contact admin.".tr);
+      ShowToastDialog.showToast("Something went wrong, please contact admin.");
       return '';
     }
   }
@@ -885,9 +927,8 @@ class GiftCardController extends GetxController {
 
   //XenditPayment
   Future<void> xenditPayment(context, amount) async {
-    ShowToastDialog.showLoader("Please wait".tr);
+    ShowToastDialog.showLoader("Please wait");
     await createXenditInvoice(amount: amount).then((model) async {
-      ShowToastDialog.closeLoader();
       if (model.id != null) {
         final result = await Get.to(() => XenditScreen(
               initialUrl: model.invoiceUrl ?? '',
@@ -896,11 +937,11 @@ class GiftCardController extends GetxController {
             ));
 
         if (result == true) {
-          ShowToastDialog.showToast("Payment Successful!!".tr);
+          ShowToastDialog.showToast("Payment Successful!!");
           placeOrder();
         } else {
           ShowToastDialog.closeLoader();
-          ShowToastDialog.showToast("Payment Failed or Cancelled!".tr);
+          ShowToastDialog.showToast("Payment Failed or Cancelled!");
         }
       }
     });
@@ -933,6 +974,173 @@ class GiftCardController extends GetxController {
       }
     } catch (e) {
       return XenditModel();
+    }
+  }
+
+  Future<void> mtnMomoMakePayment({required String amount}) async {
+    ShowToastDialog.showLoader("Please wait..");
+    try {
+      var paymentURL = await MtnMomoController.apiuserAPI(mtnMomo: mtnMomoModel.value);
+      if (paymentURL != '') {
+        ShowToastDialog.closeLoader();
+        Get.to(MtnPaymentScreen(
+          mtnMomoSettingData: mtnMomoModel.value,
+          amount: double.parse(amount),
+          currency: 'EUR',
+        ))?.then((value) {
+          if (value) {
+            ShowToastDialog.showToast("Payment Successful!!");
+            placeOrder();
+          } else {
+            ShowToastDialog.showToast("Payment UnSuccessful!!");
+          }
+        });
+      } else {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast("Payment UnSuccessful!!");
+      }
+    } catch (e, s) {
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast("exception:$e \n$s");
+    }
+  }
+
+  Future<void> cashFreeMakePayment({required BuildContext context, required String amount, required String paymentDesc}) async {
+    ShowToastDialog.showLoader("Please wait");
+    await CashfreeService()
+        .createPaymentLink(cashfree: cashfreeModel.value, userModel: userModel.value, amount: double.parse(double.parse(amount).toStringAsFixed(2)), paymentDesc: paymentDesc)
+        .then((result) {
+      if (result != null) {
+        Get.to(WebUrlServiceScreen(initialURl: result))?.then((value) {
+          ShowToastDialog.closeLoader();
+          if (value) {
+            ShowToastDialog.showToast("Payment Successful!!");
+            placeOrder();
+          } else {
+            ShowToastDialog.showToast("Payment UnSuccessful!!");
+          }
+        });
+        // final bool isDone = await Navigator.push(context, MaterialPageRoute(builder: (context) => MercadoPagoScreen(initialURl: result['response']['init_point'])));
+      } else {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast("Error while transaction!");
+      }
+    });
+  }
+
+  Future<void> makeInstamojoPayment({required String amount, required String paymentDesc}) async {
+    try {
+      ShowToastDialog.showLoader("Please wait");
+      final token = await InstamojoService.getAccessToken(instamojoModel: instamojoModel.value);
+
+      if (token == null) {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized. Please check credentials, environment (sandbox/live), and account region.");
+        throw Exception("Token is null");
+      }
+
+      final paymentUrl = await InstamojoService.createPaymentRequest(
+        accessToken: token,
+        amount: double.parse(amount).toStringAsFixed(2),
+        purpose: paymentDesc,
+      );
+
+      if (paymentUrl != null && paymentUrl != 'null') {
+        Get.to(WebUrlServiceScreen(initialURl: paymentUrl))?.then((value) {
+          ShowToastDialog.closeLoader();
+          if (value) {
+            ShowToastDialog.showToast("Payment Successful!!");
+            placeOrder();
+          } else {
+            ShowToastDialog.showToast("Payment UnSuccessful!!");
+          }
+        });
+      } else {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized. Please check credentials, environment (sandbox/live), and account region.");
+      }
+    } catch (e) {
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast("Unable to initialize payment, credentials are invalid or not authorized. Please check credentials, environment (sandbox/live), and account region.");
+      print("Payment Error: $e");
+    }
+  }
+
+  Future<void> makeFoloosiPayment({required String amount, required String paymentDesc}) async {
+    if (foloosiModel.value.merchantKey == '' || foloosiModel.value.merchantKey?.isEmpty == true) {
+      ShowToastDialog.showToast("Foloosi merchant key is missing or invalid.");
+      return;
+    }
+    try {
+      await FoloosiPlugins.init(json.encode({
+        "merchantKey": foloosiModel.value.merchantKey,
+        "customColor": "#1E8449",
+      }));
+
+      FoloosiPlugins.setLogVisible(true);
+
+      final paymentData = {
+        "orderId": "ORD${Constant.getUuid()}",
+        "orderDescription": paymentDesc,
+        "orderAmount": double.parse(amount),
+        "country": "ARE",
+        "currencyCode": "AED",
+        "customer": {
+          "name": userModel.value.fullName,
+          "email": userModel.value.email,
+          "mobile": userModel.value.phoneNumber,
+        },
+      };
+
+      final result = await FoloosiPlugins.makePayment(json.encode(paymentData));
+
+      if (result != null) {
+        ShowToastDialog.showToast("Payment Successful!!");
+        placeOrder();
+      }
+    } catch (e) {
+      ShowToastDialog.showToast("Payment UnSuccessful!!");
+    }
+  }
+
+  Future<void> makePayMongoPayment({required String amount, required String paymentDesc}) async {
+    try {
+      ShowToastDialog.showLoader("Please wait");
+      if (payMongoModel.value.secretKey == '') {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast("PayMongo secret key is missing or invaild.");
+        return;
+      }
+      PayMongoService service = PayMongoService();
+      service.secretKey = payMongoModel.value.secretKey ?? '';
+
+      final intentRes = await service.createPaymentIntent(amount: amount);
+
+      String intentId = intentRes["data"]["id"];
+      String clientKey = intentRes["data"]["attributes"]["client_key"];
+
+      final methodRes = await service.createPaymentMethodGCash(userModel: userModel.value);
+      String paymentMethodId = methodRes["data"]["id"];
+
+      final attachRes = await service.attachPaymentMethod(
+        intentId: intentId,
+        paymentMethodId: paymentMethodId,
+        clientKey: clientKey,
+      );
+
+      String redirectUrl = attachRes["data"]["attributes"]["next_action"]["redirect"]["url"];
+      Get.to(WebUrlServiceScreen(initialURl: redirectUrl))!.then((value) {
+        ShowToastDialog.closeLoader();
+        if (value) {
+          ShowToastDialog.showToast("Payment Successful!!");
+          placeOrder();
+        } else {
+          ShowToastDialog.showToast("Payment UnSuccessful!!");
+        }
+      });
+    } catch (e) {
+      ShowToastDialog.closeLoader();
+      print("Payment Error: $e");
     }
   }
 }

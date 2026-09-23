@@ -12,8 +12,11 @@ import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
+import 'package:customer/utils/dynamic_traslator.dart';
+import 'package:customer/utils/translation_notifier.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -47,8 +50,8 @@ class LoginScreen extends StatelessWidget {
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      "Skip".tr,
+                    child: TranslatedText(
+                      "Skip",
                       style: TextStyle(color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300, fontSize: 18, fontFamily: AppThemeData.semiBold),
                     ),
                   ),
@@ -61,21 +64,36 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Welcome Back! 👋".tr,
-                      style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 22, fontFamily: AppThemeData.semiBold),
+                    const SizedBox(height: AppThemeData.spaceSm),
+                    Container(
+                      height: 64,
+                      width: 64,
+                      decoration: BoxDecoration(
+                        gradient: AppThemeData.primaryGradient,
+                        borderRadius: BorderRadius.circular(AppThemeData.radiusLg),
+                        boxShadow: themeChange.getThem() ? null : AppThemeData.primaryGlow,
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.waving_hand, size: 30, color: AppThemeData.grey50),
+                      ),
                     ),
-                    Text(
-                      "Log in to continue enjoying delicious food delivered to your doorstep.".tr,
+                    const SizedBox(height: AppThemeData.spaceLg),
+                    TranslatedText(
+                      "Welcome Back!",
+                      style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 24, fontFamily: AppThemeData.bold),
+                    ),
+                    const SizedBox(height: AppThemeData.spaceXs),
+                    TranslatedText(
+                      "Log in to continue enjoying delicious food delivered to your doorstep.",
                       style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey400 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.regular),
                     ),
                     const SizedBox(
                       height: 32,
                     ),
                     TextFieldWidget(
-                      title: 'Email Address'.tr,
+                      title: 'Email Address',
                       controller: controller.emailEditingController.value,
-                      hintText: 'Enter email address'.tr,
+                      hintText: 'Enter email address',
                       prefix: Padding(
                         padding: const EdgeInsets.all(12),
                         child: SvgPicture.asset(
@@ -88,9 +106,9 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     TextFieldWidget(
-                      title: 'Password'.tr,
+                      title: 'Password',
                       controller: controller.passwordEditingController.value,
-                      hintText: 'Enter password'.tr,
+                      hintText: 'Enter password',
                       obscureText: controller.passwordVisible.value,
                       prefix: Padding(
                         padding: const EdgeInsets.all(12),
@@ -131,8 +149,8 @@ class LoginScreen extends StatelessWidget {
                         onTap: () {
                           Get.to(const ForgotPasswordScreen());
                         },
-                        child: Text(
-                          "Forgot Password".tr,
+                        child: TranslatedText(
+                          "Forgot Password",
                           style: TextStyle(
                               decoration: TextDecoration.underline,
                               decorationColor: AppThemeData.secondary300,
@@ -146,14 +164,14 @@ class LoginScreen extends StatelessWidget {
                       height: 30,
                     ),
                     RoundedButtonFill(
-                      title: "Login".tr,
+                      title: "Login",
                       color: AppThemeData.primary300,
                       textColor: AppThemeData.grey50,
                       onPress: () async {
                         if (controller.emailEditingController.value.text.trim().isEmpty) {
-                          ShowToastDialog.showToast("Please enter valid email".tr);
+                          ShowToastDialog.showToast("Please enter valid email");
                         } else if (controller.passwordEditingController.value.text.trim().isEmpty) {
-                          ShowToastDialog.showToast("Please enter valid password".tr);
+                          ShowToastDialog.showToast("Please enter valid password");
                         } else {
                           controller.loginWithEmailAndPassword();
                         }
@@ -163,11 +181,11 @@ class LoginScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Row(
                         children: [
-                          const Expanded(child: Divider(thickness: 1)),
+                          Expanded(child: Divider(thickness: 1, color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey200)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                            child: Text(
-                              "or".tr,
+                            child: TranslatedText(
+                              "or",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: themeChange.getThem() ? AppThemeData.grey500 : AppThemeData.grey400,
@@ -177,17 +195,17 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const Expanded(child: Divider()),
+                          Expanded(child: Divider(thickness: 1, color: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey200)),
                         ],
                       ),
                     ),
                     RoundedButtonFill(
-                      title: "Continue with Mobile Number".tr,
+                      title: "Continue with Mobile Number",
                       textColor: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
                       color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100,
                       icon: SvgPicture.asset(
                         "assets/icons/ic_phone.svg",
-                        colorFilter: const ColorFilter.mode(AppThemeData.grey900, BlendMode.srcIn),
+                        colorFilter: ColorFilter.mode(themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900, BlendMode.srcIn),
                       ),
                       isRight: false,
                       onPress: () async {
@@ -201,7 +219,7 @@ class LoginScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: RoundedButtonFill(
-                            title: Platform.isIOS ? "with Google".tr : "Continue with Google".tr,
+                            title: Platform.isIOS ? "with Google" : "Continue with Google",
                             textColor: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
                             color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100,
                             icon: SvgPicture.asset("assets/icons/ic_google.svg"),
@@ -218,7 +236,7 @@ class LoginScreen extends StatelessWidget {
                         Platform.isIOS
                             ? Expanded(
                                 child: RoundedButtonFill(
-                                  title: "with Apple".tr,
+                                  title: "with Apple",
                                   textColor: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
                                   color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100,
                                   icon: SvgPicture.asset("assets/icons/ic_apple.svg"),
@@ -240,36 +258,40 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                            text: 'Didn’t have an account?'.tr,
-                            style: TextStyle(
-                              color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                              fontFamily: AppThemeData.medium,
-                              fontWeight: FontWeight.w500,
-                            )),
-                        const WidgetSpan(
-                          child: SizedBox(
-                            width: 10,
+                  ValueListenableBuilder(
+                      valueListenable: TranslationNotifier.refresh,
+                      builder: (_, __, ___) {
+                        return Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                  text: 'Didn’t have an account?'.tr,
+                                  style: TextStyle(
+                                    color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                    fontFamily: AppThemeData.medium,
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                              const WidgetSpan(
+                                child: SizedBox(
+                                  width: 10,
+                                ),
+                              ),
+                              TextSpan(
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Get.to(const SignupScreen());
+                                    },
+                                  text: 'Sign up'.tr,
+                                  style: TextStyle(
+                                      color: AppThemeData.primary300,
+                                      fontFamily: AppThemeData.bold,
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: AppThemeData.primary300)),
+                            ],
                           ),
-                        ),
-                        TextSpan(
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Get.to(const SignupScreen());
-                              },
-                            text: 'Sign up'.tr,
-                            style: TextStyle(
-                                color: AppThemeData.primary300,
-                                fontFamily: AppThemeData.bold,
-                                fontWeight: FontWeight.w500,
-                                decoration: TextDecoration.underline,
-                                decorationColor: AppThemeData.primary300)),
-                      ],
-                    ),
-                  ),
+                        );
+                      }),
                 ],
               ),
             ),

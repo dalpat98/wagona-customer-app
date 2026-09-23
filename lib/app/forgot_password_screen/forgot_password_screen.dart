@@ -5,6 +5,7 @@ import 'package:customer/themes/round_button_fill.dart';
 import 'package:customer/themes/text_field_widget.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:customer/widget/translated_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -27,21 +28,21 @@ class ForgotPasswordScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Forgot Password".tr,
+                  TranslatedText(
+                    "Forgot Password",
                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900, fontSize: 22, fontFamily: AppThemeData.semiBold),
                   ),
-                  Text(
-                    "No worries!! We’ll send you reset instructions".tr,
+                  TranslatedText(
+                    "No worries!! We’ll send you reset instructions",
                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey500, fontSize: 16, fontFamily: AppThemeData.regular),
                   ),
                   const SizedBox(
                     height: 32,
                   ),
                   TextFieldWidget(
-                    title: 'Email Address'.tr,
+                    title: 'Email Address',
                     controller: controller.emailEditingController.value,
-                    hintText: 'Enter email address'.tr,
+                    hintText: 'Enter email address',
                     prefix: Padding(
                       padding: const EdgeInsets.all(12),
                       child: SvgPicture.asset(
@@ -57,12 +58,12 @@ class ForgotPasswordScreen extends StatelessWidget {
                     height: 32,
                   ),
                   RoundedButtonFill(
-                    title: "Forgot Password".tr,
+                    title: "Forgot Password",
                     color: AppThemeData.primary300,
                     textColor: AppThemeData.grey50,
                     onPress: () async {
                       if (controller.emailEditingController.value.text.trim().isEmpty) {
-                        ShowToastDialog.showToast("Please enter a valid email.".tr);
+                        ShowToastDialog.showToast("Please enter a valid email.");
                       } else {
                         controller.forgotPassword();
                       }
